@@ -1,0 +1,106 @@
+import React from 'react'
+import PropTypes from 'prop-types'
+import FormInput from './FormInput'
+
+class Input extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { error: '', used: false, value: props.value }
+    const validations = this.props.validations || []
+
+    if (this.props.required)
+      this.validations = [this.validateRequired, ...validations]
+    else this.validations = [...validations]
+  }
+
+  componentDidMount() {
+    this.props.setInputValidity(
+      this.props.name,
+      !this.validate(this.props.value)
+    )
+  }
+
+  validateRequired(value) {
+    if (!value) return 'Value required'
+    return ''
+  }
+
+  validate(value) {
+    for (let i = 0; i < this.validations.length; i++) {
+      const error = this.validations[i](value)
+      if (error) return error
+    }
+    return ''
+  }
+
+  onChange(e) {
+    let value
+    if (this.props.type === 'date') value = e ? e.format() : ''
+    else if (this.props.type === 'select') value = e
+    else if ((e.target.type && e.target.type) === 'checkbox')
+      value = e.target.checked.toString()
+    else value = e.target.value
+
+    const error = this.validate(value)
+
+    this.setState({
+      error,
+      value
+    })
+    this.props.onChange(value)
+    this.props.setInputValidity(this.props.name, !error)
+  }
+
+  lostFocus(e) {
+    let value = null
+    if (this.props.type === 'date') value = e
+    else if (this.props.type === 'select') value = this.state.value
+    else value = e.target.value
+    this.setState({ used: true, error: this.validate(value) })
+  }
+
+  render() {
+    if (
+      [
+        'text',
+        'password',
+        'email',
+        'textArea',
+        'checkbox',
+        'date',
+        'select'
+      ].includes(this.props.type)
+    ) {
+      return (
+        <FormInput
+          value={this.state.value}
+          name={this.props.name}
+          required={this.props.required}
+          error={this.state.error}
+          used={this.state.used}
+          onChange={e => this.onChange(e)}
+          lostFocus={e => this.lostFocus(e)}
+          label={this.props.label}
+          type={this.props.type}
+          loadOptions={this.props.loadOptions}
+          creatable={this.props.creatable}
+        />
+      )
+    }
+    return null
+  }
+}
+
+Input.propTypes = {
+  value: PropTypes.any,
+  required: PropTypes.bool,
+  validations: PropTypes.arrayOf(PropTypes.func),
+  onChange: PropTypes.func,
+  label: PropTypes.string,
+  type: PropTypes.string,
+  name: PropTypes.string,
+  loadOptions: PropTypes.func,
+  creatable: PropTypes.bool
+}
+
+export default Input
