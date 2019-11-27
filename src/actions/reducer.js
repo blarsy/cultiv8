@@ -1,38 +1,61 @@
 import { Map, fromJS } from 'immutable'
+import { forEach, forEachObjIndexed } from 'ramda'
+import createPlan from './createPlan'
 
 const persistedState = localStorage.getItem('state')
 const initialState = persistedState ? fromJS(JSON.parse(persistedState)): Map({})
 
 export default (state = initialState, action) => {
+  let result = state
   switch (action.type) {
     case 'IMPORTFILE_SELECTED':
-      return state.set('uploading', true)
+      result = state.set('uploading', true)
+      break
     case 'IMPORTFILE_FAILED':
-      return state.set('uploading', false)
-    case 'LOGIN_LINKEDIN_REQUEST':
-      return state.set('loggingInLinkedIn', true)
-    case 'LOGIN_SUCCESS':
-      return state
-        .set('loggingInLinkedIn', false)
-        .set('profile', action.profile)
-        .set('token', action.token)
-    case 'LOGIN_LINKEDIN_ERROR':
-      return state
-        .set('loggingInLinkedIn', false)
-        .set('loginError', action.error)
-    case 'LOGIN_LINKEDIN_CANCELLED':
-      return state.set('loggingInLinkedIn', false)
-    case 'LOGOUT_SUCCESS':
-      return state
-        .set('loggingInLinkedIn', false)
-        .set('profile', null)
-        .set('token', null)
-    case 'IMPORT_FROM_LINKEDIN_SUCCESS':
-      return state.set('cv', action.data)
+      result = state.set('uploading', false)
+      break
     case 'IMPORTFILE_UPLOADED':
-      return state.set('uploading', false).set('data', fromJS(action.data)).set('tasks', fromJS(action.tasks))
+      const selections = {}
+      forEach(product => selections[product.name]={ surface: product.surface, selected: false }, action.data.products)
+      result = state.set('uploading', false)
+        .set('data', fromJS(action.data))
+        .set('tasks', fromJS(action.tasks))
+        .set('planState', Map({ selectedPlot: null, selections: fromJS(selections), allSelected: false }))
+      break
+    case 'PLANMAKE_TOGGLEALLPRODUCTS':
+      const currentSelections = state.get('planState').get('selections').toJS()
+      const currentAllSelected = state.get('planState').get('allSelected')
+      forEachObjIndexed(selection => {
+        selection.selected = !currentAllSelected
+      } , currentSelections)
+      result = state.set('planState', Map(fromJS({ selections: currentSelections, allSelected: !currentAllSelected })))
+      break
+    case 'PLANMAKE_TOGGLEPRODUCT':
+      const currentSelections1 = state.get('planState').get('selections').toJS()
+      forEachObjIndexed((selection,name) => {
+        if(name === action.name) {
+          selection.selected = !selection.selected
+        }
+      } , currentSelections1)
+      result = state.set('planState', state.get('planState').set('selections', fromJS(currentSelections1)))
+      break
+    case 'PLANMAKE_SETPRODUCTSURFACE':
+      const currentSelections2 = state.get('planState').get('selections').toJS()
+      forEachObjIndexed((selection,name) => {
+        if(name === action.name) {
+          selection.surface = +action.surface
+        }
+      } , currentSelections2)
+      result = state.set('planState', state.get('planState').set('selections', fromJS(currentSelections2)))
+      break
+    case 'PLANMAKE_SUGGEST':
+      result = state.set('planState', state.get('planState').set('currentPlan', fromJS(createPlan(state.toJS()))))
+      break
+    case 'PLANMAKE_SETSELECTEDPLOT':
+      result = state.set('planState',state.get('planState').set('selectedPlot', action.plot))
+      break
     default:
   }
-  localStorage.setItem('state', JSON.stringify(state.toJS()))
-  return state
+  localStorage.setItem('state', JSON.stringify(result.toJS()))
+  return result
 }

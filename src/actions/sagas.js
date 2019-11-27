@@ -142,10 +142,6 @@ function* importFromSpreadsheet(file) {
 
 export default function* rootSaga() {
   yield all([
-    fork(loginLinkedInFlow),
-    fork(logoutFlow),
-    fork(loginGoogleFlow),
-    fork(restoreUserSessionFlow),
     fork(importFromLinkedInFlow),
     fork(importFromSpreadsheetFlow)
   ])

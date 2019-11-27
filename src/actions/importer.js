@@ -30,8 +30,14 @@ export default file => (new Promise(resolve => {
 
       resolve({
         soles: parseSheet(workbook, 'Soles', ['code','name','rotationIndex']),
-        surfaces: parseSheet(workbook, 'Surfaces de culture', ['field','num1','num2']),
-        products: parseSheet(workbook, 'Cultures', ['name','family','greediness','productivity','unit','greenhouse','surfaceRatio','surface','greenhouseSurface','sowMin','sowMax','harvestMin','harvestMax'])
+        surfaces: parseSheet(workbook, 'Surfaces de culture', ['plot','num1','num2']),
+        plots: parseSheet(workbook, 'Parcelles', ['code','name']),
+        products: parseSheet(workbook, 'Cultures', [
+          'name','family','greediness','productivity','unit','greenhouse','surfaceRatio',
+          'surface','greenhouseSurface','sowMin','sowMax','growingDays','nurseryDays','harvestDays',
+          'totalWorkHours', 'plantsPerSqMeter','totalNumberOfPlants','priceOrganic','actualPrice',
+          'incomePerSqMeter','totalIncome','incomePerWorkHour','soilOccupationRatio', 'amountOfWorkRatio',
+          'interestRatio'])
       })
     }
     catch(err){

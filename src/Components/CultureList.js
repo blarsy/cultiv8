@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { map } from 'ramda'
-import styled from 'styled-components'
 import { connect } from 'react-redux'
 import { List } from 'immutable'
 
