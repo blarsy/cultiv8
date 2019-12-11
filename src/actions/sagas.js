@@ -4,8 +4,8 @@ import { authorize } from '../ext/linkedIn'
 import auth from '../ext/Auth'
 import { error } from '../Events'
 import { SERVER_API_URL } from '../config'
-import importer from './importer'
-import tasksInventorizer from '../actions/TasksInventorizer'
+import importer from '../domain/importer'
+import tasksInventorizer from '../domain/TasksInventorizer'
 
 function* loginLinkedInFlow() {
   while (true) {

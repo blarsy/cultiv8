@@ -1,14 +1,32 @@
 import React from 'react'
-import { SurfacesToPlan } from '../Components'
+import { connect } from 'react-redux'
+import { SurfacesToPlan, TweakPlan } from '../Components'
+import { FlexBlock, Button } from '../toolbox'
 
 class Plan extends React.Component {
   render() {
+    let content
+    if(!this.props.planState || !this.props.planState.get('currentPlan')) {
+      content = <SurfacesToPlan />
+    } else {
+      content = <TweakPlan />
+    }
     return (
-      <section>
-        <SurfacesToPlan />
-      </section>
+      <FlexBlock isContainer flexFlow="column" alignItems="stretch">
+        <FlexBlock isContainer flexFlow="row" justifyContent="flex-end">
+          <Button disabled={!this.props.planState} onClick={() => this.props.dispatch({ type: 'RESET_PLAN', data: this.props.data })}>Annuler le plan</Button>
+        </FlexBlock>
+        {content}
+      </FlexBlock>
     )
   }
 }
 
-export default Plan
+const mapStateToProps = state => {
+  return {
+    planState: state.global.get('planState'),
+    data: state.global.get('data')
+  }
+}
+
+export default connect(mapStateToProps)(Plan)

@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { forEach, map, sort } from 'ramda'
+import { map, sort } from 'ramda'
 import { Checkbox, FlexBlock } from '../toolbox'
 import styled, { css } from 'styled-components'
 

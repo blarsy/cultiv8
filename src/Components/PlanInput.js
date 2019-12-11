@@ -11,9 +11,6 @@ class PlanInput extends React.Component {
     super(props)
     this.plotOptions = []
     forEach(plot => this.plotOptions.push({ value: plot.get('code'), label: plot.get('name') }), this.props.plots)
-    this.state = {
-      selectedPlot: this.plotOptions.length > 0 ? this.plotOptions[0].value : null
-    }
   }
 
   render() {
@@ -35,7 +32,7 @@ class PlanInput extends React.Component {
         </FlexBlock>
       ), selectedCultures)
       selectionDetails = (<FlexBlock isContainer padding="0.5rem" flex="1 0" flexFlow="column" alignItems="stretch" justifyContent="space-between">
-          <Button onClick={() => this.props.dispatch({ type: 'PLANMAKE_SUGGEST' })}>Suggérer un plan</Button>
+          <Button disabled={!planState.selectedPlot} onClick={() => this.props.dispatch({ type: 'PLANMAKE_SUGGEST' })}>Suggérer un plan</Button>
           <FlexBlock isContainer flex="1 0" flexFlow='row nowrap' padding="0.25rem 0">
             <FlexBlock flex='1 0'>Culture</FlexBlock>
             <FlexBlock flex='0 1'>Surface</FlexBlock>
