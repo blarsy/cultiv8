@@ -2,17 +2,11 @@ import React from 'react'
 import { map, forEachObjIndexed, forEach } from 'ramda'
 import { connect } from 'react-redux'
 import { List } from 'immutable'
-
-import { Button, FlexBlock } from '../toolbox'
 import Select from 'react-select'
+import { Button, FlexBlock } from '../../toolbox'
+import SelectPlot from '../SelectPlot'
 
 class PlanInput extends React.Component {
-  constructor(props){
-    super(props)
-    this.plotOptions = []
-    forEach(plot => this.plotOptions.push({ value: plot.get('code'), label: plot.get('name') }), this.props.plots)
-  }
-
   render() {
     const selectedCultures = []
     const planState = this.props.planState.toJS()
@@ -44,9 +38,8 @@ class PlanInput extends React.Component {
     }
     return (<FlexBlock isContainer flexFlow='column nowrap' padding="0.25rem">
       <p>Parcelle visée</p>
-      <Select options={this.plotOptions} value={planState.selectedPlot} onChange={e =>
-        this.props.dispatch({ type: 'PLANMAKE_SETSELECTEDPLOT', plot: e.value})}>
-      </Select>
+      <SelectPlot value={planState.selectedPlot} onChange={value =>
+        this.props.dispatch({ type: 'PLANMAKE_SETSELECTEDPLOT', plot: value})}></SelectPlot>
       {selectionDetails}
     </FlexBlock>)
   }

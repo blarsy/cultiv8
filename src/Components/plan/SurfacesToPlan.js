@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { List } from 'immutable'
 import CulturesSelector from './CulturesSelector'
 import PlanInput from './PlanInput'
-import { FlexBlock } from '../toolbox'
+import { FlexBlock } from '../../toolbox'
 
 class SurfaceToPlan extends React.Component {
   render() {

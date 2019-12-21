@@ -2,27 +2,43 @@ import React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
 import { push } from 'react-router-redux'
-import { TinyLogo, Button } from '../toolbox'
+import { map } from 'ramda'
+import { TinyLogo, Button, FlexBlock } from '../toolbox'
+import MenuRoutes from '../MenuRoutes'
 
-const Ribbon = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0.5rem;
+const MenuButton = styled(Button)`
+  background-color: ${props => props.selected ? '#5BB375': '#B5FFCB' };
+  cursor: ${props => props.selected ? 'default': 'pointer' };
+  :active,:focus {
+    box-shadow: ${props => props.selected ? '1px 0 3px 2px #9CFFB9': '1px 0 0 2px #9CFFB9' };
+  }
 `
 
 class TopMenu extends React.Component {
   render(){
-    return (<Ribbon>
+    const pathname = this.props.location.pathname
+    return (<FlexBlock isContainer flexFlow="column nowrap" alignItems="center">
       <TinyLogo />
-        <Button onClick={() => this.props.dispatch(push('cultures'))}>Semis/plantation</Button>
-        <Button onClick={() => this.props.dispatch(push('grounds'))}>Terrains</Button>
-        <Button onClick={() => this.props.dispatch(push('surfaces'))}>Surfaces</Button>
-        <Button onClick={() => this.props.dispatch(push('plan'))}>Planifier</Button>
-        <Button onClick={() => this.props.dispatch(push('log'))}>Observations</Button>
-        <Button onClick={() => this.props.dispatch(push('dataimport'))}>Importer</Button>
-    </Ribbon>)
+      <FlexBlock isContainer flexFlow="column nowrap">
+        { map(menuItem => {
+          const selected = menuItem.path == pathname
+          return (<MenuButton
+            key={menuItem.path}
+            selected={selected}
+            onClick={() => this.props.dispatch(push(menuItem.path))}>
+            {menuItem.caption}
+          </MenuButton>)
+        }
+        , MenuRoutes) }
+      </FlexBlock>
+    </FlexBlock>)
   }
 }
 
-export default connect()(TopMenu)
+const mapStateToProps = state => {
+  return {
+    location: state.router.location
+  }
+}
+
+export default connect(mapStateToProps)(TopMenu)

@@ -5,7 +5,7 @@ import {
   reduce, clone, max,
   addIndex
 } from 'ramda'
-import { getNextRange, surfaceIsAvailableInPeriod } from './planner'
+import { getNextRange, surfaceIsAvailableInPeriod, getDestructionDate } from './planner'
 
 // Standard unit of surfaces is 10 square meters
 const STANDARD_SURFACE = 10
@@ -89,10 +89,11 @@ const createSuggestions = (contiguousSurfacesRatings, nbSuggestions, targetCultu
   forEach(contiguousSurfacesRating => {
     if(contiguousSurfacesRating.length >= nbSurfaces) {
       for(let i = 0; i < contiguousSurfacesRating.length - nbSurfaces + 1; i ++){
-        const currentSet = { score: 0 , surfaces: [] }
+        const currentSet = { score: 0, maxScore: 0 , surfaces: [] }
         for(let j = i; j < nbSurfaces + i; j ++) {
           currentSet.surfaces.push(contiguousSurfacesRating[j].surface)
           currentSet.score += contiguousSurfacesRating[j].score.family + contiguousSurfacesRating[j].score.greediness
+          currentSet.maxScore += 200
         }
         contiguousSets.push(currentSet)
         if(currentSet.score / nbSurfaces === 200) nbPerfectMatches ++
@@ -136,13 +137,14 @@ const createSuggestions = (contiguousSurfacesRatings, nbSuggestions, targetCultu
 
     splitSets = addIndex(map)((possibleSet, idx) => ({
       score: reduce((acc, surfaceRating) => acc + surfaceRating.score, 0, possibleSet.surfaces) / possibleSet.nbSets,
+      maxScore: reduce((acc, surfaceRating) => acc + 200),
       surfaces: possibleSet.surfaces
-    }), contiguousSurfacesRatings)
+    }), collectSplitSets(contiguousSurfacesRatings))
 
   }
 
   // return the highest scoring sets, according to the priorities
-  return take(nbSuggestions, sort((a, b) => b.score - a.score, addIndex(map)((set, idx) => ({ score: set.score, surfaces: set.surfaces, id: idx+1 }), contiguousSets.concat(splitSets))))
+  return addIndex(map)((set, idx) => ({ score: set.score, maxScore: set.maxScore, surfaces: set.surfaces, id: idx }) ,take(nbSuggestions, sort((a, b) => b.score - a.score, contiguousSets.concat(splitSets))))
 }
 
 export default input => {
@@ -176,18 +178,18 @@ export default input => {
 
     //Isolate available surfaces by contiguous sets
     const contiguousSurfacesRatings = []
-    let i = 0
-    let inAnAvailableZone = false
+    let i = -1
+    let accumulating = false
     forEach(surfaceRating => {
-      if(surfaceRating.score === SURFACE_UNAVAILABLE && contiguousSurfacesRatings.length > 0) {
-        inAnAvailableZone = true
-      } else {
-        if(inAnAvailableZone) {
-          inAnAvailableZone = false
+      if(surfaceRating.score !== SURFACE_UNAVAILABLE) {
+        if(!accumulating) {
+          accumulating = true
+          contiguousSurfacesRatings.push([])
           i++
         }
-        if(i === contiguousSurfacesRatings.length) contiguousSurfacesRatings.push([])
         contiguousSurfacesRatings[i].push(surfaceRating)
+      } else {
+        accumulating = false
       }
     }, surfaceRatings)
 
@@ -208,9 +210,8 @@ export default input => {
       const plantDate = max(new Date(), dates.plantBetween.min)
       const cultureToSuggest = {
         product: culture.product,
-        plantDate,
-        //Foreseen culture destruction date: time to grow - time in nursery + harvesting duration
-        destroyDate: new Date(plantDate).setDate(plantDate.getDate() + (culture.product.growingDays - culture.product.nurseryDays + culture.product.harvestDays ))
+        status: 0,
+        plantDate
       }
       rating.culture = cultureToSuggest
       rating.selectedSuggestionId = suggestions[0].id

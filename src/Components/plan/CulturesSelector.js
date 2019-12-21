@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { map, sort } from 'ramda'
-import { Checkbox, FlexBlock } from '../toolbox'
+import { Checkbox, FlexBlock } from '../../toolbox'
 import styled, { css } from 'styled-components'
 
 const compareNumbers = (a, b) => {
@@ -11,9 +11,13 @@ const compareNumbers = (a, b) => {
 }
 
 const CultureLine = styled(FlexBlock)`
-  ${props => props.odd && css`
-    background-color: #CCC;
+  ${props => !props.odd && css`
+    background-color: #B5FFCB;
   `}
+`
+const CultureTitleLine = styled(CultureLine)`
+  color: #fff;
+  background-color: #B34A49;
 `
 
 const CultureCell = styled(FlexBlock)`
@@ -49,7 +53,7 @@ class CulturesSelector extends React.Component {
       const planState = this.props.planState.toJS()
       return (
         <div>
-          <CultureLine isContainer alignItems="center">
+          <CultureTitleLine isContainer alignItems="center">
             <CheckboxCell flex="0 1">
               <label>
                 <Checkbox checked={planState.allSelected} onChange={() => {
@@ -61,7 +65,7 @@ class CulturesSelector extends React.Component {
             <CultureCell flex="1 0">Surface</CultureCell>
             <CultureCell flex="1 0">Revenu horaire</CultureCell>
             <CultureCell flex="1 0">Rentabilité surface/temps</CultureCell>
-          </CultureLine>
+          </CultureTitleLine>
           {
             map(culture => {
               odd=!odd

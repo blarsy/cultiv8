@@ -1,23 +1,26 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { SurfacesToPlan, TweakPlan } from '../Components'
+import { SurfacesToPlan, TweakPlan, DataContent } from '../Components'
 import { FlexBlock, Button } from '../toolbox'
 
 class Plan extends React.Component {
   render() {
     let content
-    if(!this.props.planState || !this.props.planState.get('currentPlan')) {
+    const hasPlan = this.props.planState && this.props.planState.get('currentPlan')
+    if(!hasPlan) {
       content = <SurfacesToPlan />
     } else {
       content = <TweakPlan />
     }
     return (
-      <FlexBlock isContainer flexFlow="column" alignItems="stretch">
-        <FlexBlock isContainer flexFlow="row" justifyContent="flex-end">
-          <Button disabled={!this.props.planState} onClick={() => this.props.dispatch({ type: 'RESET_PLAN', data: this.props.data })}>Annuler le plan</Button>
+      <DataContent>
+        <FlexBlock isContainer flexFlow="column" alignItems="stretch">
+          <FlexBlock isContainer flexFlow="row" justifyContent="flex-end">
+            <Button disabled={!hasPlan} onClick={() => this.props.dispatch({ type: 'RESET_PLAN', data: this.props.data })}>Annuler le plan</Button>
+          </FlexBlock>
+          {content}
         </FlexBlock>
-        {content}
-      </FlexBlock>
+      </DataContent>
     )
   }
 }

@@ -1,4 +1,5 @@
 import XLSX from 'xlsx'
+import { forEach, find } from 'ramda'
 
 const parseSheet = (wb, sheetName, targetColNames) => {
   const sheet = wb.Sheets[sheetName]
@@ -21,6 +22,19 @@ const parseSheet = (wb, sheetName, targetColNames) => {
   return items
 }
 
+const assignCulturesToSurfaces = data => {
+  forEach(culture => {
+    const product = find(product => product.name === culture.productName, data.products)
+    const surface = find(surface => culture.plot === surface.plot && culture.surface === surface.code, data.surfaces)
+    if(!surface.cultures) surface.cultures = []
+    surface.cultures.push({
+      product,
+      plantDate: culture.plantDate,
+      status: culture.status
+    })
+  }, data.cultures)
+}
+
 export default file => (new Promise(resolve => {
   const reader = new FileReader()
   reader.onload = e => {
@@ -28,17 +42,22 @@ export default file => (new Promise(resolve => {
       const data = new Uint8Array(e.target.result)
       const workbook = XLSX.read(data, {type: 'array'})
 
-      resolve({
+      const result = {
         soles: parseSheet(workbook, 'Soles', ['code','name','rotationIndex']),
-        surfaces: parseSheet(workbook, 'Surfaces de culture', ['plot','num1','num2']),
+        surfaces: parseSheet(workbook, 'Surfaces de culture', ['plot','code']),
         plots: parseSheet(workbook, 'Parcelles', ['code','name']),
-        products: parseSheet(workbook, 'Cultures', [
+        products: parseSheet(workbook, 'Produits', [
           'name','family','greediness','productivity','unit','greenhouse','surfaceRatio',
           'surface','greenhouseSurface','sowMin','sowMax','growingDays','nurseryDays','harvestDays',
           'totalWorkHours', 'plantsPerSqMeter','totalNumberOfPlants','priceOrganic','actualPrice',
           'incomePerSqMeter','totalIncome','incomePerWorkHour','soilOccupationRatio', 'amountOfWorkRatio',
-          'interestRatio'])
-      })
+          'interestRatio']),
+        cultures: parseSheet(workbook, 'Cultures', ['productName', 'status', 'plantDate', 'plot', 'surface'])
+      }
+
+      assignCulturesToSurfaces(result)
+
+      resolve(result)
     }
     catch(err){
       resolve({ err })

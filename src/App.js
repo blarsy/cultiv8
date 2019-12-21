@@ -2,15 +2,13 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import styled, { injectGlobal } from 'styled-components'
-import { Home, DataImport, Culture, Ground, Log, Surface, Plan } from './pages'
 import { Route, withRouter } from 'react-router-dom'
+import { map } from 'ramda'
+import { FlexBlock } from './toolbox'
+import { Home, DataImport, Culture, Ground, Log, Plan } from './pages'
+import MenuRoutes from './MenuRoutes'
 
 import TopMenu from './Components/TopMenu'
-
-const AppContainer = styled.section`
-  max-width: 950px;
-  margin: auto;
-`
 
 class App extends Component {
   componentDidMount() {
@@ -36,17 +34,18 @@ class App extends Component {
 
   render() {
     return (
-      <AppContainer>
+      <FlexBlock isContainer padding="0.25rem">
         <TopMenu/>
-        <Route exact path="/" component={Home} />
-        <Route path="/plan" component={Plan} />
-        <Route path="/dataimport" component={DataImport} />
-        <Route path="/cultures" component={Culture} />
-        <Route path="/grounds" component={Ground} />
-        <Route path="/surfaces" component={Surface} />
-        <Route path="/log" component={Log} />
-        <Route path="/home" component={Home} />
-      </AppContainer>
+        <FlexBlock flex="1 0" padding="0.5rem">
+          <Route exact path="/" component={Home} />
+          <Route path="/plan" component={Plan} />
+          <Route path="/dataimport" component={DataImport} />
+          <Route path="/cultures" component={Culture} />
+          <Route path="/grounds" component={Ground} />
+          <Route path="/log" component={Log} />
+          <Route path="/home" component={Home} />
+        </FlexBlock>
+      </FlexBlock>
     )
   }
 }

@@ -1,11 +1,11 @@
 import { forEach, any } from 'ramda'
+import moment from 'moment'
 
 export const planCulture = (product, plantDate, surfaces) => {
   const cultureToPlan = {
     product: product,
     plantDate,
-    //Foreseen culture destruction date: time to grow - time in nursery + harvesting duration
-    destroyDate: new Date(plantDate).setDate(plantDate.getDate() + (product.growingDays - product.nurseryDays + product.harvestDays ))
+    status: 0
   }
   forEach(surface => {
     if(!surface.cultures) surface.cultures = []
@@ -41,7 +41,18 @@ export const getNextRange = (product, refDate) => {
 export const surfaceIsAvailableInPeriod = (surface, dates) => {
   if(surface.cultures && surface.cultures.length > 0) {
     //surface is available if it doesn't host any culture in the target date period
-    return !any(culture => dates.plantBetween.min < culture.destroyDate && dates.plantBetween.max > culture.plantDate, surface.cultures)
+    return !any(culture => dates.plantBetween.min < getDestructionDate(culture) && dates.plantBetween.max > culture.plantDate, surface.cultures)
   }
   return true
+}
+
+export const getDestructionDate = culture => {
+  return moment(culture.plantDate, 'L').add(culture.product.growingDays - culture.product.nurseryDays + culture.product.harvestDays, 'days')
+}
+
+export const cultureIsActive = (date, culture) => {
+  const primitiveDate = moment(date)
+  const plantDate = moment(culture.plantDate, 'L')
+  const destructionDate = getDestructionDate(culture)
+  return plantDate.toDate() <= primitiveDate.toDate() && destructionDate.toDate() >= primitiveDate.toDate()
 }

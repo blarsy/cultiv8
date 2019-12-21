@@ -17,6 +17,8 @@ import {
   routerReducer,
   routerMiddleware
 } from 'react-router-redux'
+import moment from 'moment'
+import 'moment/locale/fr'
 
 const history = createHistory()
 
@@ -47,6 +49,7 @@ const configureStore = () => {
   sagaMiddleware.run(sagas)
   return store
 }
+moment.locale('fr')
 
 Modal.setAppElement('#root')
 
