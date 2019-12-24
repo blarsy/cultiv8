@@ -1,8 +1,7 @@
 import React from 'react'
-import { map, forEachObjIndexed, forEach } from 'ramda'
+import { map, forEachObjIndexed } from 'ramda'
 import { connect } from 'react-redux'
 import { List } from 'immutable'
-import Select from 'react-select'
 import { Button, FlexBlock } from '../../toolbox'
 import SelectPlot from '../SelectPlot'
 

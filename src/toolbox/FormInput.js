@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
-import { Async, AsyncCreatable } from 'react-select'
+import Select, { Async, AsyncCreatable } from 'react-select'
 import moment from 'moment'
 import '../../node_modules/react-datepicker/dist/react-datepicker.min.css'
 import '../../node_modules/react-select/dist/react-select.min.css'
@@ -25,6 +25,11 @@ const DatePickerStyled = styled(DatePicker)`
 `
 
 const SelectAsyncStyled = styled(Async)`
+border: ${props =>
+  props.used && props.error ? '1px solid red' : '1px solid #222'};
+flex-grow: 1;
+`
+const SelectStyled = styled(Select)`
 border: ${props =>
   props.used && props.error ? '1px solid red' : '1px solid #222'};
 flex-grow: 1;
@@ -89,7 +94,22 @@ class FormInput extends React.Component {
           <SelectCreatableStyled
             name={this.props.name}
             value={this.props.value}
+            default={this.props.multi ? [] : null}
             autoload={false}
+            multi={this.props.multi}
+            onChange={e => this.props.onChange(e)}
+            onBlur={e => this.props.lostFocus(e)}
+            loadOptions={this.props.loadOptions}
+          />
+        )
+      } else if(this.props.async) {
+        element = (
+          <SelectAsyncStyled
+            name={this.props.name}
+            value={this.props.value}
+            default={this.props.multi ? [] : null}
+            autoload={false}
+            multi={this.props.multi}
             onChange={e => this.props.onChange(e)}
             onBlur={e => this.props.lostFocus(e)}
             loadOptions={this.props.loadOptions}
@@ -97,13 +117,15 @@ class FormInput extends React.Component {
         )
       } else {
         element = (
-          <SelectAsyncStyled
+          <SelectStyled
             name={this.props.name}
             value={this.props.value}
-            autoload={false}
+            default={this.props.multi ? [] : null}
+            autoload={true}
+            multi={this.props.multi}
             onChange={e => this.props.onChange(e)}
             onBlur={e => this.props.lostFocus(e)}
-            loadOptions={this.props.loadOptions}
+            options={this.props.options}
           />
         )
       }
@@ -156,7 +178,13 @@ FormInput.propTypes = {
   type: PropTypes.string,
   lostFocus: PropTypes.func,
   loadOptions: PropTypes.func,
-  creatable: PropTypes.bool
+  creatable: PropTypes.bool,
+  async: PropTypes.bool,
+  options: PropTypes.arrayOf(PropTypes.shape({
+    label: PropTypes.string,
+    value: PropTypes.any
+  })),
+  multi: PropTypes.bool
 }
 
 export default FormInput

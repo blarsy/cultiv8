@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { List } from 'immutable'
 import { FlexBlock } from '../../toolbox'
 import PlotDisplay from '../PlotDisplay'
 import SuggestionsSelector from './SuggestionsSelector'

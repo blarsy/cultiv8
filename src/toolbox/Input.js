@@ -21,7 +21,7 @@ class Input extends React.Component {
   }
 
   validateRequired(value) {
-    if (!value) return 'Value required'
+    if (!value || (Array.isArray(value) && value.length === 0)) return 'Value required'
     return ''
   }
 
@@ -84,6 +84,10 @@ class Input extends React.Component {
           type={this.props.type}
           loadOptions={this.props.loadOptions}
           creatable={this.props.creatable}
+          multi={this.props.multi}
+          async={this.props.async}
+          options={this.props.options}
+          customElement={this.props.customElement}
         />
       )
     }
@@ -100,7 +104,13 @@ Input.propTypes = {
   type: PropTypes.string,
   name: PropTypes.string,
   loadOptions: PropTypes.func,
-  creatable: PropTypes.bool
+  creatable: PropTypes.bool,
+  async: PropTypes.bool,
+  options: PropTypes.arrayOf(PropTypes.shape({
+    label: PropTypes.string,
+    value: PropTypes.any
+  })),
+  multi: PropTypes.bool
 }
 
 export default Input

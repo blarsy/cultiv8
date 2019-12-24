@@ -1,12 +1,10 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import styled, { injectGlobal } from 'styled-components'
+import { injectGlobal } from 'styled-components'
 import { Route, withRouter } from 'react-router-dom'
-import { map } from 'ramda'
 import { FlexBlock } from './toolbox'
 import { Home, DataImport, Culture, Ground, Log, Plan } from './pages'
-import MenuRoutes from './MenuRoutes'
 
 import TopMenu from './Components/TopMenu'
 

@@ -41,10 +41,9 @@ class SuggestionsSelector extends React.Component {
     return (
       <FlexBlock isContainer flexFlow="column" padding="0.25rem">
         { addIndex(map)((rating, idx) => {
-            const ratingIsSelected = idx==currentPlan.get('currentRating')
+            const ratingIsSelected = idx === currentPlan.get('currentRating')
             let suggestionDetails, suggestionButtons
-            if(rating.culture){
-              const product = rating.culture.product
+            if(rating.culture) {
               suggestionDetails = (
                 <div>
                   <div>{moment(rating.culture.plantDate).format('L')} - {getDestructionDate(rating.culture).format('L')}</div>

@@ -21,7 +21,7 @@ class TopMenu extends React.Component {
       <TinyLogo />
       <FlexBlock isContainer flexFlow="column nowrap">
         { map(menuItem => {
-          const selected = menuItem.path == pathname
+          const selected = menuItem.path === pathname
           return (<MenuButton
             key={menuItem.path}
             selected={selected}

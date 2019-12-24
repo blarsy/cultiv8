@@ -38,16 +38,29 @@ export const getNextRange = (product, refDate) => {
   return naiveDates
 }
 
-export const surfaceIsAvailableInPeriod = (surface, dates) => {
+export const surfaceIsAvailableForCulture = (surface, culture) => {
+  return surfaceIsAvailableBetweenDates(surface, culture.plantDate, getDestructionDate(culture))
+}
+
+const surfaceIsAvailableBetweenDates = (surface, begin, end) => {
+  const mBegin = moment(begin)
+  const mEnd = moment(end)
   if(surface.cultures && surface.cultures.length > 0) {
     //surface is available if it doesn't host any culture in the target date period
-    return !any(culture => dates.plantBetween.min < getDestructionDate(culture) && dates.plantBetween.max > culture.plantDate, surface.cultures)
+    return !any(culture => mBegin < getDestructionDate(culture) && mEnd > moment(culture.plantDate), surface.cultures)
   }
   return true
 }
 
+export const surfaceIsAvailableInPeriod = (surface, dates) => {
+  return surfaceIsAvailableBetweenDates(surface, dates.plantBetween.min, dates.plantBetween.max)
+}
+
 export const getDestructionDate = culture => {
-  return moment(culture.plantDate, 'L').add(culture.product.growingDays - culture.product.nurseryDays + culture.product.harvestDays, 'days')
+  const plantDate = moment(culture.plantDate)
+  const daysOnField = culture.product.growingDays - culture.product.nurseryDays + culture.product.harvestDays
+  const destructionDate = plantDate.add(daysOnField, 'days')
+  return destructionDate
 }
 
 export const cultureIsActive = (date, culture) => {

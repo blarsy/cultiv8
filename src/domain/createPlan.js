@@ -5,7 +5,7 @@ import {
   reduce, clone, max,
   addIndex
 } from 'ramda'
-import { getNextRange, surfaceIsAvailableInPeriod, getDestructionDate } from './planner'
+import { getNextRange, surfaceIsAvailableInPeriod } from './planner'
 
 // Standard unit of surfaces is 10 square meters
 const STANDARD_SURFACE = 10

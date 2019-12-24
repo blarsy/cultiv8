@@ -1,5 +1,6 @@
 import XLSX from 'xlsx'
 import { forEach, find } from 'ramda'
+import moment from 'moment'
 
 const parseSheet = (wb, sheetName, targetColNames) => {
   const sheet = wb.Sheets[sheetName]
@@ -29,7 +30,7 @@ const assignCulturesToSurfaces = data => {
     if(!surface.cultures) surface.cultures = []
     surface.cultures.push({
       product,
-      plantDate: culture.plantDate,
+      plantDate: moment(culture.plantDate, 'L'),
       status: culture.status
     })
   }, data.cultures)

@@ -10,6 +10,7 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   margin: ${props => '0 ' + props.margin || '1rem'};
+  flex: 1
 `
 const FormBlock = styled.article`
   display: flex;
@@ -21,6 +22,12 @@ const Title = styled.p`
   text-align: center;
   margin: 0;
   font-size: 16pt;
+`
+
+const ValidationError = styled.p`
+  color: red;
+  margin-top: 0.25rem;
+  margin-bottom: 0;
 `
 
 class ValidatedForm extends React.Component {
@@ -58,7 +65,8 @@ class ValidatedForm extends React.Component {
               'textArea',
               'checkbox',
               'date',
-              'select'
+              'select',
+              'custom'
             ].includes(input.type)
           ) {
             return (
@@ -82,6 +90,10 @@ class ValidatedForm extends React.Component {
                     this.props.setState
                   )}
                 creatable={input.creatable}
+                async={input.async}
+                multi={input.multi}
+                options={input.options}
+                customElement={input.customElement}
               />
             )
           } else {
@@ -89,6 +101,9 @@ class ValidatedForm extends React.Component {
           }
         })}
         <FormBlock align="center">
+          {this.props.error &&
+            <ValidationError>{this.props.error}</ValidationError>
+          }
           <Button type="submit" disabled={this.isFormValid()}>
             {this.props.actionLabel || 'Save'}
           </Button>
@@ -105,6 +120,7 @@ ValidatedForm.propTypes = {
   getState: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   actionLabel: PropTypes.string,
+  error: PropTypes.string,
   inputs: PropTypes.arrayOf(
     PropTypes.shape({
       type: PropTypes.string.isRequired,
@@ -113,7 +129,13 @@ ValidatedForm.propTypes = {
       label: PropTypes.string.isRequired,
       validations: PropTypes.arrayOf(PropTypes.func),
       loadOptions: PropTypes.func,
-      creatable: PropTypes.bool
+      creatable: PropTypes.bool,
+      async: PropTypes.bool,
+      multi: PropTypes.bool,
+      options: PropTypes.arrayOf(PropTypes.shape({
+        label: PropTypes.string,
+        value: PropTypes.any
+      }))
     })
   ).isRequired
 }

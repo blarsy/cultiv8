@@ -4,7 +4,16 @@ import moment from 'moment'
 import createPlan from '../domain/createPlan'
 
 const persistedState = localStorage.getItem('state')
-const initialState = persistedState ? fromJS(JSON.parse(persistedState)): Map({ groundsState: { displayDate: moment(new Date())} })
+const initialState = persistedState ?
+  fromJS(JSON.parse(persistedState)):
+  Map({
+    groundsState: {
+      displayDate: moment(new Date())
+    },
+    cultureState: {
+      creating: false
+    }
+  })
 
 const MakeBlankPlanState = products => {
   const selections = {}
@@ -80,6 +89,12 @@ export default (state = initialState, action) => {
       break
     case 'GROUND_CHANGEDISPLAYDATE':
       result = mergeDeep(state, fromJS({ groundsState: { displayDate: action.value }}))
+      break
+    case 'BEGIN_CREATE_CULTURE':
+      result = mergeDeep(state, fromJS({ cultureState: { creating: true }}))
+      break
+    case 'CANCEL_CREATE_CULTURE':
+      result = mergeDeep(state, fromJS({ cultureState: { creating: false }}))
       break
     default:
   }
