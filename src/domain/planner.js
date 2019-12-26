@@ -1,16 +1,17 @@
 import { forEach, any } from 'ramda'
 import moment from 'moment'
 
-export const planCulture = (product, plantDate, surfaces) => {
-  const cultureToPlan = {
+export const addCulture = (product, plantDate, surfaces, status) => {
+  const cultureToAdd = {
     product: product,
     plantDate,
-    status: 0
+    status
   }
   forEach(surface => {
     if(!surface.cultures) surface.cultures = []
-    surface.cultures.push(cultureToPlan)
+    surface.cultures.push(cultureToAdd)
   }, surfaces)
+  return cultureToAdd
 }
 
 export const getNextRange = (product, refDate) => {
@@ -65,7 +66,7 @@ export const getDestructionDate = culture => {
 
 export const cultureIsActive = (date, culture) => {
   const primitiveDate = moment(date)
-  const plantDate = moment(culture.plantDate, 'L')
+  const plantDate = moment(culture.plantDate)
   const destructionDate = getDestructionDate(culture)
   return plantDate.toDate() <= primitiveDate.toDate() && destructionDate.toDate() >= primitiveDate.toDate()
 }

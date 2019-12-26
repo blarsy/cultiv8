@@ -1,7 +1,8 @@
-import { Map, fromJS, mergeDeep } from 'immutable'
-import { forEach, forEachObjIndexed } from 'ramda'
+import { Map, fromJS, mergeDeep, merge } from 'immutable'
+import { forEach, forEachObjIndexed, any, map, find, filter } from 'ramda'
 import moment from 'moment'
 import createPlan from '../domain/createPlan'
+import { addCulture } from '../domain/planner'
 
 const persistedState = localStorage.getItem('state')
 const initialState = persistedState ?
@@ -95,6 +96,35 @@ export default (state = initialState, action) => {
       break
     case 'CANCEL_CREATE_CULTURE':
       result = mergeDeep(state, fromJS({ cultureState: { creating: false }}))
+      break
+    case 'SAVE_CULTURE':
+      const cultures = state.get('data').get('cultures').toJS()
+      const surfaces = state.get('data').get('surfaces').toJS()
+      const products = state.get('data').get('products').toJS()
+      const selectedSurfaces = map(selectedSurface => {
+        const split = selectedSurface.value.split('ùùù')
+        return {
+          plot: split[0],
+          code: split[1]
+        }
+      }, action.data.surfaces)
+      const cultureSurfaces = filter(surface => any(selectedSurface => selectedSurface.plot === surface.plot && selectedSurface.code === surface.code, selectedSurfaces), surfaces)
+      const cultureToAdd = addCulture(
+        find(product => product.name === action.data.product.value, products),
+        action.data.plantDate,
+        cultureSurfaces,
+        action.data.status.value
+      )
+      forEach(surface => cultures.push({
+        productName: action.data.product.value,
+        status: action.data.status.value,
+        plantDate: action.data.plantDate,
+        plot: surface.plot,
+        code: surface.code
+      }), cultureSurfaces)
+      const updatedData = merge(state.get('data'), { cultures: fromJS(cultures), surfaces: fromJS(surfaces) })
+      const cultureState = state.get('cultureState')
+      result = merge(state, {data: updatedData, cultureState: cultureState.set('creating', false)})
       break
     default:
   }

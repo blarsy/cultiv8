@@ -25,14 +25,16 @@ const parseSheet = (wb, sheetName, targetColNames) => {
 
 const assignCulturesToSurfaces = data => {
   forEach(culture => {
+    const plantDate = moment(culture.plantDate, 'L').toDate()
     const product = find(product => product.name === culture.productName, data.products)
     const surface = find(surface => culture.plot === surface.plot && culture.surface === surface.code, data.surfaces)
     if(!surface.cultures) surface.cultures = []
     surface.cultures.push({
       product,
-      plantDate: moment(culture.plantDate, 'L'),
+      plantDate,
       status: culture.status
     })
+    culture.plantDate = plantDate
   }, data.cultures)
 }
 
