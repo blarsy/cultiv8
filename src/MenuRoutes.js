@@ -4,5 +4,5 @@ export default[
   { path: '/grounds', caption: 'Terrains' },
   { path: '/plan', caption: 'Planifier' },
   { path: '/log', caption: 'Journal' },
-  { path: '/dataimport', caption: 'Importer' },
+  { path: '/dataimport', caption: 'Importer / Exporter' },
 ]

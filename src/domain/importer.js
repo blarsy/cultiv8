@@ -23,11 +23,16 @@ const parseSheet = (wb, sheetName, targetColNames) => {
   return items
 }
 
-const assignCulturesToSurfaces = data => {
+const assignCulturesToSurfaces = (data, datesInIsoFormat) => {
   forEach(culture => {
-    const plantDate = moment(culture.plantDate, 'L').toDate()
+    let plantDate
+    if(datesInIsoFormat) {
+      plantDate = moment(culture.plantDate)
+    } else {
+      plantDate = moment(culture.plantDate, 'L').toDate()
+    }
     const product = find(product => product.name === culture.productName, data.products)
-    const surface = find(surface => culture.plot === surface.plot && culture.surface === surface.code, data.surfaces)
+    const surface = find(surface => culture.plot === surface.plot && culture.code === surface.code, data.surfaces)
     if(!surface.cultures) surface.cultures = []
     surface.cultures.push({
       product,
@@ -38,7 +43,22 @@ const assignCulturesToSurfaces = data => {
   }, data.cultures)
 }
 
-export default file => (new Promise(resolve => {
+export const fromJson = file => (new Promise(resolve => {
+  const reader = new FileReader()
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result)
+      assignCulturesToSurfaces(data, true)
+      resolve(data)
+    }
+    catch(err){
+      resolve({ err })
+    }
+  }
+  reader.readAsText(file)
+}))
+
+export const fromSpreadsheet = file => (new Promise(resolve => {
   const reader = new FileReader()
   reader.onload = e => {
     try {
@@ -55,10 +75,10 @@ export default file => (new Promise(resolve => {
           'totalWorkHours', 'plantsPerSqMeter','totalNumberOfPlants','priceOrganic','actualPrice',
           'incomePerSqMeter','totalIncome','incomePerWorkHour','soilOccupationRatio', 'amountOfWorkRatio',
           'interestRatio']),
-        cultures: parseSheet(workbook, 'Cultures', ['productName', 'status', 'plantDate', 'plot', 'surface'])
+        cultures: parseSheet(workbook, 'Cultures', ['productName', 'status', 'plantDate', 'plot', 'code'])
       }
 
-      assignCulturesToSurfaces(result)
+      assignCulturesToSurfaces(result, false)
 
       resolve(result)
     }

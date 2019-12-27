@@ -3,6 +3,7 @@ import { forEach, forEachObjIndexed, any, map, find, filter } from 'ramda'
 import moment from 'moment'
 import createPlan from '../domain/createPlan'
 import { addCulture } from '../domain/planner'
+import fileDownload from 'js-file-download'
 
 const persistedState = localStorage.getItem('state')
 const initialState = persistedState ?
@@ -20,6 +21,41 @@ const MakeBlankPlanState = products => {
   const selections = {}
   forEach(product => selections[product.name]={ surface: product.surface, selected: false }, products)
   return Map({ selectedPlot: null, selections: fromJS(selections), allSelected: false })
+}
+
+const saveCulture = (state, cultureData) => {
+  const cultures = state.get('data').get('cultures').toJS()
+  const surfaces = state.get('data').get('surfaces').toJS()
+  const products = state.get('data').get('products').toJS()
+  const selectedSurfaces = map(selectedSurface => {
+    const split = selectedSurface.value.split('ùùù')
+    return {
+      plot: split[0],
+      code: split[1]
+    }
+  }, cultureData.surfaces)
+  const cultureSurfaces = filter(surface => any(selectedSurface => selectedSurface.plot === surface.plot && selectedSurface.code === surface.code, selectedSurfaces), surfaces)
+  const cultureToAdd = addCulture(
+    find(product => product.name === cultureData.product.value, products),
+    cultureData.plantDate,
+    cultureSurfaces,
+    cultureData.status.value
+  )
+  forEach(surface => cultures.push({
+    productName: cultureData.product.value,
+    status: cultureData.status.value,
+    plantDate: cultureData.plantDate,
+    plot: surface.plot,
+    code: surface.code
+  }), cultureSurfaces)
+  const updatedData = merge(state.get('data'), { cultures: fromJS(cultures), surfaces: fromJS(surfaces) })
+  const cultureState = state.get('cultureState')
+  return merge(state, {data: updatedData, cultureState: cultureState.set('creating', false)})
+}
+
+const downloadSavedData = data => {
+  forEach(surface => delete surface.cultures, data.surfaces)
+  fileDownload(JSON.stringify(data), `cultiv8Data-${moment().format('YYYYMMDD-HHmmss')}.json`)
 }
 
 export default (state = initialState, action) => {
@@ -98,34 +134,10 @@ export default (state = initialState, action) => {
       result = mergeDeep(state, fromJS({ cultureState: { creating: false }}))
       break
     case 'SAVE_CULTURE':
-      const cultures = state.get('data').get('cultures').toJS()
-      const surfaces = state.get('data').get('surfaces').toJS()
-      const products = state.get('data').get('products').toJS()
-      const selectedSurfaces = map(selectedSurface => {
-        const split = selectedSurface.value.split('ùùù')
-        return {
-          plot: split[0],
-          code: split[1]
-        }
-      }, action.data.surfaces)
-      const cultureSurfaces = filter(surface => any(selectedSurface => selectedSurface.plot === surface.plot && selectedSurface.code === surface.code, selectedSurfaces), surfaces)
-      const cultureToAdd = addCulture(
-        find(product => product.name === action.data.product.value, products),
-        action.data.plantDate,
-        cultureSurfaces,
-        action.data.status.value
-      )
-      forEach(surface => cultures.push({
-        productName: action.data.product.value,
-        status: action.data.status.value,
-        plantDate: action.data.plantDate,
-        plot: surface.plot,
-        code: surface.code
-      }), cultureSurfaces)
-      const updatedData = merge(state.get('data'), { cultures: fromJS(cultures), surfaces: fromJS(surfaces) })
-      const cultureState = state.get('cultureState')
-      result = merge(state, {data: updatedData, cultureState: cultureState.set('creating', false)})
+      result = saveCulture(state, action.data)
       break
+    case 'DOWNLOAD_ALL_DATA':
+      downloadSavedData(state.get('data').toJS())
     default:
   }
   localStorage.setItem('state', JSON.stringify(result.toJS()))
