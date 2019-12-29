@@ -5,7 +5,7 @@ import {
   reduce, clone, max,
   addIndex
 } from 'ramda'
-import { getNextRange, surfaceIsAvailableInPeriod } from './planner'
+import { getNextRange, surfaceIsAvailableInPeriod, assignCulturesToSurfaces } from './planner'
 
 // Standard unit of surfaces is 10 square meters
 const STANDARD_SURFACE = 10
@@ -151,7 +151,9 @@ export default input => {
   //Collect surfaces from target plot
   //Use a deep clone of the surfaces array, as we will assume the best suggestions
   //are actually applied, but we don't want this to actually modify the source data
-  const surfaces = filter(surface => surface.plot === input.planState.selectedPlot, clone(input.data.surfaces))
+  const rawData = clone(input.data)
+  assignCulturesToSurfaces(rawData)
+  const surfaces = filter(surface => surface.plot === input.planState.selectedPlot, clone(rawData.surfaces))
 
   //Collect selected products
   const selections = []

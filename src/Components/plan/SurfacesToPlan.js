@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { List } from 'immutable'
-import CulturesSelector from './CulturesSelector'
+import ProductsSelector from './ProductsSelector'
 import PlanInput from './PlanInput'
 import { FlexBlock } from '../../toolbox'
 
@@ -11,7 +11,7 @@ class SurfaceToPlan extends React.Component {
       return (
         <FlexBlock isContainer flexFlow='row nowrap'>
           <FlexBlock flex='2 0'>
-            <CulturesSelector />
+            <ProductsSelector />
           </FlexBlock>
           <FlexBlock flex='1 0'>
             <PlanInput/>

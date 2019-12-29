@@ -31,7 +31,7 @@ const SurfaceInput = styled.input`
   max-width: 4rem;
 `
 
-class CulturesSelector extends React.Component {
+class ProductsSelector extends React.Component {
   toggleAllSelected(){
     this.props.dispatch({ type: 'PLANMAKE_TOGGLEALLPRODUCTS' })
   }
@@ -103,4 +103,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect(mapStateToProps)(CulturesSelector)
+export default connect(mapStateToProps)(ProductsSelector)

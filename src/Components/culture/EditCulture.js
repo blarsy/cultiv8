@@ -1,16 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { sort, map, append, any, forEach, find } from 'ramda'
+import { sort, map, forEach, find } from 'ramda'
 import { connect } from 'react-redux'
 import { ValidatedForm, getInitialState, FlexBlock } from '../../toolbox'
-import Select from 'react-select'
 import { surfaceIsAvailableForCulture } from '../../domain/planner'
 
 class EditCulture extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = { selectedSurfaces: [] }
     this.surfaces = this.props.surfaces.toJS()
     this.products = this.props.products.toJS()
 

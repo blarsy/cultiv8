@@ -1,4 +1,4 @@
-import { forEach, any } from 'ramda'
+import { forEach, any, find } from 'ramda'
 import moment from 'moment'
 
 export const addCulture = (product, plantDate, surfaces, status) => {
@@ -69,4 +69,17 @@ export const cultureIsActive = (date, culture) => {
   const plantDate = moment(culture.plantDate)
   const destructionDate = getDestructionDate(culture)
   return plantDate.toDate() <= primitiveDate.toDate() && destructionDate.toDate() >= primitiveDate.toDate()
+}
+
+export const assignCulturesToSurfaces = data => {
+  forEach(culture => {
+    const product = find(product => product.name === culture.productName, data.products)
+    const surface = find(surface => culture.plot === surface.plot && culture.code === surface.code, data.surfaces)
+    if(!surface.cultures) surface.cultures = []
+    surface.cultures.push({
+      product,
+      plantDate: culture.plantDate,
+      status: culture.status
+    })
+  }, data.cultures)
 }

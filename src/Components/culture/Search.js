@@ -1,7 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { map, sort } from 'ramda'
-import { Checkbox, FlexBlock } from '../../toolbox'
+import { FlexBlock } from '../../toolbox'
 
 class Search extends React.Component {
   render() {

@@ -23,7 +23,12 @@ const parseSheet = (wb, sheetName, targetColNames) => {
   return items
 }
 
-const assignCulturesToSurfaces = (data, datesInIsoFormat) => {
+const setIdsOnCultures = cultures => {
+  let id = 1
+  forEach(culture => culture.id = id++, cultures)
+}
+
+const parsePlantdates = (cultures, datesInIsoFormat) => {
   forEach(culture => {
     let plantDate
     if(datesInIsoFormat) {
@@ -31,16 +36,8 @@ const assignCulturesToSurfaces = (data, datesInIsoFormat) => {
     } else {
       plantDate = moment(culture.plantDate, 'L').toDate()
     }
-    const product = find(product => product.name === culture.productName, data.products)
-    const surface = find(surface => culture.plot === surface.plot && culture.code === surface.code, data.surfaces)
-    if(!surface.cultures) surface.cultures = []
-    surface.cultures.push({
-      product,
-      plantDate,
-      status: culture.status
-    })
     culture.plantDate = plantDate
-  }, data.cultures)
+  }, cultures)
 }
 
 export const fromJson = file => (new Promise(resolve => {
@@ -48,7 +45,7 @@ export const fromJson = file => (new Promise(resolve => {
   reader.onload = e => {
     try {
       const data = JSON.parse(e.target.result)
-      assignCulturesToSurfaces(data, true)
+      parsePlantdates(data.cultures, true)
       resolve(data)
     }
     catch(err){
@@ -77,8 +74,8 @@ export const fromSpreadsheet = file => (new Promise(resolve => {
           'interestRatio']),
         cultures: parseSheet(workbook, 'Cultures', ['productName', 'status', 'plantDate', 'plot', 'code'])
       }
-
-      assignCulturesToSurfaces(result, false)
+      setIdsOnCultures(result.cultures)
+      parsePlantdates(result.cultures, false)
 
       resolve(result)
     }

@@ -24,7 +24,7 @@ export const getInitialState = inputs => {
       if (input.type === 'date') initialValue = input.default.toJSON()
       else initialValue = input.default
     } else {
-      initialValue = ''
+      initialValue = input.multi ? [] : ''
     }
     initialState[input.name] = initialValue
   })

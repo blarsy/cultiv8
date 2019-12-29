@@ -2,10 +2,18 @@ import React from 'react'
 import { connect } from 'react-redux'
 import DatePicker from 'react-datepicker'
 import moment from 'moment'
+import { fromJS } from 'immutable'
 import { SelectPlot, DataContent, PlotDisplay } from '../Components'
+import { assignCulturesToSurfaces } from '../domain/planner'
 import { FlexBlock } from '../toolbox'
 
 class Ground extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.data = this.props.data.toJS()
+    assignCulturesToSurfaces(this.data)
+  }
   render() {
     const selectedPlot = this.props.state ? this.props.state.get('selectedPlot'): ''
     const displayDate = (this.props.state && this.props.state.get('displayDate')) ? moment(this.props.state.get('displayDate')) : moment(new Date())
@@ -15,7 +23,7 @@ class Ground extends React.Component {
     if(!selectedPlot || !displayDate) {
       plotZone = (<p>Veuillez fournir les infos nécessaires sur la parcelle ci-dessus.</p>)
     } else {
-      plotZone = (<PlotDisplay date={displayDate.toISOString()} surfaces={this.props.data.get('surfaces')} selectedPlot={selectedPlot} />)
+      plotZone = (<PlotDisplay date={displayDate.toISOString()} surfaces={fromJS(this.data.surfaces)} selectedPlot={selectedPlot} />)
     }
 
     return (

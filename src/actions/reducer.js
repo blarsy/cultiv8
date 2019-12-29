@@ -1,8 +1,7 @@
 import { Map, fromJS, mergeDeep, merge } from 'immutable'
-import { forEach, forEachObjIndexed, any, map, find, filter } from 'ramda'
+import { forEach, forEachObjIndexed, any, map, filter } from 'ramda'
 import moment from 'moment'
 import createPlan from '../domain/createPlan'
-import { addCulture } from '../domain/planner'
 import fileDownload from 'js-file-download'
 
 const persistedState = localStorage.getItem('state')
@@ -13,6 +12,9 @@ const initialState = persistedState ?
       displayDate: moment(new Date())
     },
     cultureState: {
+      creating: false
+    },
+    logState: {
       creating: false
     }
   })
@@ -26,7 +28,6 @@ const MakeBlankPlanState = products => {
 const saveCulture = (state, cultureData) => {
   const cultures = state.get('data').get('cultures').toJS()
   const surfaces = state.get('data').get('surfaces').toJS()
-  const products = state.get('data').get('products').toJS()
   const selectedSurfaces = map(selectedSurface => {
     const split = selectedSurface.value.split('ùùù')
     return {
@@ -35,12 +36,6 @@ const saveCulture = (state, cultureData) => {
     }
   }, cultureData.surfaces)
   const cultureSurfaces = filter(surface => any(selectedSurface => selectedSurface.plot === surface.plot && selectedSurface.code === surface.code, selectedSurfaces), surfaces)
-  const cultureToAdd = addCulture(
-    find(product => product.name === cultureData.product.value, products),
-    cultureData.plantDate,
-    cultureSurfaces,
-    cultureData.status.value
-  )
   forEach(surface => cultures.push({
     productName: cultureData.product.value,
     status: cultureData.status.value,
@@ -51,6 +46,36 @@ const saveCulture = (state, cultureData) => {
   const updatedData = merge(state.get('data'), { cultures: fromJS(cultures), surfaces: fromJS(surfaces) })
   const cultureState = state.get('cultureState')
   return merge(state, {data: updatedData, cultureState: cultureState.set('creating', false)})
+}
+
+const saveLogEntry = (state, logEntryData) => {
+  const logEntries = state.get('data').get('log') ? state.get('data').get('log').toJS() : []
+  const logTags = state.get('data').get('logTags') ? state.get('data').get('logTags').toJS() : []
+  const tagsToCreate = filter(tag => !any(logTag => logTag.toLowerCase() === tag.value.toLowerCase(), logTags), logEntryData.tags)
+  if(tagsToCreate.length > 0) {
+    logTags.push(...map(tag => tag.value, tagsToCreate))
+  }
+  const logEntry = {
+    date: logEntryData.date,
+    tags: map(tag => tag.value, logEntryData.tags),
+    description: logEntryData.description
+  }
+  if(logEntryData.linkedCultures && logEntryData.linkedCultures.length > 0) {
+    logEntry.cultures = map(culture => culture.value, logEntryData.linkedCultures)
+  }
+  if(logEntryData.linkedSurfaces && logEntryData.linkedSurfaces.length > 0) {
+    logEntry.surfaces = map(surface => {
+      const split = surface.value.split('ùùù')
+      const plot = split[0]
+      const code = split[1]
+      return { plot, code }
+    }, logEntryData.linkedSurfaces)
+  }
+  logEntries.push(logEntry)
+
+  const updatedData = merge(state.get('data'), { log: fromJS(logEntries), logTags: fromJS(logTags) })
+  const logState = state.get('logState')
+  return merge(state, { data: updatedData, logState: logState.set('creating', false) })
 }
 
 const downloadSavedData = data => {
@@ -138,6 +163,13 @@ export default (state = initialState, action) => {
       break
     case 'DOWNLOAD_ALL_DATA':
       downloadSavedData(state.get('data').toJS())
+      break
+    case 'TOGGLE_LOGENTRY_CREATION':
+      result = mergeDeep(state, fromJS({ logState: { creating: !state.get('logState').get('creating') }}))
+      break
+    case 'CREATE_LOGENTRY':
+      result = saveLogEntry(state, action.data)
+      break
     default:
   }
   localStorage.setItem('state', JSON.stringify(result.toJS()))

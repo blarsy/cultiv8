@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
-import Select, { Async, AsyncCreatable } from 'react-select'
+import Select, { Async, AsyncCreatable, Creatable } from 'react-select'
 import moment from 'moment'
 import '../../node_modules/react-datepicker/dist/react-datepicker.min.css'
 import '../../node_modules/react-select/dist/react-select.min.css'
@@ -35,7 +35,13 @@ border: ${props =>
 flex-grow: 1;
 `
 
-const SelectCreatableStyled = styled(AsyncCreatable)`
+const SelectAsyncCreatableStyled = styled(AsyncCreatable)`
+border: ${props =>
+  props.used && props.error ? '1px solid red' : '1px solid #222'};
+flex-grow: 1;
+`
+
+const SelectCreatableStyled = styled(Creatable)`
 border: ${props =>
   props.used && props.error ? '1px solid red' : '1px solid #222'};
 flex-grow: 1;
@@ -89,9 +95,9 @@ class FormInput extends React.Component {
         />
       )
     } else if (this.props.type === 'select') {
-      if (this.props.creatable) {
+      if (this.props.creatable && this.props.async) {
         element = (
-          <SelectCreatableStyled
+          <SelectAsyncCreatableStyled
             name={this.props.name}
             value={this.props.value}
             default={this.props.multi ? [] : null}
@@ -113,6 +119,19 @@ class FormInput extends React.Component {
             onChange={e => this.props.onChange(e)}
             onBlur={e => this.props.lostFocus(e)}
             loadOptions={this.props.loadOptions}
+          />
+        )
+      } else if (this.props.creatable) {
+        element = (
+          <SelectCreatableStyled
+            name={this.props.name}
+            value={this.props.value}
+            default={this.props.multi ? [] : null}
+            autoload={true}
+            multi={this.props.multi}
+            onChange={e => this.props.onChange(e)}
+            onBlur={e => this.props.lostFocus(e)}
+            options={this.props.options}
           />
         )
       } else {
