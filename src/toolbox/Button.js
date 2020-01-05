@@ -1,12 +1,13 @@
+import React from 'react'
 import styled from 'styled-components'
 
-export default styled.button`
+const Button = styled.button`
   border-radius: 0.25rem;
   background-color: #B5FFCB;
   border: 1px solid #5BB375;
-  color: #B34A49;
+  color: #333;
   font-size: 1.25rem;
-  padding: 0.5rem;
+  padding: ${props => props.children[1] ? '0.5rem' : '0.25rem'};
   cursor: pointer;
   :hover {
     background-color: #FF9C9C;
@@ -19,6 +20,21 @@ export default styled.button`
   :disabled {
     cursor: default;
     background-color: #B5FFCB;
-    color: #FF9C9C;
+    color: #888;
   }
 `
+const Icon = styled.img`
+  height: 1rem;
+  margin-right: ${props => props.isSoleContent ? '0' : '0.5rem'};
+`
+
+export default props => {
+  if(!props.icon) {
+    return (<Button { ...props}></Button>)
+  } else {
+    return (<Button {...props}>
+      <Icon src={'img/' + props.icon + '.svg'} isSoleContent={!props.children || !props.children[1]}/>
+      {props.children}
+    </Button>)
+  }
+}

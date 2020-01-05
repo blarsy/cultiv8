@@ -2,8 +2,10 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { sort, map, forEach, find } from 'ramda'
 import { connect } from 'react-redux'
-import { ValidatedForm, getInitialState, FlexBlock } from '../../toolbox'
+import moment from 'moment'
+import { ValidatedForm, getInitialState } from '../../toolbox'
 import { surfaceIsAvailableForCulture } from '../../domain/planner'
+import { statussesOptions } from './common'
 
 class EditCulture extends React.Component {
   constructor(props) {
@@ -11,19 +13,11 @@ class EditCulture extends React.Component {
 
     this.surfaces = this.props.surfaces.toJS()
     this.products = this.props.products.toJS()
-
-    const statusses = [{
-      label: 'Planifié',
-      value: 0
-    },
-    {
-      label: 'Implanté',
-      value: 1
-    },
-    {
-      label: 'Détruit',
-      value: 2
-    }]
+    const surfacesOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(surface => ({ label: surface.plot + ' ' + surface.code, value: surface.plot + 'ùùù' + surface.code }), this.surfaces))
+    const productOptions = map(product => ({
+      label: product.name,
+      value: product.name
+    }), sort((a, b) => a.name.localeCompare(b.name), this.products))
 
     this.inputs = [
       {
@@ -38,30 +32,39 @@ class EditCulture extends React.Component {
         name: 'product',
         label: 'Production',
         required: true,
-        options: map(product => ({
-          label: product.name,
-          value: product.name
-        }), sort((a, b) => a.name.localeCompare(b.name), this.products))
+        options: productOptions
       },
       {
         type: 'select',
         name: 'status',
         label: 'Statut',
         required: true,
-        options: statusses,
-        default: statusses[0]
+        options: statussesOptions,
+        default: statussesOptions[0]
       },
       {
         type: 'select',
         name: 'surfaces',
         label: 'Surfaces',
         required: true,
-        options: sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(surface => ({ label: surface.plot + ' ' + surface.code, value: surface.plot + 'ùùù' + surface.code }), this.surfaces)),
+        options: surfacesOptions,
         multi: true
       }
     ]
 
     this.state = getInitialState(this.inputs)
+    if(props.cultureState && props.cultureState.get('editedCulture')) {
+      const cultureToEdit = props.cultureState.get('editedCulture').toJS()
+      const initialData = {
+        plantDate: moment(cultureToEdit.plantDate).toDate(),
+        status: find(option => option.value === cultureToEdit.status, statussesOptions),
+        product: find(option => option.value === cultureToEdit.productName, productOptions)
+      }
+      if(cultureToEdit.surfaces && cultureToEdit.surfaces.length > 0) {
+        initialData.surfaces = map(surface => find(option => option.value === surface.plot + 'ùùù' + surface.code, surfacesOptions), cultureToEdit.surfaces)
+      }
+      this.state = { ...this.state, ...initialData }
+    }
   }
 
   validateCulture() {
@@ -94,22 +97,20 @@ class EditCulture extends React.Component {
 
   render() {
     return (
-      <FlexBlock isContainer flexFlow="column" flex="1" justifyContent="stretch">
-        <ValidatedForm
-          margin="10%"
-          getState={() => this.state}
-          setState={state => this.setState(state)}
-          inputs={this.inputs}
-          onSubmit={() => {
-            if(this.validateCulture()) {
-              this.props.onEditDone(this.state)
-            }
-          }}
-          actionLabel="Ok"
-          title="Edition culture"
-          error={this.state.error}
-        />
-      </FlexBlock>
+      <ValidatedForm
+        margin="10%"
+        getState={() => this.state}
+        setState={state => this.setState(state)}
+        inputs={this.inputs}
+        onSubmit={() => {
+          if(this.validateCulture()) {
+            this.props.onEditDone(this.state)
+          }
+        }}
+        actionLabel="Ok"
+        title="Edition culture"
+        error={this.state.error}
+      />
     )
   }
 }
@@ -120,7 +121,8 @@ EditCulture.propTypes = {
 
 const mapStateToProps = state => ({
   products: state.global.get('data').get('products'),
-  surfaces: state.global.get('data').get('surfaces')
+  surfaces: state.global.get('data').get('surfaces'),
+  cultureState: state.global.get('cultureState')
 })
 
 export default connect(mapStateToProps)(EditCulture)

@@ -25,6 +25,7 @@ class TopMenu extends React.Component {
           return (<MenuButton
             key={menuItem.path}
             selected={selected}
+            icon={menuItem.icon}
             onClick={() => this.props.dispatch(push(menuItem.path))}>
             {menuItem.caption}
           </MenuButton>)

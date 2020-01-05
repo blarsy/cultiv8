@@ -1,6 +1,4 @@
 import XLSX from 'xlsx'
-import { forEach, find } from 'ramda'
-import moment from 'moment'
 
 const parseSheet = (wb, sheetName, targetColNames) => {
   const sheet = wb.Sheets[sheetName]
@@ -23,29 +21,11 @@ const parseSheet = (wb, sheetName, targetColNames) => {
   return items
 }
 
-const setIdsOnCultures = cultures => {
-  let id = 1
-  forEach(culture => culture.id = id++, cultures)
-}
-
-const parsePlantdates = (cultures, datesInIsoFormat) => {
-  forEach(culture => {
-    let plantDate
-    if(datesInIsoFormat) {
-      plantDate = moment(culture.plantDate)
-    } else {
-      plantDate = moment(culture.plantDate, 'L').toDate()
-    }
-    culture.plantDate = plantDate
-  }, cultures)
-}
-
 export const fromJson = file => (new Promise(resolve => {
   const reader = new FileReader()
   reader.onload = e => {
     try {
       const data = JSON.parse(e.target.result)
-      parsePlantdates(data.cultures, true)
       resolve(data)
     }
     catch(err){
@@ -71,11 +51,8 @@ export const fromSpreadsheet = file => (new Promise(resolve => {
           'surface','greenhouseSurface','sowMin','sowMax','growingDays','nurseryDays','harvestDays',
           'totalWorkHours', 'plantsPerSqMeter','totalNumberOfPlants','priceOrganic','actualPrice',
           'incomePerSqMeter','totalIncome','incomePerWorkHour','soilOccupationRatio', 'amountOfWorkRatio',
-          'interestRatio']),
-        cultures: parseSheet(workbook, 'Cultures', ['productName', 'status', 'plantDate', 'plot', 'code'])
+          'interestRatio'])
       }
-      setIdsOnCultures(result.cultures)
-      parsePlantdates(result.cultures, false)
 
       resolve(result)
     }
