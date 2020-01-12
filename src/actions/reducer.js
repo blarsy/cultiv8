@@ -1,8 +1,9 @@
 import { Map, fromJS, mergeDeep, merge } from 'immutable'
 import { forEach, forEachObjIndexed, any, map, filter, includes, find, reduce } from 'ramda'
 import moment from 'moment'
-import createPlan from '../domain/createPlan'
 import fileDownload from 'js-file-download'
+import createPlan from '../domain/createPlan'
+import { nextId } from '../domain/data'
 
 const persistedState = localStorage.getItem('state')
 const blankState = fromJS({
@@ -54,12 +55,6 @@ const saveCulture = (state, cultureData) => {
   const updatedData = merge(state.get('data'), { cultures: fromJS(cultures) })
   const cultureState = state.get('cultureState')
   return merge(state, {data: updatedData, cultureState: cultureState.set('editing', false)})
-}
-
-const nextId = list => {
-  let max = 0
-  forEach(item => { if(max < item.id) max = item.id }, list)
-  return max + 1
 }
 
 const saveLogEntry = (state, logEntryData) => {
@@ -261,7 +256,8 @@ export default (state = initialState, action) => {
       ratingsJs[currentRating].selectedSuggestionId = action.suggestionId
       const updatedCurrentPlan = state.get('planState').get('currentPlan').set('ratings', fromJS(ratingsJs))
       const updatedPlanState = state.get('planState').set('currentPlan', updatedCurrentPlan)
-      result = state.set('planState', updatedPlanState)
+      const stateWithPlanToRecreate = state.set('planState', updatedPlanState)
+      result = state.set('planState', state.get('planState').set('currentPlan', fromJS(createPlan(stateWithPlanToRecreate.toJS()))))
       break
     case 'GROUND_SELECTPLOT':
       result = mergeDeep(state, fromJS({ groundsState: { selectedPlot: action.value }}))

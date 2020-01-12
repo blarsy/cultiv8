@@ -3,10 +3,18 @@ export const statussesOptions = [{
       value: 0
     },
     {
-      label: 'Implanté',
+      label: 'Semé',
       value: 1
     },
     {
-      label: 'Détruit',
+      label: 'Implanté',
       value: 2
+    },
+    {
+      label: 'En récolte',
+      value: 3
+    },
+    {
+      label: 'Détruit',
+      value: 100
     }]

@@ -1,31 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { map, sort } from 'ramda'
-import { Checkbox, FlexBlock } from '../../toolbox'
-import styled, { css } from 'styled-components'
-
-const compareNumbers = (a, b) => {
-  if(a > b) return -1
-  if(a < b) return 1
-  return 0
-}
-
-const CultureLine = styled(FlexBlock)`
-  ${props => !props.odd && css`
-    background-color: #B5FFCB;
-  `}
-`
-const CultureTitleLine = styled(CultureLine)`
-  color: #fff;
-  background-color: #B34A49;
-`
-
-const CultureCell = styled(FlexBlock)`
-  padding: 0.25rem;
-`
-const CheckboxCell = styled.span`
-  padding: 0.25rem;
-`
+import { Checkbox } from '../../toolbox'
+import styled from 'styled-components'
+import Table from '../Table'
 
 const SurfaceInput = styled.input`
   max-width: 4rem;
@@ -45,54 +22,76 @@ class ProductsSelector extends React.Component {
   }
 
   render() {
-    if(this.props.products && this.props.products.size > 0) {
-      const sorted = sort((a,b) =>
-        compareNumbers(a.get('incomePerSqMeterPerMonthOnTheField'), b.get('incomePerSqMeterPerMonthOnTheField')),
-        this.props.products.toArray())
-      let odd = false
-      const planState = this.props.planState.toJS()
-      return (
-        <div>
-          <CultureTitleLine isContainer alignItems="center">
-            <CheckboxCell flex="0 1">
-              <label>
-                <Checkbox checked={planState.allSelected} onChange={() => {
-                  this.toggleAllSelected()
-                }}/>
-              </label>
-            </CheckboxCell>
-            <CultureCell flex="1 0">Nom</CultureCell>
-            <CultureCell flex="1 0">Surface</CultureCell>
-            <CultureCell flex="1 0">Revenu horaire</CultureCell>
-            <CultureCell flex="1 0">Rentabilité surface/temps</CultureCell>
-          </CultureTitleLine>
-          {
-            map(culture => {
-              odd=!odd
-              const name = culture.get('name')
-              return (<CultureLine isContainer alignItems="center" odd={odd} key={name}>
-                <CheckboxCell flex="0 1">
-                  <label>
-                    <Checkbox
-                      checked={planState.selections[name].selected}
-                      onChange={() => this.toggleSelected(name)}/>
-                  </label>
-                </CheckboxCell>
-                <CultureCell flex="1 0">{name}</CultureCell>
-                <CultureCell flex="1 0">{planState.selections[name].selected ?
-                  <SurfaceInput type="number"
-                    value={planState.selections[name].surface.toFixed()}
-                    onChange={e => this.setSurface(name, e.target.value)}/> :
-                    culture.get('surface').toFixed()}
-                  </CultureCell>
-                <CultureCell flex="1 0">{culture.get('incomePerWorkHour').toFixed(1)}</CultureCell>
-                <CultureCell flex="1 0">{culture.get('interestRatio').toFixed(1)}</CultureCell>
-              </CultureLine>)
-            }, sorted)
-          }
-        </div>)
-    }
-    return <p>No data</p>
+    const planState = this.props.planState.toJS()
+    const dataColumns = [
+      {
+        titleContent: () => (<label>
+          <Checkbox checked={planState.allSelected} onChange={() => {
+            this.toggleAllSelected()
+          }}/>
+        </label>),
+        ratio: '0 1',
+        noSort: true,
+        content: product => (<label>
+            <Checkbox
+              checked={planState.selections[product.name].selected}
+              onChange={() => this.toggleSelected(product.name)}/>
+          </label>)
+      },
+      {
+        title: 'Nom',
+        ratio: '2 0',
+        content: product => product.name,
+        flexProps: {
+          isContainer: true,
+          alignItems: 'center'
+        }
+      },
+      {
+        title: 'Surperficie',
+        ratio: '1 0',
+        sort: {
+          type: 'number',
+          value: product => product.surface
+        },
+        content: product => (planState.selections[product.name].selected ?
+          <SurfaceInput type="number"
+            value={planState.selections[product.name].surface.toFixed()}
+            onChange={e => this.setSurface(product.name, e.target.value)}/> :
+            product.surface.toFixed()),
+        flexProps: {
+          isContainer: true,
+          alignItems: 'center'
+        }
+      },
+      {
+        title: 'Revenu horaire',
+        ratio: '1 0',
+        sort: {
+          type: 'number',
+          value: product => product.incomePerWorkHour
+        },
+        content: product => product.incomePerWorkHour.toFixed(1),
+        flexProps: {
+          isContainer: true,
+          alignItems: 'center'
+        }
+      },
+      {
+        title: 'Rentabilité surperficie / temps',
+        ratio: '1 0',
+        sort: {
+          type: 'number',
+          value: product => product.interestRatio
+        },
+        content: product => product.interestRatio.toFixed(1),
+        flexProps: {
+          isContainer: true,
+          alignItems: 'center'
+        }
+      }
+    ]
+    return (<Table data={this.props.products.toJS()} dataColumns={dataColumns} linePadding="0.25rem 0" />)
   }
 }
 

@@ -2,9 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { map, find } from 'ramda'
-import styled from 'styled-components'
 import moment from 'moment'
-import { FlexBlock, Button } from '../../toolbox'
 import SearchResultsDisplay from '../SearchResultsDisplay'
 import { statussesOptions } from './common'
 
@@ -16,19 +14,27 @@ class CulturesDisplay extends React.Component {
       editActionName: 'BEGIN_EDIT_CULTURE',
       dataColumns: [
         {
-          ratio: 1,
+          title: 'Date plantation',
+          sort: {
+            value: culture => culture.plantDate,
+            type: 'date'
+          },
+          ratio: '1',
           content: culture => moment(culture.plantDate).format('L')
         },
         {
-          ratio: 2,
+          title: 'Produit',
+          ratio: '2',
           content: culture => culture.productName
         },
         {
-          ratio: 2,
-          content: culture => 'Surfaces: ' + map(surface => surface.plot + ' ' + surface.code + ' ', culture.surfaces)
+          title: 'Surfaces',
+          ratio: '2',
+          content: culture => map(surface => surface.plot + ' ' + surface.code + ' ', culture.surfaces)
         },
         {
-          ratio: 1,
+          title: 'Statut',
+          ratio: '1',
           content: culture => find(option => option.value === culture.status, statussesOptions).label
         }
       ]

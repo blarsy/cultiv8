@@ -6,6 +6,7 @@ import {
   addIndex
 } from 'ramda'
 import { getNextRange, surfaceIsAvailableInPeriod, assignCulturesToSurfaces } from './planner'
+import { nextId } from './data'
 
 // Standard unit of surfaces is 10 square meters
 const STANDARD_SURFACE = 10
@@ -147,11 +148,27 @@ const createSuggestions = (contiguousSurfacesRatings, nbSuggestions, targetCultu
   return addIndex(map)((set, idx) => ({ score: set.score, maxScore: set.maxScore, surfaces: set.surfaces, id: idx }) ,take(nbSuggestions, sort((a, b) => b.score - a.score, contiguousSets.concat(splitSets))))
 }
 
+const createdSuggestedCultures = (data, ratings) => {
+  const targetRatings = filter(rating => rating.selectedSuggestionId, ratings)
+  forEach(rating => {
+    const cultureToAdd = {
+      id: nextId(data.cultures),
+      status: rating.culture.status,
+      plantDate: rating.culture.plantDate,
+      productName: rating.name,
+      surfaces: rating.suggestions[rating.selectedSuggestionId].surfaces
+    }
+    data.cultures.push(cultureToAdd)
+  }, targetRatings)
+}
+
 export default input => {
   //Collect surfaces from target plot
   //Use a deep clone of the surfaces array, as we will assume the best suggestions
   //are actually applied, but we don't want this to actually modify the source data
   const rawData = clone(input.data)
+  const currentPlanRatings = input.planState.currentPlan ? input.planState.currentPlan.ratings : []
+  createdSuggestedCultures(rawData, currentPlanRatings)
   assignCulturesToSurfaces(rawData)
   const surfaces = filter(surface => surface.plot === input.planState.selectedPlot, clone(rawData.surfaces))
 
@@ -170,63 +187,75 @@ export default input => {
 
   //For each product ordered by interest, rate each surface for suitable-ness
   const ratings=[]
+
   forEach(culture => {
-    const dates = getNextRange(culture.product, new Date())
-    //Rate every surfaces, also marking those unavailable at the target culture period
-    const surfaceRatings = map(surface => ({
-      surface,
-      score: surfaceIsAvailableInPeriod(surface, dates) ? rateSurface(surface, culture) : SURFACE_UNAVAILABLE
-    }), surfaces)
+    let rating
+    const ratingWithSuggestion = find(rating => rating.name === culture.product.name && rating.selectedSuggestionId, currentPlanRatings)
+    if(ratingWithSuggestion) {
+      rating = ratingWithSuggestion
+    } else {
+      const dates = getNextRange(culture.product, new Date())
+      //Rate every surfaces, also marking those unavailable at the target culture period
+      const surfaceRatings = map(surface => ({
+        surface,
+        score: surfaceIsAvailableInPeriod(surface, dates) ? rateSurface(surface, culture) : SURFACE_UNAVAILABLE
+      }), surfaces)
 
-    //Isolate available surfaces by contiguous sets
-    const contiguousSurfacesRatings = []
-    let i = -1
-    let accumulating = false
-    forEach(surfaceRating => {
-      if(surfaceRating.score !== SURFACE_UNAVAILABLE) {
-        if(!accumulating) {
-          accumulating = true
-          contiguousSurfacesRatings.push([])
-          i++
+      //Isolate available surfaces by contiguous sets
+      const contiguousSurfacesRatings = []
+      let i = -1
+      let accumulating = false
+      forEach(surfaceRating => {
+        if(surfaceRating.score !== SURFACE_UNAVAILABLE) {
+          if(!accumulating) {
+            accumulating = true
+            contiguousSurfacesRatings.push([])
+            i++
+          }
+          contiguousSurfacesRatings[i].push(surfaceRating)
+        } else {
+          accumulating = false
         }
-        contiguousSurfacesRatings[i].push(surfaceRating)
-      } else {
-        accumulating = false
+      }, surfaceRatings)
+
+      //Create suggestions
+      const suggestions = createSuggestions(contiguousSurfacesRatings, 5, culture)
+
+      //Save suggestions & ratings
+      rating = {
+        name: culture.product.name,
+        dates,
+        surfaceRatings,
+        suggestions
       }
-    }, surfaceRatings)
 
-    //Create suggestions
-    const suggestions = createSuggestions(contiguousSurfacesRatings, 5, culture)
-
-    //Save suggestions & ratings
-    const rating = {
-      name: culture.product.name,
-      dates,
-      surfaceRatings,
-      suggestions
-    }
-
-    if(suggestions.length > 0) {
-      //Consider the best suggestion is applied (so that subsequent products are
-      //suggested surfaces without collisions)
-      const plantDate = max(new Date(), dates.plantBetween.min)
-      const cultureToSuggest = {
-        product: culture.product,
-        status: 0,
-        plantDate
+      if(suggestions.length > 0) {
+        //Consider the best suggestion is applied (so that subsequent products are
+        //suggested surfaces without collisions)
+        const plantDate = max(new Date(), dates.plantBetween.min)
+        const cultureToSuggest = {
+          product: culture.product,
+          status: 0,
+          plantDate
+        }
+        rating.culture = cultureToSuggest
+        rating.selectedSuggestionId = suggestions[0].id
+        forEach(surface => {
+          if(!surface.cultures) surface.cultures = []
+          surface.cultures.push(cultureToSuggest)
+        }, suggestions[0].surfaces)
       }
-      rating.culture = cultureToSuggest
-      rating.selectedSuggestionId = suggestions[0].id
-      forEach(surface => {
-        if(!surface.cultures) surface.cultures = []
-        surface.cultures.push(cultureToSuggest)
-      }, suggestions[0].surfaces)
     }
 
     ratings.push(rating)
   }, cultures)
-  return {
+  const result = {
     ratings,
     surfaces
   }
+  if(input.planState.currentPlan) {
+    result.currentRating = input.planState.currentPlan.currentRating
+  }
+
+  return result
 }

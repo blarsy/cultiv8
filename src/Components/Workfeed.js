@@ -1,48 +1,50 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { map } from 'ramda'
-import styled from 'styled-components'
 import { connect } from 'react-redux'
-import { List } from 'immutable'
+import moment from 'moment'
+import inventorize from '../domain/TasksInventorizer'
+import Table from './Table'
 
-const Feed = styled.div`display: flex;
-  justify-content: space-between`
-const CultureCell = styled.p`flex:2;`
-const NormalCell = styled.p`flex:1;`
 class Workfeed extends React.Component {
   render() {
-    if(this.props.data && this.props.data.size > 0) {
-      return (
-        <section>
-          <Feed>
-            <NormalCell>Type</NormalCell>
-            <CultureCell>Culture</CultureCell>
-            <NormalCell>Quantité (mètres carrés)</NormalCell>
-          </Feed>
-          {
-            map(task => {
-              return (<Feed key={task.get('type') + task.get('culture') + task.get('quantity')}>
-                <NormalCell>{task.get('type')}</NormalCell>
-                <CultureCell>{task.get('culture')}</CultureCell>
-                <NormalCell>{task.get('quantity').toFixed(1)}</NormalCell>
-              </Feed>)
-            }, this.props.data)
-          }
-        </section>
-      )
+    const data = {
+      cultures: this.props.data.get('cultures').toJS(),
+      products: this.props.data.get('products').toJS()
     }
+    const tasks = inventorize(data)
+    const cols = [
+      {
+        title: 'Date',
+        sort: {
+          value: task => task.date,
+          type: 'date'
+        },
+        ratio: '1',
+        content: task => moment(task.date).format('L')
+      },
+      {
+        title: 'Tâche',
+        ratio: '1',
+        content: task => task.type
+      },
+      {
+        title: 'Culture',
+        ratio: '2',
+        content: task => task.culture
+      }
+    ]
 
-    return <p>No data</p>
+    return (<Table data={tasks} dataColumns={cols} />)
   }
 }
 
 Workfeed.propTypes = {
-  data: PropTypes.instanceOf(List)
+  data: PropTypes.object
 }
 
 const mapStateToProps = state => {
   return {
-    data: state.global.get('tasks')
+    data: state.global.get('data')
   }
 }
 

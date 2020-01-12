@@ -20,11 +20,18 @@ class LogEntriesDisplay extends React.Component {
       editActionName: 'BEGIN_EDIT_LOGENTRY',
       dataColumns: [
         {
-          ratio: 1,
+          title: 'Date',
+          sort: {
+            value: logEntry => logEntry.date,
+            type: 'date'
+          },
+          ratio: '1',
           content: logEntry => moment(logEntry.date).format('L')
         },
         {
-          ratio: 2,
+          title: 'Infos',
+          noSort: true,
+          ratio: '2',
           content: logEntry => (<FlexBlock isContainer flexFlow="column">{ logEntry.tags.length >= 0 && <span>Tags: {map(tag => tag, logEntry.tags)}</span> }
             { logEntry.surfaces && logEntry.surfaces.length >= 0 && <span>Surfaces: {map(surface => surface.plot + ' ' + surface.code, logEntry.surfaces)}</span> }
             { logEntry.cultures && logEntry.cultures.length >= 0 && <span>Cultures: {map(cultureId => {
@@ -34,7 +41,9 @@ class LogEntriesDisplay extends React.Component {
           </FlexBlock>)
         },
         {
-          ratio: 4,
+          title: 'Contenu',
+          ratio: '4',
+          noSort: true,
           content: logEntry => logEntry.description
         }
       ]

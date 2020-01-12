@@ -1,23 +1,42 @@
-import { forEach } from 'ramda'
+import { forEach, find, filter } from 'ramda'
+import moment from 'moment'
 
-export default (data) => {
-  const result = []
+export default data => {
+  const results = []
   //Sewing cultures in plan
   //Planting cultures in plan
   //Removing ended cultures
   if(data.cultures){
     forEach(culture => {
-      const currentMonth = new Date().getMonth()+1
-      if(culture.sowMin < culture.sowMax) {
-        if(currentMonth >= culture.sowMin && currentMonth <= culture.sowMax){
-          result.push({type: 'seed', culture: culture.name, quantity: culture.surface})
+      const result = {
+        culture: culture.id
+      }
+      if (culture.status === 0) {
+        //Culture planned: scheduled seeding/Planting
+        result.date = culture.plantDate
+        result.type = 'seed'
+      } else {
+        const product = find(product => product.name === culture.productName, data.products)
+        if (culture.status === 1) {
+          //culture in place: plan planting in the field, or harvest
+          if(product.nurseryDays > 0) {
+            result.date = moment(culture.plantDate).add(product.nurseryDays, 'days').toISOString()
+            result.type = 'plant'
+          } else {
+            result.date = moment(culture.plantDate).add(product.growingDays, 'days').toISOString()
+            result.type = 'harvest'
+          }
+        } else if (culture.status === 2) {
+          result.date = moment(culture.plantDate).add(product.growingDays, 'days').toISOString()
+          result.type = 'harvest'
+        } else if (culture.status === 3) {
+          result.date = moment(culture.plantDate).add(product.growingDays + product.harvestDays, 'days').toISOString()
+          result.type = 'destroy'
         }
       }
-      if(currentMonth <= culture.sowMin && currentMonth >= culture.sowMax){
-        result.push({type: 'seed', culture: culture.name, quantity: culture.surface})
-      }
-    }, data.cultures)
+      results.push(result)
+    }, filter(culture => culture.status !== 100, data.cultures))
   }
   //Planning fertilization of surfaces after a full cycle of cultures greediness
-  return result
+  return results
 }

@@ -5,11 +5,7 @@ import { Workfeed } from '../Components'
 
 class Home extends React.Component {
   render() {
-    return (
-      <section>
-        <Workfeed />
-      </section>
-    )
+    return (<Workfeed />)
   }
 }
 
