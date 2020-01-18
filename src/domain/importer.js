@@ -49,7 +49,7 @@ export const fromSpreadsheet = file => (new Promise(resolve => {
         products: parseSheet(workbook, 'Produits', [
           'name','family','greediness','productivity','unit','greenhouse','surfaceRatio',
           'surface','greenhouseSurface','sowMin','sowMax','growingDays','nurseryDays','harvestDays',
-          'totalWorkHours', 'plantsPerSqMeter','totalNumberOfPlants','priceOrganic','actualPrice',
+          'workPerSqMeter', 'plantsPerSqMeter','totalNumberOfPlants','priceOrganic','actualPrice',
           'incomePerSqMeter','totalIncome','incomePerWorkHour','soilOccupationRatio', 'amountOfWorkRatio',
           'interestRatio'])
       }

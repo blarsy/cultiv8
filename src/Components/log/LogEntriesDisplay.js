@@ -25,24 +25,24 @@ class LogEntriesDisplay extends React.Component {
             value: logEntry => logEntry.date,
             type: 'date'
           },
-          ratio: '1',
+          flex: '1',
           content: logEntry => moment(logEntry.date).format('L')
         },
         {
           title: 'Infos',
           noSort: true,
-          ratio: '2',
+          flex: '2',
           content: logEntry => (<FlexBlock isContainer flexFlow="column">{ logEntry.tags.length >= 0 && <span>Tags: {map(tag => tag, logEntry.tags)}</span> }
             { logEntry.surfaces && logEntry.surfaces.length >= 0 && <span>Surfaces: {map(surface => surface.plot + ' ' + surface.code, logEntry.surfaces)}</span> }
             { logEntry.cultures && logEntry.cultures.length >= 0 && <span>Cultures: {map(cultureId => {
               const culture = find(culture => culture.id === cultureId, this.cultures)
-              return culture.productName + ' ' + moment(culture.plantdate).format('L')
+              return culture.productName + ' ' + moment(culture.plantDate).format('L')
             }, logEntry.cultures)}</span> }
           </FlexBlock>)
         },
         {
           title: 'Contenu',
-          ratio: '4',
+          flex: '4',
           noSort: true,
           content: logEntry => logEntry.description
         }

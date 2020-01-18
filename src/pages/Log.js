@@ -4,12 +4,6 @@ import { Button, FlexBlock } from '../toolbox'
 import { EditLogEntry, DataContent, LogSearch, LogEntriesDisplay } from '../Components'
 
 class Log extends React.Component {
-  constructor(props) {
-    super(props)
-
-    this.state = { logs: [] }
-  }
-
   render() {
     let button, content
     if(this.props.state.get('editing')) {
@@ -30,6 +24,9 @@ class Log extends React.Component {
         </FlexBlock>
       </FlexBlock>
     )
+  }
+  componentWillUnmount() {
+    this.props.dispatch({ type: 'DISMISS_SEARCHRESULT', stateName: 'logState' })
   }
 }
 

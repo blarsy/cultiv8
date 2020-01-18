@@ -1,11 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import { Workfeed } from '../Components'
+import { Workfeed, DataContent } from '../Components'
 
 class Home extends React.Component {
   render() {
-    return (<Workfeed />)
+    return (<DataContent><Workfeed /></DataContent>)
   }
 }
 

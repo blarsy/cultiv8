@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { injectGlobal } from 'styled-components'
 import { Route, withRouter } from 'react-router-dom'
 import { FlexBlock } from './toolbox'
-import { Home, DataImport, Culture, Ground, Log, Plan } from './pages'
+import { Home, DataImport, Culture, Ground, Log, Plan, Product, Settings } from './pages'
 
 import TopMenu from './Components/TopMenu'
 
@@ -34,7 +34,7 @@ class App extends Component {
     return (
       <FlexBlock isContainer padding="0.25rem">
         <TopMenu/>
-        <FlexBlock flex="1 0" padding="0.5rem">
+        <FlexBlock flex="1 0" padding="0.5rem" overflow="hidden">
           <Route exact path="/" component={Home} />
           <Route path="/plan" component={Plan} />
           <Route path="/dataimport" component={DataImport} />
@@ -42,6 +42,8 @@ class App extends Component {
           <Route path="/grounds" component={Ground} />
           <Route path="/log" component={Log} />
           <Route path="/home" component={Home} />
+          <Route path="/products" component={Product} />
+          <Route path="/settings" component={Settings} />
         </FlexBlock>
       </FlexBlock>
     )

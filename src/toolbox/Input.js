@@ -6,11 +6,10 @@ class Input extends React.Component {
   constructor(props) {
     super(props)
     this.state = { error: '', used: false, value: props.value }
-    const validations = this.props.validations || []
+    this.validations = this.props.validations || []
 
     if (this.props.required)
-      this.validations = [this.validateRequired, ...validations]
-    else this.validations = [...validations]
+      this.validations = [this.validateRequired, ...this.validations]
   }
 
   componentDidMount() {
@@ -39,6 +38,8 @@ class Input extends React.Component {
     else if (this.props.type === 'select') value = e
     else if ((e.target.type && e.target.type) === 'checkbox')
       value = e.target.checked.toString()
+    else if (e.target.type && (e.target.type === 'number'))
+      value = +e.target.value
     else value = e.target.value
 
     const error = this.validate(value)
@@ -68,7 +69,8 @@ class Input extends React.Component {
         'textArea',
         'checkbox',
         'date',
-        'select'
+        'select',
+        'number'
       ].includes(this.props.type)
     ) {
       return (

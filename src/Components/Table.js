@@ -7,6 +7,7 @@ import { FlexBlock } from './../toolbox'
 
 const Cell = styled(FlexBlock)`
   padding: 0 0.25rem;
+  background-color: ${props => props.lineIndex % 2 !== 0 && '#B5FFCB'};
 `
 const HeaderCell = styled(FlexBlock)`
   padding: 0.25rem;
@@ -16,7 +17,6 @@ const HeaderCell = styled(FlexBlock)`
 `
 
 const Line = styled(FlexBlock)`
-  background-color: ${props => props.index % 2 !== 0 && '#B5FFCB'};
   padding: ${props => props.padding}
 `
 
@@ -48,7 +48,7 @@ class Table extends React.Component {
           sortable={!dataColumn.noSort}
           key={idx}
           justifyContent="center"
-          flex={dataColumn.ratio}>
+          flex={dataColumn.flex}>
             {dataColumn.title || dataColumn.titleContent()}
         </HeaderCell>), this.props.dataColumns) }
     </FlexBlock>)
@@ -80,11 +80,12 @@ class Table extends React.Component {
               compare = (a, b) => moment(a).toDate() - moment(b).toDate()
             else
               compare = (a, b) => moment(b).toDate() - moment(a).toDate()
+            break
           default:
             if(this.state.asc)
-              compare = (a, b) => a.toString().toUpperCase().localeCompare(b.toString().toUpperCase())
+              compare = (a, b) => (a || '').toString().toUpperCase().localeCompare((b || '').toString().toUpperCase())
             else
-              compare = (a, b) => b.toString().toUpperCase().localeCompare(a.toString().toUpperCase())
+              compare = (a, b) => (b || '').toString().toUpperCase().localeCompare((a || '').toString().toUpperCase())
         }
         dataToDisplay = sort((a, b) => {
           let valA
@@ -99,11 +100,11 @@ class Table extends React.Component {
           return compare(valA, valB)
         }, this.props.data)
       }
-      lines = addIndex(map)((data, lineIdx) => (<Line key={lineIdx} index={lineIdx} padding={this.props.linePadding} isContainer flexFlow="row nowrap">
-        { addIndex(map)((dataColumn, idx) => <Cell key={idx} flex={dataColumn.ratio} isContainer={!!dataColumn.flexProps} { ...dataColumn.flexProps }>{dataColumn.content(data)}</Cell>, this.props.dataColumns) }
+      lines = addIndex(map)((data, lineIdx) => (<Line key={lineIdx} padding={this.props.linePadding} isContainer flexFlow="row nowrap">
+        { addIndex(map)((dataColumn, idx) => <Cell key={idx} justifyContent={dataColumn.alignRight && 'flex-end'} lineIndex={lineIdx} flex={dataColumn.flex} isContainer { ...dataColumn.flexProps }>{dataColumn.content(data)}</Cell>, this.props.dataColumns) }
       </ Line>), dataToDisplay)
     }
-    return (<TableBlock isContainer flexFlow="column">
+    return (<TableBlock overflow="auto" isContainer flexFlow="column">
       {header}
       {lines}
     </TableBlock>)

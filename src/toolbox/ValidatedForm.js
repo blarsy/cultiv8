@@ -66,6 +66,7 @@ class ValidatedForm extends React.Component {
               'checkbox',
               'date',
               'select',
+              'number',
               'custom'
             ].includes(input.type)
           ) {

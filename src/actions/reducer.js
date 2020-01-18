@@ -1,9 +1,9 @@
-import { Map, fromJS, mergeDeep, merge } from 'immutable'
-import { forEach, forEachObjIndexed, any, map, filter, includes, find, reduce } from 'ramda'
+import { Map, fromJS, mergeDeep, merge, find } from 'immutable'
+import { forEach, forEachObjIndexed, filter } from 'ramda'
 import moment from 'moment'
 import fileDownload from 'js-file-download'
 import createPlan from '../domain/createPlan'
-import { nextId } from '../domain/data'
+import { setStateRight, searchLog, searchCulture, searchProduct, saveCulture, saveLogEntry, saveProduct, recalculateSurfaces } from './stateTransformers'
 
 const persistedState = localStorage.getItem('state')
 const blankState = fromJS({
@@ -15,10 +15,16 @@ const blankState = fromJS({
   },
   logState: {
     editing: false
+  },
+  productState: {
+    editing: false
+  },
+  settings: {
+    totalSurface: 10
   }
 })
 const initialState = persistedState ?
-  fromJS(JSON.parse(persistedState)):
+  setStateRight(fromJS(JSON.parse(persistedState))):
   blankState
 
 const MakeBlankPlanState = products => {
@@ -27,172 +33,9 @@ const MakeBlankPlanState = products => {
   return Map({ selectedPlot: null, selections: fromJS(selections), allSelected: false })
 }
 
-const saveCulture = (state, cultureData) => {
-  const cultures = state.get('data').get('cultures') ? state.get('data').get('cultures').toJS() : []
-  const selectedSurfaces = map(selectedSurface => {
-    const split = selectedSurface.value.split('ùùù')
-    return {
-      plot: split[0],
-      code: split[1]
-    }
-  }, cultureData.surfaces)
-
-  let editedCulture
-  if(state.get('cultureState').get('editedCulture')) {
-    editedCulture = find(culture => culture.id === state.get('cultureState').get('editedCulture').get('id'), cultures)
-  } else {
-    editedCulture = {
-      id: nextId(cultures)
-    }
-    cultures.push(editedCulture)
-  }
-
-  editedCulture.productName = cultureData.product.value
-  editedCulture.status = cultureData.status.value
-  editedCulture.plantDate = cultureData.plantDate
-  editedCulture.surfaces = selectedSurfaces
-
-  const updatedData = merge(state.get('data'), { cultures: fromJS(cultures) })
-  const cultureState = state.get('cultureState')
-  return merge(state, {data: updatedData, cultureState: cultureState.set('editing', false)})
-}
-
-const saveLogEntry = (state, logEntryData) => {
-  const logEntries = state.get('data').get('log') ? state.get('data').get('log').toJS() : []
-  const logTags = state.get('data').get('logTags') ? state.get('data').get('logTags').toJS() : []
-  const tagsToCreate = filter(tag => !any(logTag => logTag.toLowerCase() === tag.value.toLowerCase(), logTags), logEntryData.tags)
-  if(tagsToCreate.length > 0) {
-    logTags.push(...map(tag => tag.value, tagsToCreate))
-  }
-
-  let logEntry
-  if(state.get('logState').get('editedEntry')) {
-    logEntry = find(entry => entry.id === state.get('logState').get('editedEntry').get('id'), logEntries)
-  } else {
-    logEntry = {
-      id: nextId(logEntries)
-    }
-    logEntries.push(logEntry)
-  }
-  logEntry.date = moment(logEntryData.date).format()
-  logEntry.tags = map(tag => tag.value, logEntryData.tags)
-  logEntry.description = logEntryData.description
-  if(logEntryData.linkedCultures) {
-    logEntry.cultures = map(culture => culture.value, logEntryData.linkedCultures)
-  }
-  if(logEntryData.linkedSurfaces) {
-    logEntry.surfaces = map(surface => {
-      const split = surface.value.split('ùùù')
-      const plot = split[0]
-      const code = split[1]
-      return { plot, code }
-    }, logEntryData.linkedSurfaces)
-  }
-
-  const updatedData = merge(state.get('data'), { log: fromJS(logEntries), logTags: fromJS(logTags) })
-  const logState = state.get('logState')
-  return merge(state, { data: updatedData, logState: logState.set('editing', false) })
-}
-
 const downloadSavedData = data => {
   forEach(surface => delete surface.cultures, data.surfaces)
   fileDownload(JSON.stringify(data), `cultiv8Data-${moment().format('YYYYMMDD-HHmmss')}.json`)
-}
-
-const searchLog = (state, searchData) => {
-  if(!searchData) searchData = (state.get('logState') && state.get('logState').get('lastSearchData') ? state.get('logState').get('lastSearchData').toJS() : {})
-
-  let result = []
-  if(state.get('data').get('log')) {
-    const filters = []
-    if(searchData.tags && searchData.tags.length > 0) {
-      filters.push(logEntry => {
-        if(!logEntry.tags) return false
-        return any(tag => includes(tag.value, logEntry.tags), searchData.tags)
-      })
-    }
-    if(searchData.cultures && searchData.cultures.length > 0) {
-      filters.push(logEntry => {
-        if(!logEntry.cultures) return false
-        return any(culture => includes(culture.value, logEntry.cultures), searchData.cultures)
-      })
-    }
-    if(searchData.surfaces && searchData.surfaces.length > 0) {
-      const surfacesToSearchFor = map(surface => {
-        const split = surface.value.split('ùùù')
-        return { plot: split[0], code: split[1] }
-      }, searchData.surfaces)
-      filters.push(logEntry => {
-        if(!logEntry.surfaces) return false
-        return any(surface => find(logSurface => surface.plot === logSurface.plot && surface.code === logSurface.code, logEntry.surfaces), surfacesToSearchFor)
-      })
-    }
-    if(searchData.description) {
-      filters.push(logEntry => logEntry.description.toLowerCase().includes(searchData.description))
-    }
-    if(searchData.fromDate && searchData.tillDate) {
-      filters.push(logEntry => {
-        return moment(logEntry.date) <= moment(searchData.tillDate) && moment(logEntry.date) >= moment(searchData.fromDate)
-      })
-    } else if(searchData.fromDate) {
-      filters.push(logEntry => {
-        return moment(logEntry.date) >= moment(searchData.fromDate)
-      })
-    } else if(searchData.tillDate) {
-      filters.push(logEntry => {
-        return moment(logEntry.date) <= moment(searchData.tillDate)
-      })
-    }
-    result = reduce((entries, filterFunc) => filter(filterFunc, entries), state.get('data').get('log').toJS(), filters)
-  }
-  const logState = state.get('logState').set('lastSearchResult', fromJS(result)).set('lastSearchData', fromJS(searchData))
-
-  return state.set('logState', logState)
-}
-
-const searchCulture = (state, searchData) => {
-  if(!searchData) searchData = (state.get('cultureState') && state.get('cultureState').get('lastSearchData') ? state.get('cultureState').get('lastSearchData').toJS() : {})
-
-  let result = []
-  if(state.get('data').get('cultures')) {
-    const filters = []
-    if(searchData.products && searchData.products.length > 0) {
-      filters.push(culture => {
-        return any(product => product.value === culture.productName, searchData.products)
-      })
-    }
-    if(searchData.surfaces && searchData.surfaces.length > 0) {
-      const surfacesToSearchFor = map(surface => {
-        const split = surface.value.split('ùùù')
-        return { plot: split[0], code: split[1] }
-      }, searchData.surfaces)
-      filters.push(culture => {
-        return any(surface => find(logSurface => surface.plot === logSurface.plot && surface.code === logSurface.code, culture.surfaces), surfacesToSearchFor)
-      })
-    }
-    if(searchData.status) {
-      filters.push(culture => {
-        return culture.status === searchData.status.value
-      })
-    }
-    if(searchData.fromDate && searchData.tillDate) {
-      filters.push(culture => {
-        return moment(culture.plantDate) <= moment(searchData.tillDate) && moment(culture.plantDate) >= moment(searchData.fromDate)
-      })
-    } else if(searchData.fromDate) {
-      filters.push(culture => {
-        return moment(culture.plantDate) >= moment(searchData.fromDate)
-      })
-    } else if(searchData.tillDate) {
-      filters.push(culture => {
-        return moment(culture.plantDate) <= moment(searchData.tillDate)
-      })
-    }
-    result = reduce((entries, filterFunc) => filter(filterFunc, entries), state.get('data').get('cultures').toJS(), filters)
-  }
-  const cultureState = state.get('cultureState').set('lastSearchResult', fromJS(result)).set('lastSearchData', fromJS(searchData))
-
-  return state.set('cultureState', cultureState)
 }
 
 export default (state = initialState, action) => {
@@ -205,8 +48,10 @@ export default (state = initialState, action) => {
       result = state.set('uploading', false)
       break
     case 'IMPORTFILE_UPLOADED':
+      const dataBeforeImport = state.get('data') || fromJS({})
+      const dataAfterImport = setStateRight(dataBeforeImport.merge(fromJS(action.data)))
       result = blankState
-        .set('data', fromJS(action.data))
+        .set('data', dataAfterImport)
         .set('tasks', fromJS(action.tasks))
         .set('planState', MakeBlankPlanState(action.data.products))
       break
@@ -220,11 +65,16 @@ export default (state = initialState, action) => {
       break
     case 'PLANMAKE_TOGGLEPRODUCT':
       const currentSelections1 = state.get('planState').get('selections').toJS()
-      forEachObjIndexed((selection,name) => {
-        if(name === action.name) {
-          selection.selected = !selection.selected
-        }
-      } , currentSelections1)
+      if(!currentSelections1[action.name]) {
+        const newProduct = find(product => product.name === action.name, state.get('data').get('products').toJS())
+        currentSelections1[action.name]= { selected: true, surface: newProduct.surface }
+      } else {
+        forEachObjIndexed((selection,name) => {
+          if(name === action.name) {
+            selection.selected = !selection.selected
+          }
+        } , currentSelections1)
+      }
       result = state.set('planState', state.get('planState').set('selections', fromJS(currentSelections1)))
       break
     case 'PLANMAKE_SETPRODUCTSURFACE':
@@ -307,6 +157,31 @@ export default (state = initialState, action) => {
       break
     case 'SEARCH_LOG':
       result = searchLog(state, action.data)
+      break
+    case 'SEARCH_PRODUCT':
+      result = searchProduct(state, action.data)
+      break
+    case 'TOGGLE_PRODUCT_CREATION':
+      result = mergeDeep(state, fromJS({ productState: { editedProduct: null, editing: !state.get('productState').get('editing') }}))
+      break
+    case 'BEGIN_EDIT_PRODUCT':
+      const updatedProductState = state.get('productState').set('editing', true).set('editedProduct', fromJS(action.data))
+      result = merge(state, { productState: updatedProductState })
+      break
+    case 'SAVE_PRODUCT':
+      result = saveProduct(state, action.data)
+      result = searchProduct(result)
+      break
+    case 'SAVE_SETTINGS':
+      const currentTotalSurface = state.get('settings').get('totalSurface')
+      result = state.set('settings', fromJS({ totalSurface : action.data.totalSurface }))
+      if(currentTotalSurface !== action.data.totalSurface) {
+        result = recalculateSurfaces(result)
+      }
+      break
+    case 'DISMISS_SEARCHRESULT':
+      const updatedState = state.get(action.stateName).set('lastSearchResult', fromJS([]))
+      result = state.set(action.stateName, updatedState)
       break
     default:
   }

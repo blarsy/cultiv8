@@ -8,4 +8,5 @@ export default styled.div`
   justify-content: ${props => props.justifyContent};
   align-items: ${props => props.alignItems};
   padding: ${props => (props.padding ? props.padding : '0')};
+  overflow: ${props => props.overflow};
 `

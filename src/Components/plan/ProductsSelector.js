@@ -30,17 +30,17 @@ class ProductsSelector extends React.Component {
             this.toggleAllSelected()
           }}/>
         </label>),
-        ratio: '0 1',
+        flex: '0 1',
         noSort: true,
         content: product => (<label>
             <Checkbox
-              checked={planState.selections[product.name].selected}
+              checked={planState.selections[product.name] ? planState.selections[product.name].selected : false}
               onChange={() => this.toggleSelected(product.name)}/>
           </label>)
       },
       {
         title: 'Nom',
-        ratio: '2 0',
+        flex: '2 0',
         content: product => product.name,
         flexProps: {
           isContainer: true,
@@ -49,12 +49,12 @@ class ProductsSelector extends React.Component {
       },
       {
         title: 'Surperficie',
-        ratio: '1 0',
+        flex: '1 0',
         sort: {
           type: 'number',
           value: product => product.surface
         },
-        content: product => (planState.selections[product.name].selected ?
+        content: product => ((planState.selections[product.name] && planState.selections[product.name].selected) ?
           <SurfaceInput type="number"
             value={planState.selections[product.name].surface.toFixed()}
             onChange={e => this.setSurface(product.name, e.target.value)}/> :
@@ -66,7 +66,7 @@ class ProductsSelector extends React.Component {
       },
       {
         title: 'Revenu horaire',
-        ratio: '1 0',
+        flex: '1 0',
         sort: {
           type: 'number',
           value: product => product.incomePerWorkHour
@@ -79,7 +79,7 @@ class ProductsSelector extends React.Component {
       },
       {
         title: 'Rentabilité surperficie / temps',
-        ratio: '1 0',
+        flex: '1 0',
         sort: {
           type: 'number',
           value: product => product.interestRatio

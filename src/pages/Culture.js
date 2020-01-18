@@ -27,6 +27,10 @@ class Culture extends React.Component {
       </FlexBlock>
     )
   }
+
+  componentWillUnmount() {
+    this.props.dispatch({ type: 'DISMISS_SEARCHRESULT', stateName: 'cultureState' })
+  }
 }
 
 const mapStateToProps = state => ({

@@ -11,8 +11,10 @@ class Ground extends React.Component {
   constructor(props) {
     super(props)
 
-    this.data = this.props.data.toJS()
-    if(this.data.cultures) assignCulturesToSurfaces(this.data)
+    if(this.props.data) {
+      this.data = this.props.data.toJS()
+      if(this.data.cultures) assignCulturesToSurfaces(this.data)
+    }
   }
   render() {
     const selectedPlot = this.props.state ? this.props.state.get('selectedPlot'): ''

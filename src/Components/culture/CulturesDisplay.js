@@ -19,22 +19,22 @@ class CulturesDisplay extends React.Component {
             value: culture => culture.plantDate,
             type: 'date'
           },
-          ratio: '1',
+          flex: '1',
           content: culture => moment(culture.plantDate).format('L')
         },
         {
           title: 'Produit',
-          ratio: '2',
+          flex: '2',
           content: culture => culture.productName
         },
         {
           title: 'Surfaces',
-          ratio: '2',
+          flex: '2',
           content: culture => map(surface => surface.plot + ' ' + surface.code + ' ', culture.surfaces)
         },
         {
           title: 'Statut',
-          ratio: '1',
+          flex: '1',
           content: culture => find(option => option.value === culture.status, statussesOptions).label
         }
       ]

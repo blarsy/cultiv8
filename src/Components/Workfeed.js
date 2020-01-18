@@ -19,17 +19,17 @@ class Workfeed extends React.Component {
           value: task => task.date,
           type: 'date'
         },
-        ratio: '1',
+        flex: '1',
         content: task => moment(task.date).format('L')
       },
       {
         title: 'Tâche',
-        ratio: '1',
+        flex: '1',
         content: task => task.type
       },
       {
         title: 'Culture',
-        ratio: '2',
+        flex: '2',
         content: task => task.culture
       }
     ]
