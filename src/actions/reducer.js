@@ -3,7 +3,12 @@ import { forEach, forEachObjIndexed, filter } from 'ramda'
 import moment from 'moment'
 import fileDownload from 'js-file-download'
 import createPlan from '../domain/createPlan'
-import { setStateRight, searchLog, searchCulture, searchProduct, saveCulture, saveLogEntry, saveProduct, recalculateSurfaces } from './stateTransformers'
+import { setStateRight, searchLog,
+  searchCulture, searchProduct,
+  saveCulture, saveLogEntry,
+  saveProduct, recalculateSurfaces,
+  getTotalSurface
+} from './stateTransformers'
 
 const persistedState = localStorage.getItem('state')
 const blankState = fromJS({
@@ -18,9 +23,6 @@ const blankState = fromJS({
   },
   productState: {
     editing: false
-  },
-  settings: {
-    totalSurface: 10
   }
 })
 const initialState = persistedState ?
@@ -49,9 +51,11 @@ export default (state = initialState, action) => {
       break
     case 'IMPORTFILE_UPLOADED':
       const dataBeforeImport = state.get('data') || fromJS({})
-      const dataAfterImport = setStateRight(dataBeforeImport.merge(fromJS(action.data)))
+      const dataAfterImport = dataBeforeImport.merge(fromJS(action.data))
+      const stateToSetRight = state.set('data', dataAfterImport)
+      const stateAfterImport = setStateRight(stateToSetRight)
       result = blankState
-        .set('data', dataAfterImport)
+        .set('data', stateAfterImport.get('data'))
         .set('tasks', fromJS(action.tasks))
         .set('planState', MakeBlankPlanState(action.data.products))
       break
@@ -173,8 +177,10 @@ export default (state = initialState, action) => {
       result = searchProduct(result)
       break
     case 'SAVE_SETTINGS':
-      const currentTotalSurface = state.get('settings').get('totalSurface')
-      result = state.set('settings', fromJS({ totalSurface : action.data.totalSurface }))
+      const currentData = state.get('data') || fromJS({})
+
+      const currentTotalSurface = getTotalSurface(state)
+      result = state.set('data', currentData.set('settings', fromJS({ totalSurface : action.data.totalSurface })))
       if(currentTotalSurface !== action.data.totalSurface) {
         result = recalculateSurfaces(result)
       }

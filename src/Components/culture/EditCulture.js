@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { sort, map, forEach, find } from 'ramda'
 import { connect } from 'react-redux'
 import moment from 'moment'
+import { fromJS } from 'immutable'
 import { ValidatedForm, getInitialState } from '../../toolbox'
 import { surfaceIsAvailableForCulture } from '../../domain/planner'
 import { statussesOptions } from './common'
@@ -30,7 +31,7 @@ class EditCulture extends React.Component {
       {
         type: 'select',
         name: 'product',
-        label: 'Production',
+        label: 'Produit',
         required: true,
         options: productOptions
       },
@@ -120,8 +121,8 @@ EditCulture.propTypes = {
 }
 
 const mapStateToProps = state => ({
-  products: state.global.get('data').get('products'),
-  surfaces: state.global.get('data').get('surfaces'),
+  products: state.global.get('data').get('products') || fromJS([]),
+  surfaces: state.global.get('data').get('surfaces') || fromJS([]),
   cultureState: state.global.get('cultureState')
 })
 

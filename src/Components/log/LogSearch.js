@@ -54,7 +54,7 @@ class LogSearch extends React.Component {
 
 const mapStateToProps = state => ({
   cultures: state.global.get('data').get('cultures'),
-  surfaces: state.global.get('data').get('surfaces'),
+  surfaces: state.global.get('data').get('surfaces') || List(),
   tags: state.global.get('data').get('logTags') || List(),
   logEntries: state.global.get('data').get('log'),
 })

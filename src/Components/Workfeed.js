@@ -8,8 +8,8 @@ import Table from './Table'
 class Workfeed extends React.Component {
   render() {
     const data = {
-      cultures: this.props.data.get('cultures').toJS(),
-      products: this.props.data.get('products').toJS()
+      cultures: this.props.data.get('cultures') ? this.props.data.get('cultures').toJS() : [],
+      products: this.props.data.get('products') ? this.props.data.get('products').toJS() : []
     }
     const tasks = inventorize(data)
     const cols = [

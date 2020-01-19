@@ -9,7 +9,7 @@ class SelectPlot extends React.Component {
   constructor(props){
     super(props)
     this.plotOptions = []
-    forEach(plot => this.plotOptions.push({ value: plot.get('code'), label: plot.get('name') }), this.props.plots)
+    forEach(plot => this.plotOptions.push({ value: plot.get('code'), label: plot.get('name') }), this.props.plots || [])
   }
 
   render() {

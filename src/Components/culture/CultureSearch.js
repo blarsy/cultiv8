@@ -4,6 +4,7 @@ import { map, sort } from 'ramda'
 import Select from 'react-select'
 import moment from 'moment'
 import DatePicker from 'react-datepicker'
+import { fromJS } from 'immutable'
 import { FlexBlock } from '../../toolbox'
 import { statussesOptions } from './common'
 import SearchForm from './../SearchForm'
@@ -45,8 +46,8 @@ class CultureSearch extends React.Component {
 
 const mapStateToProps = state => {
   return {
-    products: state.global.get('data') && state.global.get('data').get('products'),
-    surfaces: state.global.get('data').get('surfaces')
+    products: (state.global.get('data') && state.global.get('data').get('products')) || fromJS([]),
+    surfaces: state.global.get('data').get('surfaces') || fromJS([])
   }
 }
 

@@ -3,6 +3,8 @@ import { forEach, any, map, filter, includes, find, reduce } from 'ramda'
 import moment from 'moment'
 import { nextId } from '../domain/data'
 
+const DEFAULT_TOTAL_SURFACE = 10
+
 export const saveCulture = (state, cultureData) => {
   const cultures = state.get('data').get('cultures') ? state.get('data').get('cultures').toJS() : []
   const selectedSurfaces = map(selectedSurface => {
@@ -274,7 +276,7 @@ export const calculateProduct = (product, totalSurface, sumRatios) => {
 }
 
 const setProductCalculatedProps = (products, state) => {
-  const totalSurface = state.get('settings').get('totalSurface')
+  const totalSurface = getTotalSurface(state)
   const sumRatios = reduce((acc, value) => {
     return acc + value.surfaceRatio
   }, 0, products)
@@ -282,8 +284,12 @@ const setProductCalculatedProps = (products, state) => {
   forEach(product => calculateProduct(product, totalSurface, sumRatios), products)
 }
 
+export const getTotalSurface = state => {
+  return (state.get('data') && state.get('data').get('settings') && state.get('data').get('settings').get('totalSurface')) || DEFAULT_TOTAL_SURFACE
+}
+
 export const recalculateSurfaces = state => {
-  const products = state.get('data').get('products').toJS()
+  const products = (state.get('data') && state.get('data').get('products') && state.get('data').get('products').toJS()) || []
 
   setProductCalculatedProps(products, state)
 
@@ -291,22 +297,13 @@ export const recalculateSurfaces = state => {
 }
 
 export const setStateRight = state => {
-  let result
-  if(!state.get('settings')) {
-    result = state.set('settings', { totalSurface: 40 })
-  } else {
-    const totalSurface = state.get('settings').get('totalSurface')
-    if(!totalSurface) result = state.set('settings', merge(state.get('settings'), { totalSurface: 40 }))
-    else result = state
-  }
-
   if(state.get('data')) {
-    const products = state.get('data') ? state.get('data').get('products').toJS() || [] : []
+    const products = (state.get('data') && state.get('data').get('products') && state.get('data').get('products').toJS()) || []
 
-    setProductCalculatedProps(products, result)
+    setProductCalculatedProps(products, state)
 
-    return result.set('data', result.get('data').set('products', fromJS(products)))
+    return state.set('data', state.get('data').set('products', fromJS(products)))
   } else {
-    return result
+    return state.set('data', fromJS({ settings: { totalSurface: getTotalSurface }}))
   }
 }

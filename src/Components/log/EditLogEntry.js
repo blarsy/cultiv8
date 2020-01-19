@@ -99,8 +99,8 @@ EditLog.propTypes = {
 }
 
 const mapStateToProps = state => ({
-  cultures: state.global.get('data').get('cultures'),
-  surfaces: state.global.get('data').get('surfaces'),
+  cultures: state.global.get('data').get('cultures') || List(),
+  surfaces: state.global.get('data').get('surfaces') || List(),
   tags: state.global.get('data').get('logTags') || List(),
   logState: state.global.get('logState'),
   log: state.global.get('log')

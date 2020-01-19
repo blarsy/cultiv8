@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
+import { fromJS } from 'immutable'
 import { ValidatedForm, getInitialState } from '../toolbox'
 
 class Settings extends React.Component {
@@ -44,7 +45,7 @@ Settings.propTypes = {
 }
 
 const mapStateToProps = state => ({
-  settings: state.global.get('settings')
+  settings: (state.global.get('data') && state.global.get('data').get('settings')) || fromJS({})
 })
 
 export default connect(mapStateToProps)(Settings)
