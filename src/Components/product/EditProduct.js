@@ -1,8 +1,5 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { List } from 'immutable'
-import { sort, map, find } from 'ramda'
-import moment from 'moment'
 import { connect } from 'react-redux'
 import { ValidatedForm, getInitialState } from '../../toolbox'
 import { getFamiliesOptions, greedinessOptions, monthesOptions } from './common'

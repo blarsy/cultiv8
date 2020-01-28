@@ -1,0 +1,44 @@
+import { find, filter, any } from 'ramda'
+import { nextId } from './data'
+
+export default class LogEntriesList {
+  constructor(data) {
+    this.log = data.log || []
+    this.logTags = data.logTags || []
+  }
+
+  logData() {
+    return { log :this.log, logTags: this.logTags }
+  }
+
+  addTags(tags) {
+    const tagsToCreate = filter(tag => !any(logTag => logTag.toLowerCase() === tag.toLowerCase(), this.logTags), tags)
+    if(tagsToCreate.length > 0) {
+      this.logTags.push(...tagsToCreate)
+    }
+  }
+
+  add(date, tags, description, surfaces, cultures) {
+    const logEntry = {
+      id: nextId(this.log),
+      date,
+      tags,
+      description,
+      surfaces,
+      cultures
+    }
+    this.addTags(tags)
+    this.log.push(logEntry)
+  }
+
+  update(id, date, tags, description, surfaces, cultures) {
+    const logEntryToUpdate = find(logEntry => logEntry.id === id, this.log)
+    logEntryToUpdate.date = date
+    logEntryToUpdate.tags = tags
+    logEntryToUpdate.description = description
+    logEntryToUpdate.surfaces = surfaces
+    logEntryToUpdate.cultures = cultures
+
+    this.addTags(tags)
+  }
+}

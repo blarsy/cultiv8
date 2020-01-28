@@ -9,4 +9,6 @@ export default styled.div`
   align-items: ${props => props.alignItems};
   padding: ${props => (props.padding ? props.padding : '0')};
   overflow: ${props => props.overflow};
+  overflow-x: ${props => props.overflowX};
+  overflow-y: ${props => props.overflowY};
 `

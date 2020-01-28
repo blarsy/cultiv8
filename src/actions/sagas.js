@@ -2,7 +2,6 @@ import { take, put, fork, all } from 'redux-saga/effects'
 import { push } from 'react-router-redux'
 import { error } from '../Events'
 import { fromSpreadsheet, fromJson } from '../domain/importer'
-import tasksInventorizer from '../domain/TasksInventorizer'
 
 function* importFromSpreadsheetFlow() {
   while(true) {
@@ -22,7 +21,7 @@ function* importFromSpreadsheet(file) {
     if(parseResult.err){
       yield put({type: 'IMPORTFILE_FAILED', data: parseResult.err})
     } else {
-      yield put({ type: 'IMPORTFILE_UPLOADED', data: parseResult, tasks: tasksInventorizer(parseResult)})
+      yield put({ type: 'IMPORTFILE_UPLOADED', data: parseResult})
       yield put(push('/home'))
     }
   }
@@ -39,7 +38,7 @@ function* importFromJson(file) {
     if(parseResult.err){
       yield put({type: 'IMPORTFILE_FAILED', data: parseResult.err})
     } else {
-      yield put({ type: 'IMPORTFILE_UPLOADED', data: parseResult, tasks: tasksInventorizer(parseResult)})
+      yield put({ type: 'IMPORTFILE_UPLOADED', data: parseResult })
       yield put(push('/home'))
     }
   }

@@ -19,9 +19,9 @@ class Culture extends React.Component {
       )
     }
     return (
-      <FlexBlock isContainer flexFlow="column">
+      <FlexBlock isContainer flexFlow="column" flex="1">
         <FlexBlock flex="0" alignItems="center">{button}</FlexBlock>
-        <FlexBlock flex="1 0">
+        <FlexBlock flex="1 0" padding="0.5rem">
           <DataContent>{content}</DataContent>
         </FlexBlock>
       </FlexBlock>

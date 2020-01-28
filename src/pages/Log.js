@@ -17,7 +17,7 @@ class Log extends React.Component {
       </FlexBlock>)
     }
     return (
-      <FlexBlock isContainer flexFlow="column">
+      <FlexBlock isContainer flex="1" flexFlow="column">
         <FlexBlock flex="0" alignItems="center" padding="0 0 0.5rem">{button}</FlexBlock>
         <FlexBlock flex="1 0">
           <DataContent>{content}</DataContent>

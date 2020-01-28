@@ -176,7 +176,7 @@ export default input => {
   const selections = []
   forEachObjIndexed((selection, name) => {
     if(selection.selected)
-      selections.push({ name, selected: selection.selected, surface: selection.surface })
+      selections.push({ name, surface: selection.surface })
     }, input.planState.selections)
 
   const cultures = sort((cultA, cultB) => cultB.product.interestRatio - cultA.product.interestRatio,

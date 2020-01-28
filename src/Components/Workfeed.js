@@ -2,16 +2,16 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import moment from 'moment'
-import inventorize from '../domain/TasksInventorizer'
+import { find } from 'ramda'
 import Table from './Table'
 
 class Workfeed extends React.Component {
   render() {
     const data = {
       cultures: this.props.data.get('cultures') ? this.props.data.get('cultures').toJS() : [],
-      products: this.props.data.get('products') ? this.props.data.get('products').toJS() : []
+      products: this.props.data.get('products') ? this.props.data.get('products').toJS() : [],
+      tasks: this.props.data.get('tasks') ? this.props.data.get('tasks').toJS() : [],
     }
-    const tasks = inventorize(data)
     const cols = [
       {
         title: 'Date',
@@ -30,11 +30,15 @@ class Workfeed extends React.Component {
       {
         title: 'Culture',
         flex: '2',
-        content: task => task.culture
+        content: task => {
+          const culture = find(culture => culture.id === task.cultureId, data.cultures)
+          const product = find(product => product.name === culture.productName, data.products)
+          return product.name + ' - ' + moment(culture.plantDate).format('L')
+        }
       }
     ]
 
-    return (<Table data={tasks} dataColumns={cols} />)
+    return (<Table data={data.tasks} dataColumns={cols} />)
   }
 }
 

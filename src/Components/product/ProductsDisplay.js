@@ -1,11 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { map, find } from 'ramda'
-import moment from 'moment'
-import { FlexBlock } from '../../toolbox'
+import { find } from 'ramda'
 import SearchResultsDisplay from '../SearchResultsDisplay'
-import { monthesOptions, greedinessOptions, greenhouseOptions } from './common'
+import { monthesOptions, greedinessOptions } from './common'
 
 class ProductsDisplay extends React.Component {
   constructor(props) {

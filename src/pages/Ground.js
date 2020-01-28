@@ -30,24 +30,26 @@ class Ground extends React.Component {
 
     return (
       <DataContent>
-        <FlexBlock isContainer justifyContent="space-around">
-          <FlexBlock isContainer flexFlow="column" padding="0 0 1rem">
-            <p>Sélectionnez la parcelle à visualiser:</p>
-            <SelectPlot value={selectedPlot} onChange={value => this.props.dispatch({ type: 'GROUND_SELECTPLOT', value})} />
+        <FlexBlock isContainer flexFlow="column" flex="1">
+          <FlexBlock isContainer justifyContent="space-around">
+            <FlexBlock isContainer flexFlow="column" padding="0 0 1rem">
+              <p>Sélectionnez la parcelle à visualiser:</p>
+              <SelectPlot value={selectedPlot} onChange={value => this.props.dispatch({ type: 'GROUND_SELECTPLOT', value})} />
+            </FlexBlock>
+            <FlexBlock isContainer flexFlow="column">
+              <p>Date à visualiser:</p>
+              <DatePicker popperPlacement="bottom" popperModifiers={{
+                preventOverflow: {
+                  enabled: true,
+                  escapeWithReference: false, // force popper to stay in viewport (even when input is scrolled out of view)
+                  boundariesElement: 'viewport'
+                }
+              }} selected={displayDate} onChange={value => this.props.dispatch({ type: 'GROUND_CHANGEDISPLAYDATE', value})} />
+            </FlexBlock>
           </FlexBlock>
-          <FlexBlock isContainer flexFlow="column">
-            <p>Date à visualiser:</p>
-            <DatePicker popperPlacement="bottom" popperModifiers={{
-              preventOverflow: {
-                enabled: true,
-                escapeWithReference: false, // force popper to stay in viewport (even when input is scrolled out of view)
-                boundariesElement: 'viewport'
-              }
-            }} selected={displayDate} onChange={value => this.props.dispatch({ type: 'GROUND_CHANGEDISPLAYDATE', value})} />
+          <FlexBlock isContainer flex="1 0" justifyContent="center">
+            {plotZone}
           </FlexBlock>
-        </FlexBlock>
-        <FlexBlock isContainer flex="1 0" justifyContent="center">
-          {plotZone}
         </FlexBlock>
       </DataContent>
     )

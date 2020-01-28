@@ -1,12 +1,12 @@
 import { fromJS, merge } from 'immutable'
 import { forEach, any, map, filter, includes, find, reduce } from 'ramda'
 import moment from 'moment'
-import { nextId } from '../domain/data'
+import { CultureList, LogEntriesList } from '../domain'
 
 const DEFAULT_TOTAL_SURFACE = 10
 
 export const saveCulture = (state, cultureData) => {
-  const cultures = state.get('data').get('cultures') ? state.get('data').get('cultures').toJS() : []
+  const cultureList = new CultureList(state.get('data').toJS())
   const selectedSurfaces = map(selectedSurface => {
     const split = selectedSurface.value.split('ùùù')
     return {
@@ -15,59 +15,49 @@ export const saveCulture = (state, cultureData) => {
     }
   }, cultureData.surfaces)
 
-  let editedCulture
   if(state.get('cultureState').get('editedCulture')) {
-    editedCulture = find(culture => culture.id === state.get('cultureState').get('editedCulture').get('id'), cultures)
+    cultureList.update(
+      state.get('cultureState').get('editedCulture').get('id'),
+      cultureData.product.value,
+      cultureData.status.value,
+      cultureData.plantDate,
+      selectedSurfaces)
   } else {
-    editedCulture = {
-      id: nextId(cultures)
-    }
-    cultures.push(editedCulture)
+    cultureList.add(
+      cultureData.product.value,
+      cultureData.status.value,
+      cultureData.plantDate,
+      selectedSurfaces)
   }
 
-  editedCulture.productName = cultureData.product.value
-  editedCulture.status = cultureData.status.value
-  editedCulture.plantDate = cultureData.plantDate
-  editedCulture.surfaces = selectedSurfaces
-
-  const updatedData = merge(state.get('data'), { cultures: fromJS(cultures) })
+  const updatedData = merge(state.get('data'), fromJS(cultureList.data()))
   const cultureState = state.get('cultureState')
   return merge(state, {data: updatedData, cultureState: cultureState.set('editing', false)})
 }
 
 export const saveLogEntry = (state, logEntryData) => {
-  const logEntries = state.get('data').get('log') ? state.get('data').get('log').toJS() : []
-  const logTags = state.get('data').get('logTags') ? state.get('data').get('logTags').toJS() : []
-  const tagsToCreate = filter(tag => !any(logTag => logTag.toLowerCase() === tag.value.toLowerCase(), logTags), logEntryData.tags)
-  if(tagsToCreate.length > 0) {
-    logTags.push(...map(tag => tag.value, tagsToCreate))
-  }
+  const logEntriesList = new LogEntriesList(state.get('data').toJS())
+  const surfaces = map(surface => {
+    const split = surface.value.split('ùùù')
+    const plot = split[0]
+    const code = split[1]
+    return { plot, code }
+  }, logEntryData.linkedSurfaces)
 
-  let logEntry
   if(state.get('logState').get('editedEntry')) {
-    logEntry = find(entry => entry.id === state.get('logState').get('editedEntry').get('id'), logEntries)
+    logEntriesList.update(state.get('logState').get('editedEntry').get('id'),
+      moment(logEntryData.date).format(),
+      map(tag => tag.value, logEntryData.tags),
+      logEntryData.description, surfaces,
+      map(culture => culture.value, logEntryData.linkedCultures || []))
   } else {
-    logEntry = {
-      id: nextId(logEntries)
-    }
-    logEntries.push(logEntry)
-  }
-  logEntry.date = moment(logEntryData.date).format()
-  logEntry.tags = map(tag => tag.value, logEntryData.tags)
-  logEntry.description = logEntryData.description
-  if(logEntryData.linkedCultures) {
-    logEntry.cultures = map(culture => culture.value, logEntryData.linkedCultures)
-  }
-  if(logEntryData.linkedSurfaces) {
-    logEntry.surfaces = map(surface => {
-      const split = surface.value.split('ùùù')
-      const plot = split[0]
-      const code = split[1]
-      return { plot, code }
-    }, logEntryData.linkedSurfaces)
+    logEntriesList.add(moment(logEntryData.date).format(),
+      map(tag => tag.value, logEntryData.tags),
+      logEntryData.description, surfaces,
+      map(culture => culture.value, logEntryData.linkedCultures || []))
   }
 
-  const updatedData = merge(state.get('data'), { log: fromJS(logEntries), logTags: fromJS(logTags) })
+  const updatedData = merge(state.get('data'), fromJS({ log: logEntriesList.log, logTags: logEntriesList.logTags }))
   const logState = state.get('logState')
   return merge(state, { data: updatedData, logState: logState.set('editing', false) })
 }

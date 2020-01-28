@@ -16,6 +16,9 @@ class App extends Component {
         padding: 0;
         font-family: sans-serif;
         color: #222;
+        > div {
+          overflow: visible;
+        }
       }
       input {
         border-radius: 0.25rem;
@@ -34,7 +37,7 @@ class App extends Component {
     return (
       <FlexBlock isContainer padding="0.25rem">
         <TopMenu/>
-        <FlexBlock flex="1 0" padding="0.5rem" overflow="hidden">
+        <FlexBlock isContainer flex="1 0" padding="0.5rem" overflowX="hidden" overflowY="visible">
           <Route exact path="/" component={Home} />
           <Route path="/plan" component={Plan} />
           <Route path="/dataimport" component={DataImport} />
