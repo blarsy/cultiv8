@@ -12,6 +12,7 @@ class EditLog extends React.Component {
 
     const cultureOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()) || moment(b.plantDate).toDate() - moment(a.plantDate).toDate(), map(culture => ({ label: `${culture.productName} - ${moment(culture.plantDate).format('L')}`, value: culture.id }), props.cultures.toJS()))
     const surfaceOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(surface => ({ label: surface.plot + ' ' + surface.code, value: surface.plot + 'ùùù' + surface.code }), props.surfaces.toJS()))
+    const plotOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(plot => ({ label: plot.name + ' ' + plot.code, value: plot.code }), props.plots.toJS()))
     const tagOptions = map(category => ({
       label: category,
       value: category
@@ -50,6 +51,14 @@ class EditLog extends React.Component {
       },
       {
         type: 'select',
+        name: 'linkedPlots',
+        label: 'Parcelles concernées',
+        required: false,
+        options: plotOptions,
+        multi: true
+      },
+      {
+        type: 'select',
         name: 'linkedCultures',
         label: 'Cultures concernées',
         required: false,
@@ -70,6 +79,9 @@ class EditLog extends React.Component {
       }
       if(logEntryToEdit.surfaces && logEntryToEdit.surfaces.length > 0) {
         initialData.linkedSurfaces = map(surface => find(option => option.value === surface.plot + 'ùùù' + surface.code, surfaceOptions), logEntryToEdit.surfaces)
+      }
+      if(logEntryToEdit.plots && logEntryToEdit.plots.length > 0) {
+        initialData.linkedPlots = map(plot => find(option => option.value === plot.code, plotOptions), logEntryToEdit.plots)
       }
       if(logEntryToEdit.cultures && logEntryToEdit.cultures.length > 0) {
         initialData.linkedCultures = map(cultureId => find(option => option.value === cultureId, cultureOptions), logEntryToEdit.cultures)
@@ -103,7 +115,8 @@ const mapStateToProps = state => ({
   surfaces: state.global.get('data').get('surfaces') || List(),
   tags: state.global.get('data').get('logTags') || List(),
   logState: state.global.get('logState'),
-  log: state.global.get('log')
+  log: state.global.get('log'),
+  plots: state.global.get('data').get('plots') || List()
 })
 
 export default connect(mapStateToProps)(EditLog)

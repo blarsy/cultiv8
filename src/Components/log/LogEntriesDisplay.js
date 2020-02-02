@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { map, find } from 'ramda'
 import moment from 'moment'
-import { FlexBlock } from '../../toolbox'
 import SearchResultsDisplay from '../SearchResultsDisplay'
 
 class LogEntriesDisplay extends React.Component {
@@ -11,6 +10,7 @@ class LogEntriesDisplay extends React.Component {
     super(props)
 
     this.cultures = props.cultures ? props.cultures.toJS() : []
+    this.plots = props.plots ? props.plots.toJS() : []
   }
 
   render() {
@@ -25,24 +25,42 @@ class LogEntriesDisplay extends React.Component {
             value: logEntry => logEntry.date,
             type: 'date'
           },
-          flex: '1',
+          flex: '1 0',
           content: logEntry => moment(logEntry.date).format('L')
         },
         {
-          title: 'Infos',
+          title: 'Tags',
           noSort: true,
-          flex: '2',
-          content: logEntry => (<FlexBlock isContainer flexFlow="column">{ logEntry.tags.length >= 0 && <span>Tags: {map(tag => tag, logEntry.tags)}</span> }
-            { logEntry.surfaces && logEntry.surfaces.length >= 0 && <span>Surfaces: {map(surface => surface.plot + ' ' + surface.code, logEntry.surfaces)}</span> }
-            { logEntry.cultures && logEntry.cultures.length >= 0 && <span>Cultures: {map(cultureId => {
-              const culture = find(culture => culture.id === cultureId, this.cultures)
-              return culture.productName + ' ' + moment(culture.plantDate).format('L')
-            }, logEntry.cultures)}</span> }
-          </FlexBlock>)
+          flex: '1 0',
+          content: logEntry => (map(tag => tag, logEntry.tags))
+        },
+        {
+          title: 'Surfaces',
+          noSort: true,
+          flex: '1 0',
+          content: logEntry => logEntry.surfaces && logEntry.surfaces.length >= 0 && map(surface => surface.plot + ' ' + surface.code, logEntry.surfaces)
+        },
+        {
+          title: 'Parcelles',
+          noSort: true,
+          flex: '1 0',
+          content: logEntry => logEntry.plots && logEntry.plots.length >= 0 && map(plotCode => {
+            const plot = find(plot => plot.code === plotCode, this.plots)
+            return plot.name + ' - ' + plot.code
+          }, logEntry.plots)
+        },
+        {
+          title: 'Cultures',
+          noSort: true,
+          flex: '1 0',
+          content: logEntry => logEntry.cultures && logEntry.cultures.length >= 0 && map(cultureId => {
+            const culture = find(culture => culture.id === cultureId, this.cultures)
+            return culture.productName + ' ' + moment(culture.plantDate).format('L')
+          }, logEntry.cultures)
         },
         {
           title: 'Contenu',
-          flex: '4',
+          flex: '4 0',
           noSort: true,
           content: logEntry => logEntry.description
         }
@@ -67,6 +85,7 @@ LogEntriesDisplay.propTypes = {
 
 const mapStateToProps = state => ({
   cultures: state.global.get('data').get('cultures'),
+  plots: state.global.get('data').get('plots'),
   data: (state.global.get('logState') && state.global.get('logState').get('lastSearchResult')) ? state.global.get('logState').get('lastSearchResult').toJS() : []
 })
 

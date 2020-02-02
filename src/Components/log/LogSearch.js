@@ -18,6 +18,7 @@ class LogSearch extends React.Component {
     }
     this.surfacesOptions = sort((a,b) => a.label.localeCompare(b.label), map(surface => ({ value: surface.plot + 'ùùù' + surface.code, label: surface.plot + ' ' + surface.code}), props.surfaces.toJS()))
     this.logToSearch = props.logEntries ? props.logEntries.toJS() : []
+    this.plotOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(plot => ({ label: plot.name + ' - ' + plot.code, value: plot.code }), props.plots.toJS()))
 
     this.state = { description: '' }
   }
@@ -35,6 +36,10 @@ class LogSearch extends React.Component {
       <FlexBlock flex="0 0 50%">
         <span>Surfaces</span>
         <Select multi value={this.state.surfaces} options={this.surfacesOptions} onChange={e => this.setState({ surfaces: e })}/>
+      </FlexBlock>
+      <FlexBlock flex="0 0 50%">
+        <span>Parcelles</span>
+        <Select multi value={this.state.plots} options={this.plotOptions} onChange={e => this.setState({ plots: e })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%" isContainer flexFlow="column" justifyContent="stretch">
         <span>Mot-clé</span>
@@ -57,6 +62,7 @@ const mapStateToProps = state => ({
   surfaces: state.global.get('data').get('surfaces') || List(),
   tags: state.global.get('data').get('logTags') || List(),
   logEntries: state.global.get('data').get('log'),
+  plots: state.global.get('data').get('plots') || List()
 })
 
 export default connect(mapStateToProps)(LogSearch)

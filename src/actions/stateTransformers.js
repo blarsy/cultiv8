@@ -49,11 +49,13 @@ export const saveLogEntry = (state, logEntryData) => {
       moment(logEntryData.date).format(),
       map(tag => tag.value, logEntryData.tags),
       logEntryData.description, surfaces,
+      map(plot => plot.value, logEntryData.plots),
       map(culture => culture.value, logEntryData.linkedCultures || []))
   } else {
     logEntriesList.add(moment(logEntryData.date).format(),
       map(tag => tag.value, logEntryData.tags),
       logEntryData.description, surfaces,
+      map(plot => plot.value, logEntryData.linkedPlots),
       map(culture => culture.value, logEntryData.linkedCultures || []))
   }
 
@@ -123,6 +125,12 @@ export const searchLog = (state, searchData) => {
       filters.push(logEntry => {
         if(!logEntry.surfaces) return false
         return any(surface => find(logSurface => surface.plot === logSurface.plot && surface.code === logSurface.code, logEntry.surfaces), surfacesToSearchFor)
+      })
+    }
+    if(searchData.plots && searchData.plots.length > 0) {
+      filters.push(logEntry => {
+        if(!logEntry.plots) return false
+        return any(plot => includes(plot.value, logEntry.plots), searchData.plots)
       })
     }
     if(searchData.description) {

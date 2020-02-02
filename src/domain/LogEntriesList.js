@@ -18,25 +18,27 @@ export default class LogEntriesList {
     }
   }
 
-  add(date, tags, description, surfaces, cultures) {
+  add(date, tags, description, surfaces, plots, cultures) {
     const logEntry = {
       id: nextId(this.log),
       date,
       tags,
       description,
       surfaces,
+      plots,
       cultures
     }
     this.addTags(tags)
     this.log.push(logEntry)
   }
 
-  update(id, date, tags, description, surfaces, cultures) {
+  update(id, date, tags, description, surfaces, plots, cultures) {
     const logEntryToUpdate = find(logEntry => logEntry.id === id, this.log)
     logEntryToUpdate.date = date
     logEntryToUpdate.tags = tags
     logEntryToUpdate.description = description
     logEntryToUpdate.surfaces = surfaces
+    logEntryToUpdate.plots = plots
     logEntryToUpdate.cultures = cultures
 
     this.addTags(tags)
