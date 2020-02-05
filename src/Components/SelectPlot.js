@@ -13,9 +13,11 @@ class SelectPlot extends React.Component {
   }
 
   render() {
-    return (<Select options={this.plotOptions} value={this.props.value} onChange={e =>
-      this.props.onChange(e.value)}>
-    </Select>)
+    return (<Select
+      options={this.plotOptions}
+      value={this.props.value}
+      clearable={false}
+      onChange={e => this.props.onChange(e.value)} />)
   }
 }
 

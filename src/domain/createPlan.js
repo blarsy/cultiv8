@@ -162,6 +162,45 @@ const createdSuggestedCultures = (data, ratings) => {
   }, targetRatings)
 }
 
+const sortFnUsingPrio = (field, order) => {
+  const interestSortFn = (cultA, cultB) => cultB.product.interestRatio - cultA.product.interestRatio
+  if(!field) return interestSortFn
+
+  switch(field) {
+    case 'plantDate':
+      return (cultA, cultB) => {
+        const today = new Date().setHours(0,0,0,0)
+        const rangeA = getNextRange(cultA.product, today)
+        const rangeB = getNextRange(cultB.product, today)
+        const sortValue = +rangeA.plantBetween.min - +rangeB.plantBetween.min
+        if(sortValue === 0) return interestSortFn(cultA, cultB)
+        return sortValue
+      }
+    case 'greediness':
+      if(order === 'asc') {
+        return (cultA, cultB) => {
+          const sortValue = +cultB.product.greediness - +cultA.product.greediness
+          if(sortValue === 0) return interestSortFn(cultA, cultB)
+          return sortValue
+        }
+      } else {
+        return (cultA, cultB) => {
+          const sortValue = +cultB.product.greediness + +cultA.product.greediness
+          if(sortValue === 0) return interestSortFn(cultA, cultB)
+          return sortValue
+        }
+      }
+    case 'family':
+      return (cultA, cultB) => {
+        const sortValue = cultB.product.family.localeCompare(cultA.product.family)
+        if(sortValue === 0) return interestSortFn(cultA, cultB)
+        return sortValue
+      }
+    default:
+      return interestSortFn
+  }
+}
+
 export default input => {
   //Collect surfaces from target plot
   //Use a deep clone of the surfaces array, as we will assume the best suggestions
@@ -179,7 +218,8 @@ export default input => {
       selections.push({ name, surface: selection.surface })
     }, input.planState.selections)
 
-  const cultures = sort((cultA, cultB) => cultB.product.interestRatio - cultA.product.interestRatio,
+  const sortPrioData = input.planState.selectedPriority ? input.planState.selectedPriority.split('_') : ['', '']
+  const cultures = sort(sortFnUsingPrio(...sortPrioData),
     map(selection => ({
       targetSurface: selection.surface,
       product: find(product => product.name === selection.name, input.data.products) }),
@@ -225,7 +265,6 @@ export default input => {
       rating = {
         name: culture.product.name,
         dates,
-        surfaceRatings,
         suggestions
       }
 

@@ -1,4 +1,4 @@
-import { find } from 'ramda'
+import { find, filter } from 'ramda'
 import moment from 'moment'
 import TaskList from './TaskList'
 import LogEntriesList from './LogEntriesList'
@@ -16,9 +16,8 @@ export default class CultureList {
     return {
       cultures: this.cultures,
       tasks: this.taskList.tasks,
-      products: this.products,
-      log: this.logEntriesList.logData.log,
-      logTags: this.logEntriesList.logData.logTags
+      log: this.logEntriesList.log,
+      logTags: this.logEntriesList.logTags
     }
   }
 
@@ -43,6 +42,12 @@ export default class CultureList {
     cultureToUpdate.surfaces = surfaces
 
     this.processStatusChange(cultureToUpdate)
+  }
+
+  remove(id) {
+    this.taskList.removeCultureTasks(id)
+    this.logEntriesList.removeCultureLogEntries(id)
+    this.cultures = filter(culture => culture.id !== id, this.cultures)
   }
 
   productFromName(productName) {
@@ -88,7 +93,7 @@ export default class CultureList {
     } else if(status === 4){
       this.taskList.removeCultureAutoTasks(culture.id)
     }
-    this.logEntriesList.add(now, ['Action'], `statuts passé en '${this.getStatusLabel(status)}'` , [], [culture.id])
+    this.logEntriesList.add(now, ['Action'], `statuts passé en '${this.getStatusLabel(status)}'` , [], [], [culture.id])
 
   }
 }

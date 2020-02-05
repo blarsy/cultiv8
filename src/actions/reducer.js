@@ -5,9 +5,9 @@ import fileDownload from 'js-file-download'
 import createPlan from '../domain/createPlan'
 import { setStateRight, searchLog,
   searchCulture, searchProduct,
-  saveCulture, saveLogEntry,
+  saveCulture, removeCulture, saveLogEntry,
   saveProduct, recalculateSurfaces,
-  getTotalSurface
+  getTotalSurface, adoptPlan
 } from './stateTransformers'
 
 const persistedState = localStorage.getItem('state')
@@ -96,8 +96,18 @@ export default (state = initialState, action) => {
     case 'PLANMAKE_SETSELECTEDPLOT':
       result = state.set('planState',state.get('planState').set('selectedPlot', action.plot))
       break
+    case 'PLANMAKE_SELECTPRIORITY':
+      result = state.set('planState', state.get('planState').set('selectedPriority', action.priority))
+      break
+    case 'VOID_CURRENTPLAN':
+      result = state.set('planState', state.get('planState').delete('currentPlan'))
+      break
     case 'RESET_PLAN':
-      result = state.set('planState', MakeBlankPlanState(action.data.get('products').toJS()))
+      result = state.set('planState', MakeBlankPlanState(state.get('data').get('products').toJS()))
+      break
+    case 'ACCEPT_PLAN':
+      const dataWithAcceptedPlan = adoptPlan(state)
+      result = state.set('planState', MakeBlankPlanState(state.get('data').get('products').toJS())).set('data', state.get('data').merge(fromJS(dataWithAcceptedPlan)))
       break
     case 'SELECT_RATING':
       const currentPlan = state.get('planState').get('currentPlan').set('currentRating', action.rating)
@@ -131,9 +141,7 @@ export default (state = initialState, action) => {
       result = searchCulture(result)
       break
     case 'REMOVE_CULTURE':
-      const cultures = state.get('data').get('cultures').toJS()
-      const updatedData = merge(state.get('data'), fromJS({ cultures: filter(culture => culture.id !== action.data.id, cultures) }))
-      result = merge(state, { data : updatedData })
+      result = removeCulture(state, action.data.id)
       result = searchCulture(result)
       break
     case 'SEARCH_CULTURE':

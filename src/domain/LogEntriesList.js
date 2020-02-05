@@ -1,4 +1,4 @@
-import { find, filter, any } from 'ramda'
+import { find, filter, reject, any } from 'ramda'
 import { nextId } from './data'
 
 export default class LogEntriesList {
@@ -42,5 +42,13 @@ export default class LogEntriesList {
     logEntryToUpdate.cultures = cultures
 
     this.addTags(tags)
+  }
+
+  removeCultureLogEntries(cultureId) {
+    this.log = filter(logEntry => {
+      if(!logEntry.cultures.includes(cultureId)) return true
+      if(logEntry.cultures.length === 1) return false
+      logEntry.cultures = reject(logEntryCultureId => logEntryCultureId === cultureId,  logEntry.cultures)
+    }, this.log)
   }
 }

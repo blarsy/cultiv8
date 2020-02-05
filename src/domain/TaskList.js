@@ -1,4 +1,4 @@
-import { filter, includes } from 'ramda'
+import { reject, includes } from 'ramda'
 import moment from 'moment'
 
 export default class TaskList {
@@ -16,6 +16,10 @@ export default class TaskList {
   }
 
   removeCultureAutoTasks(cultureId) {
-    this.tasks = filter(task => task.cultureId === cultureId && includes(task.status, ['seed', 'plant', 'harvest', 'destroy']), this.tasks)
+    this.tasks = reject(task => task.cultureId === cultureId && includes(task.status, ['seed', 'plant', 'harvest', 'destroy']), this.tasks)
+  }
+
+  removeCultureTasks(cultureId) {
+    this.tasks = reject(task => task.cultureId === cultureId, this.tasks)
   }
 }

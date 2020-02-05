@@ -65,6 +65,15 @@ class ProductsSelector extends React.Component {
         }
       },
       {
+        title: 'Serre ?',
+        flex: '1 0',
+        content: product => product.greenhouse ? 'O': 'N',
+        flexProps: {
+          isContainer: true,
+          alignItems: 'center'
+        }
+      },
+      {
         title: 'Revenu horaire',
         flex: '1 0',
         sort: {

@@ -35,6 +35,13 @@ export const saveCulture = (state, cultureData) => {
   return merge(state, {data: updatedData, cultureState: cultureState.set('editing', false)})
 }
 
+export const removeCulture = (state, cultureId) => {
+  const cultureList = new CultureList(state.get('data').toJS())
+  cultureList.remove(cultureId)
+  const updatedData = merge(state.get('data'), fromJS(cultureList.data()))
+  return merge(state, { data: updatedData})
+}
+
 export const saveLogEntry = (state, logEntryData) => {
   const logEntriesList = new LogEntriesList(state.get('data').toJS())
   const surfaces = map(surface => {
@@ -304,4 +311,13 @@ export const setStateRight = state => {
   } else {
     return state.set('data', fromJS({ settings: { totalSurface: getTotalSurface }}))
   }
+}
+
+export const adoptPlan = (state) => {
+  const cultureList = new CultureList(state.get('data').toJS())
+  const plan = state.get('planState').get('currentPlan').toJS()
+  forEach(rating => {
+    cultureList.add(rating.culture.product.name, rating.culture.status, rating.culture.plantDate, rating.suggestions[rating.selectedSuggestionId].surfaces)
+  }, plan.ratings)
+  return cultureList.data()
 }
