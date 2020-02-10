@@ -8,7 +8,7 @@ const DEFAULT_TOTAL_SURFACE = 10
 export const saveCulture = (state, cultureData) => {
   const cultureList = new CultureList(state.get('data').toJS())
   const selectedSurfaces = map(selectedSurface => {
-    const split = selectedSurface.value.split('ùùù')
+    const split = selectedSurface.split('ùùù')
     return {
       plot: split[0],
       code: split[1]
@@ -18,14 +18,14 @@ export const saveCulture = (state, cultureData) => {
   if(state.get('cultureState').get('editedCulture')) {
     cultureList.update(
       state.get('cultureState').get('editedCulture').get('id'),
-      cultureData.product.value,
-      cultureData.status.value,
+      cultureData.product,
+      cultureData.status,
       cultureData.plantDate,
       selectedSurfaces)
   } else {
     cultureList.add(
-      cultureData.product.value,
-      cultureData.status.value,
+      cultureData.product,
+      cultureData.status,
       cultureData.plantDate,
       selectedSurfaces)
   }
@@ -45,7 +45,7 @@ export const removeCulture = (state, cultureId) => {
 export const saveLogEntry = (state, logEntryData) => {
   const logEntriesList = new LogEntriesList(state.get('data').toJS())
   const surfaces = map(surface => {
-    const split = surface.value.split('ùùù')
+    const split = surface.split('ùùù')
     const plot = split[0]
     const code = split[1]
     return { plot, code }
@@ -54,16 +54,16 @@ export const saveLogEntry = (state, logEntryData) => {
   if(state.get('logState').get('editedEntry')) {
     logEntriesList.update(state.get('logState').get('editedEntry').get('id'),
       moment(logEntryData.date).format(),
-      map(tag => tag.value, logEntryData.tags),
+      logEntryData.tags,
       logEntryData.description, surfaces,
-      map(plot => plot.value, logEntryData.plots),
-      map(culture => culture.value, logEntryData.linkedCultures || []))
+      logEntryData.linkedPlots,
+      logEntryData.linkedCultures || [])
   } else {
     logEntriesList.add(moment(logEntryData.date).format(),
-      map(tag => tag.value, logEntryData.tags),
+      logEntryData.tags,
       logEntryData.description, surfaces,
-      map(plot => plot.value, logEntryData.linkedPlots),
-      map(culture => culture.value, logEntryData.linkedCultures || []))
+      logEntryData.linkedPlots,
+      logEntryData.linkedCultures || [])
   }
 
   const updatedData = merge(state.get('data'), fromJS({ log: logEntriesList.log, logTags: logEntriesList.logTags }))
@@ -83,14 +83,14 @@ export const saveProduct = (state, productData) => {
     products.push(product)
   }
   product.name = productData.name
-  product.family = productData.family.value
-  product.greediness = +productData.greediness.value
+  product.family = productData.family
+  product.greediness = +productData.greediness
   product.productivity = +productData.productivity
   product.unit = productData.unit
   product.greenhouse = productData.greenhouse
   product.surfaceRatio = +productData.surfaceRatio
-  product.sowMax = +productData.sowMax.value
-  product.sowMin = +productData.sowMin.value
+  product.sowMax = +productData.sowMax
+  product.sowMin = +productData.sowMin
   product.growingDays = +productData.growingDays
   product.nurseryDays = +productData.nurseryDays
   product.harvestDays = +productData.harvestDays
@@ -115,18 +115,18 @@ export const searchLog = (state, searchData) => {
     if(searchData.tags && searchData.tags.length > 0) {
       filters.push(logEntry => {
         if(!logEntry.tags) return false
-        return any(tag => includes(tag.value, logEntry.tags), searchData.tags)
+        return any(tag => includes(tag, logEntry.tags), searchData.tags)
       })
     }
     if(searchData.cultures && searchData.cultures.length > 0) {
       filters.push(logEntry => {
         if(!logEntry.cultures) return false
-        return any(culture => includes(culture.value, logEntry.cultures), searchData.cultures)
+        return any(culture => includes(culture, logEntry.cultures), searchData.cultures)
       })
     }
     if(searchData.surfaces && searchData.surfaces.length > 0) {
       const surfacesToSearchFor = map(surface => {
-        const split = surface.value.split('ùùù')
+        const split = surface.split('ùùù')
         return { plot: split[0], code: split[1] }
       }, searchData.surfaces)
       filters.push(logEntry => {
@@ -137,7 +137,7 @@ export const searchLog = (state, searchData) => {
     if(searchData.plots && searchData.plots.length > 0) {
       filters.push(logEntry => {
         if(!logEntry.plots) return false
-        return any(plot => includes(plot.value, logEntry.plots), searchData.plots)
+        return any(plot => includes(plot, logEntry.plots), searchData.plots)
       })
     }
     if(searchData.description) {
@@ -171,12 +171,12 @@ export const searchCulture = (state, searchData) => {
     const filters = []
     if(searchData.products && searchData.products.length > 0) {
       filters.push(culture => {
-        return any(product => product.value === culture.productName, searchData.products)
+        return any(product => product === culture.productName, searchData.products)
       })
     }
     if(searchData.surfaces && searchData.surfaces.length > 0) {
       const surfacesToSearchFor = map(surface => {
-        const split = surface.value.split('ùùù')
+        const split = surface.split('ùùù')
         return { plot: split[0], code: split[1] }
       }, searchData.surfaces)
       filters.push(culture => {
@@ -185,7 +185,7 @@ export const searchCulture = (state, searchData) => {
     }
     if(searchData.status) {
       filters.push(culture => {
-        return culture.status === searchData.status.value
+        return culture.status === searchData.status
       })
     }
     if(searchData.fromDate && searchData.tillDate) {
@@ -224,21 +224,21 @@ export const searchProduct = (state, searchData) => {
     }
 
     if(searchData.greedinesses && searchData.greedinesses.length) {
-      filters.push(product => any(greediness => product.greediness === greediness.value, searchData.greedinesses))
+      filters.push(product => any(greediness => product.greediness === greediness, searchData.greedinesses))
     }
 
     if(searchData.sowMin && searchData.sowMax) {
       filters.push(product => {
         if(product.sowMin < product.sowMax) {
-          return searchData.sowMin.value <= product.sowMax && searchData.sowMax.value >= product.sowMin
+          return searchData.sowMin <= product.sowMax && searchData.sowMax >= product.sowMin
         } else {
-          return searchData.sowMin.value >= product.sowMax || searchData.sowMax.value <= product.sowMin
+          return searchData.sowMin >= product.sowMax || searchData.sowMax <= product.sowMin
         }
       })
     } else if(searchData.sowMin) {
       filters.push(product => {
         if(product.sowMin < product.sowMax) {
-          return searchData.sowMin.value <= product.sowMax
+          return searchData.sowMin <= product.sowMax
         } else {
           return true
         }
@@ -246,15 +246,15 @@ export const searchProduct = (state, searchData) => {
     } else if(searchData.sowMax) {
       filters.push(product => {
         if(product.sowMin < product.sowMax) {
-          return searchData.sowMax.value >= product.sowMin
+          return searchData.sowMax >= product.sowMin
         } else {
           return true
         }
       })
     }
 
-    if(searchData.greenhouse && searchData.greenhouse.value !== 1) {
-      if(searchData.greenhouse.value === 3)
+    if(searchData.greenhouse && searchData.greenhouse !== 1) {
+      if(searchData.greenhouse === 3)
         filters.push(product => product.greenhouse === 'O')
       else
         filters.push(product => product.greenhouse !== 'O')

@@ -169,7 +169,7 @@ const sortFnUsingPrio = (field, order) => {
   switch(field) {
     case 'plantDate':
       return (cultA, cultB) => {
-        const today = new Date().setHours(0,0,0,0)
+        const today = new Date(new Date().setHours(0,0,0,0))
         const rangeA = getNextRange(cultA.product, today)
         const rangeB = getNextRange(cultB.product, today)
         const sortValue = +rangeA.plantBetween.min - +rangeB.plantBetween.min
@@ -271,7 +271,7 @@ export default input => {
       if(suggestions.length > 0) {
         //Consider the best suggestion is applied (so that subsequent products are
         //suggested surfaces without collisions)
-        const plantDate = max(new Date(), dates.plantBetween.min)
+        const plantDate = max(new Date(new Date().setHours(0,0,0,0)), dates.plantBetween.min)
         const cultureToSuggest = {
           product: culture.product,
           status: 0,

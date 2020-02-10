@@ -35,7 +35,9 @@ class CulturesDisplay extends React.Component {
         {
           title: 'Statut',
           flex: '1',
-          content: culture => find(option => option.value === culture.status, statussesOptions).label
+          content: culture => {
+            return find(option => option.value === culture.status, statussesOptions).label
+          }
         }
       ]
     }

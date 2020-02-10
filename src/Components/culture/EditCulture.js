@@ -40,8 +40,7 @@ class EditCulture extends React.Component {
         name: 'status',
         label: 'Statut',
         required: true,
-        options: statussesOptions,
-        default: statussesOptions[0]
+        options: statussesOptions
       },
       {
         type: 'select',
@@ -58,11 +57,11 @@ class EditCulture extends React.Component {
       const cultureToEdit = props.cultureState.get('editedCulture').toJS()
       const initialData = {
         plantDate: moment(cultureToEdit.plantDate).toDate(),
-        status: find(option => option.value === cultureToEdit.status, statussesOptions),
-        product: find(option => option.value === cultureToEdit.productName, productOptions)
+        status: find(option => option.value === cultureToEdit.status, statussesOptions).value,
+        product: find(option => option.value === cultureToEdit.productName, productOptions).value
       }
       if(cultureToEdit.surfaces && cultureToEdit.surfaces.length > 0) {
-        initialData.surfaces = map(surface => find(option => option.value === surface.plot + 'ùùù' + surface.code, surfacesOptions), cultureToEdit.surfaces)
+        initialData.surfaces = map(surface => surface.plot + 'ùùù' + surface.code, cultureToEdit.surfaces)
       }
       this.state = { ...this.state, ...initialData }
     }
@@ -71,12 +70,12 @@ class EditCulture extends React.Component {
   validateCulture() {
     const unavailableSurfaces = []
     forEach(surfaceId => {
-      const split = surfaceId.value.split('ùùù')
+      const split = surfaceId.split('ùùù')
       const plot = split[0]
       const code = split[1]
       const surface = find(surface => surface.plot === plot && surface.code === code, this.surfaces)
       const cultureToCheck = {
-        product: find(product => product.name === this.state.product.value, this.products),
+        product: find(product => product.name === this.state.product, this.products),
         plantDate: this.state.plantDate
       }
       if(!surfaceIsAvailableForCulture(surface, cultureToCheck)) {

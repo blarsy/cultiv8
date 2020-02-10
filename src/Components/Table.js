@@ -43,7 +43,7 @@ class Table extends React.Component {
     const header = (<FlexBlock isContainer>
       { addIndex(map)((dataColumn, idx) => (
         <HeaderCell
-          onClick={() => dataColumn.noSort ? null : this.sort(idx)}
+          onClick={() => dataColumn.noSort ? null : this.sort(idx+1)}
           isContainer
           sortable={!dataColumn.noSort}
           key={idx}
@@ -60,9 +60,10 @@ class Table extends React.Component {
       const sortColIdx = this.state.sortColumnIndex
       let dataToDisplay = this.props.data
       if(sortColIdx) {
+        const actualSortIdx = sortColIdx - 1
         let compare
-        const sortType = this.props.dataColumns[sortColIdx].sort && this.props.dataColumns[sortColIdx].sort.type
-        switch (sortType || typeof this.props.dataColumns[sortColIdx].content(dataToDisplay[0])) {
+        const sortType = this.props.dataColumns[actualSortIdx].sort && this.props.dataColumns[actualSortIdx].sort.type
+        switch (sortType || typeof this.props.dataColumns[actualSortIdx].content(dataToDisplay[0])) {
           case "number":
             if(this.state.asc)
               compare = (a, b) => a - b
@@ -90,12 +91,12 @@ class Table extends React.Component {
         dataToDisplay = sort((a, b) => {
           let valA
           let valB
-          if(this.props.dataColumns[sortColIdx].sort) {
-            valA = this.props.dataColumns[sortColIdx].sort.value(a)
-            valB = this.props.dataColumns[sortColIdx].sort.value(b)
+          if(this.props.dataColumns[actualSortIdx].sort) {
+            valA = this.props.dataColumns[actualSortIdx].sort.value(a)
+            valB = this.props.dataColumns[actualSortIdx].sort.value(b)
           } else {
-            valA = this.props.dataColumns[sortColIdx].content(a)
-            valB = this.props.dataColumns[sortColIdx].content(b)
+            valA = this.props.dataColumns[actualSortIdx].content(a)
+            valB = this.props.dataColumns[actualSortIdx].content(b)
           }
           return compare(valA, valB)
         }, this.props.data)

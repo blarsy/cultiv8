@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { map } from 'ramda'
 import FormInput from './FormInput'
 
 class Input extends React.Component {
@@ -20,7 +21,9 @@ class Input extends React.Component {
   }
 
   validateRequired(value) {
-    if (!value || (Array.isArray(value) && value.length === 0)) return 'Value required'
+    if (Array.isArray(value) && value.length === 0) return 'Value required'
+    if (typeof value === 'number') return ''
+    if (!value) return 'Value required'
     return ''
   }
 
@@ -35,8 +38,13 @@ class Input extends React.Component {
   onChange(e) {
     let value
     if (this.props.type === 'date') value = e ? e.format() : ''
-    else if (this.props.type === 'select') value = e
-    else if ((e.target.type && e.target.type) === 'checkbox')
+    else if (this.props.type === 'select') {
+      if(this.props.multi) {
+        value = map(item => item.value, e)
+      } else {
+        value = e.value
+      }
+    } else if ((e.target.type && e.target.type) === 'checkbox')
       value = e.target.checked.toString()
     else if (e.target.type && (e.target.type === 'number'))
       value = +e.target.value

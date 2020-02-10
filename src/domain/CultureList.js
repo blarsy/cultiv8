@@ -1,4 +1,4 @@
-import { find, filter } from 'ramda'
+import { find, filter, max } from 'ramda'
 import moment from 'moment'
 import TaskList from './TaskList'
 import LogEntriesList from './LogEntriesList'
@@ -74,9 +74,12 @@ export default class CultureList {
     const product = this.productFromName(culture.productName)
     const now = moment().toISOString()
     const status = culture.status
+    if(!culture.statusHistory) culture.statusHistory = [{date: now, status: culture.status}]
+    else culture.statusHistory.push({date: now, status: culture.status})
+    
     if(status === 0) {
       // Planned
-      this.taskList.add('seed',culture.plantDate,culture.id)
+      this.taskList.add('seed',max(moment(culture.plantDate).add(-product.nurseryDays), new Date(new Date().setHours(0,0,0,0))),culture.id)
     } else if(status === 1) {
       // Sown
       if(product.nurseryDays > 0) {

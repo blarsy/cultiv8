@@ -22,15 +22,15 @@ class CultureSearch extends React.Component {
     return (<SearchForm formState="cultureState" actionName="SEARCH_CULTURE" searchData={this.state} setState={args => this.setState(args)}>
       <FlexBlock flex="0 0 50%">
         <span>Production</span>
-        <Select multi value={this.state.products} options={this.productsOptions} onChange={e => this.setState({ products: e })}/>
+        <Select multi value={this.state.products} options={this.productsOptions} onChange={e => this.setState({ products: map(item => item.value, e) })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%">
         <span>Status</span>
-        <Select value={this.state.status} options={statussesOptions} onChange={e => this.setState({ status: e })}/>
+        <Select value={this.state.status} options={statussesOptions} onChange={e => this.setState({ status: e ? e.value : null })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%">
         <span>Surfaces</span>
-        <Select multi value={this.state.surfaces} options={this.surfacesOptions} onChange={e => this.setState({ surfaces: e })}/>
+        <Select multi value={this.state.surfaces} options={this.surfacesOptions} onChange={e => this.setState({ surfaces: map(item => item.value, e) })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%" isContainer flexFlow="column" justifyContent="stretch">
         <span>From date</span>

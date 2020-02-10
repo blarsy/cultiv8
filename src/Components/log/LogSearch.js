@@ -27,19 +27,19 @@ class LogSearch extends React.Component {
     return (<SearchForm formState="logState" actionName="SEARCH_LOG" searchData={this.state} setState={args => this.setState(args)}>
       <FlexBlock flex="0 0 50%">
         <span>Tags</span>
-        <Select multi value={this.state.tags} options={this.tagsOptions} onChange={e => this.setState({ tags: e })}/>
+        <Select multi value={this.state.tags} options={this.tagsOptions} onChange={e => this.setState({ tags: map(item => item.value, e) })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%">
         <span>Cultures</span>
-        <Select multi value={this.state.cultures} options={this.culturesOptions} onChange={e => this.setState({ cultures: e })}/>
+        <Select multi value={this.state.cultures} options={this.culturesOptions} onChange={e => this.setState({ cultures: map(item => item.value, e) })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%">
         <span>Surfaces</span>
-        <Select multi value={this.state.surfaces} options={this.surfacesOptions} onChange={e => this.setState({ surfaces: e })}/>
+        <Select multi value={this.state.surfaces} options={this.surfacesOptions} onChange={e => this.setState({ surfaces: map(item => item.value, e) })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%">
         <span>Parcelles</span>
-        <Select multi value={this.state.plots} options={this.plotOptions} onChange={e => this.setState({ plots: e })}/>
+        <Select multi value={this.state.plots} options={this.plotOptions} onChange={e => this.setState({ plots: map(item => item.value, e) })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%" isContainer flexFlow="column" justifyContent="stretch">
         <span>Mot-clé</span>

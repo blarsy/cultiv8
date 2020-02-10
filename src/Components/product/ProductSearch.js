@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Select from 'react-select'
+import { map } from 'ramda'
 import SearchForm from '../SearchForm'
 import { FlexBlock } from '../../toolbox'
 import { greedinessOptions, monthesOptions, greenhouseOptions, getFamiliesOptions } from './common'
@@ -22,23 +23,23 @@ class ProductSearch extends React.Component {
       </FlexBlock>
       <FlexBlock flex="0 0 50%">
         <span>Famille</span>
-        <Select multi value={this.state.families} options={this.familiesOptions} onChange={e => this.setState({ families: e })}/>
+        <Select multi value={this.state.families} options={this.familiesOptions} onChange={e => this.setState({ families: map(item => item.value, e) })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%" isContainer flexFlow="column" justifyContent="stretch">
         <span>Gourmandise</span>
-        <Select multi value={this.state.greedinesses} options={greedinessOptions} onChange={e => this.setState({ greedinesses: e })}/>
+        <Select multi value={this.state.greedinesses} options={greedinessOptions} onChange={e => this.setState({ greedinesses: map(item => item.value, e) })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%" isContainer flexFlow="column" justifyContent="stretch">
         <span>Serre/Plein champ</span>
-        <Select value={this.state.greenhouse} options={greenhouseOptions} onChange={e => this.setState({ greenhouse: e })}/>
+        <Select value={this.state.greenhouse} options={greenhouseOptions} onChange={e => this.setState({ greenhouse: e ? e.value: null })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%" isContainer flexFlow="column" justifyContent="stretch">
         <span>Planté/semé entre</span>
-        <Select value={this.state.sowMin} options={monthesOptions} onChange={e => this.setState({ sowMin: e })}/>
+        <Select value={this.state.sowMin} options={monthesOptions} onChange={e => this.setState({ sowMin: e.value })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%" isContainer flexFlow="column" justifyContent="stretch">
         <span>et</span>
-        <Select value={this.state.sowMax} options={monthesOptions} onChange={e => this.setState({ sowMax: e })}/>
+        <Select value={this.state.sowMax} options={monthesOptions} onChange={e => this.setState({ sowMax: e.value })}/>
       </FlexBlock>
     </SearchForm>)
   }

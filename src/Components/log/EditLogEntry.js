@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { List } from 'immutable'
-import { sort, map, find } from 'ramda'
+import { sort, map } from 'ramda'
 import moment from 'moment'
 import { connect } from 'react-redux'
 import { ValidatedForm, getInitialState } from '../../toolbox'
@@ -75,16 +75,16 @@ class EditLog extends React.Component {
         description: logEntryToEdit.description
       }
       if(logEntryToEdit.tags && logEntryToEdit.tags.length > 0) {
-        initialData.tags = map(tag => find(tagOption => tagOption.value === tag, tagOptions), logEntryToEdit.tags)
+        initialData.tags = logEntryToEdit.tags
       }
       if(logEntryToEdit.surfaces && logEntryToEdit.surfaces.length > 0) {
-        initialData.linkedSurfaces = map(surface => find(option => option.value === surface.plot + 'ùùù' + surface.code, surfaceOptions), logEntryToEdit.surfaces)
+        initialData.linkedSurfaces = map(surface => surface.plot + 'ùùù' + surface.code, logEntryToEdit.surfaces)
       }
       if(logEntryToEdit.plots && logEntryToEdit.plots.length > 0) {
-        initialData.linkedPlots = map(plot => find(option => option.value === plot.code, plotOptions), logEntryToEdit.plots)
+        initialData.linkedPlots = logEntryToEdit.plots
       }
       if(logEntryToEdit.cultures && logEntryToEdit.cultures.length > 0) {
-        initialData.linkedCultures = map(cultureId => find(option => option.value === cultureId, cultureOptions), logEntryToEdit.cultures)
+        initialData.linkedCultures = logEntryToEdit.cultures
       }
       this.state = { ...this.state, ...initialData }
     }
