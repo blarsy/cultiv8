@@ -72,14 +72,14 @@ export default class CultureList {
 
   processStatusChange(culture) {
     const product = this.productFromName(culture.productName)
-    const now = moment().toISOString()
+    const today = moment(new Date(new Date().setHours(0,0,0,0))).toISOString()
     const status = culture.status
-    if(!culture.statusHistory) culture.statusHistory = [{date: now, status: culture.status}]
-    else culture.statusHistory.push({date: now, status: culture.status})
-    
+    if(!culture.statusHistory) culture.statusHistory = [{date: today, status: culture.status}]
+    else culture.statusHistory.push({date: today, status: culture.status})
+
     if(status === 0) {
       // Planned
-      this.taskList.add('seed',max(moment(culture.plantDate).add(-product.nurseryDays), new Date(new Date().setHours(0,0,0,0))),culture.id)
+      this.taskList.add('seed',max(moment(culture.plantDate).add(-product.nurseryDays, 'days'), new Date(new Date().setHours(0,0,0,0))),culture.id)
     } else if(status === 1) {
       // Sown
       if(product.nurseryDays > 0) {
@@ -96,7 +96,7 @@ export default class CultureList {
     } else if(status === 4){
       this.taskList.removeCultureAutoTasks(culture.id)
     }
-    this.logEntriesList.add(now, ['Action'], `statuts passé en '${this.getStatusLabel(status)}'` , [], [], [culture.id])
+    this.logEntriesList.add(today, ['Action'], `statuts passé en '${this.getStatusLabel(status)}'` , [], [], [culture.id])
 
   }
 }

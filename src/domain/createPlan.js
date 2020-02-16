@@ -5,6 +5,7 @@ import {
   reduce, clone, max,
   addIndex
 } from 'ramda'
+import moment from 'moment'
 import { getNextRange, surfaceIsAvailableInPeriod, assignCulturesToSurfaces } from './planner'
 import { nextId } from './data'
 
@@ -271,7 +272,8 @@ export default input => {
       if(suggestions.length > 0) {
         //Consider the best suggestion is applied (so that subsequent products are
         //suggested surfaces without collisions)
-        const plantDate = max(new Date(new Date().setHours(0,0,0,0)), dates.plantBetween.min)
+        const soonestSowDate = max(new Date(new Date().setHours(0,0,0,0)), dates.sowBetween.min)
+        const plantDate = moment(soonestSowDate).add(culture.product.nurseryDays, 'days').toDate()
         const cultureToSuggest = {
           product: culture.product,
           status: 0,

@@ -1,5 +1,5 @@
-import { Map, fromJS, mergeDeep, merge, find } from 'immutable'
-import { forEach, forEachObjIndexed, filter } from 'ramda'
+import { Map, fromJS, mergeDeep, merge } from 'immutable'
+import { forEach, forEachObjIndexed, filter, find, reject } from 'ramda'
 import moment from 'moment'
 import fileDownload from 'js-file-download'
 import createPlan from '../domain/createPlan'
@@ -196,6 +196,33 @@ export default (state = initialState, action) => {
     case 'DISMISS_SEARCHRESULT':
       const updatedState = state.get(action.stateName).set('lastSearchResult', fromJS([]))
       result = state.set(action.stateName, updatedState)
+      break
+    case 'TOGGLE_PLOT_CREATION':
+      result = state.set('groundsState', state.get('groundsState').set('editedPlot', fromJS({ code: '', name: '' })))
+      break
+    case 'TOGGLE_PLOT_EDITION':
+      if(state.get('groundsState').get('editedPlot')) {
+        result = state.set('groundsState', state.get('groundsState').delete('editedPlot'))
+      } else {
+        const plotToEdit = find(plot => plot.code === state.get('groundsState').get('selectedPlot'), state.get('data').get('plots').toJS())
+        result = state.set('groundsState', state.get('groundsState').set('editedPlot', fromJS(plotToEdit)))
+      }
+      break
+    case 'SAVE_PLOT':
+      const plots = state.get('data').get('plots').toJS()
+      let plotToUpdate = find(plot => plot.code === action.data.code, plots)
+      if(!plotToUpdate) {
+        plotToUpdate = {}
+        plots.push(plotToUpdate)
+      }
+      plotToUpdate.code = action.data.code
+      plotToUpdate.name = action.data.name
+      result = state.set('data', state.get('data').merge( fromJS({ plots }) ))
+        .set('groundsState', state.get('groundsState').delete('editedPlot'))
+      break
+    case 'REMOVE_PLOT':
+      const reducedPlots = reject(plot => plot.code === state.get('groundsState').get('selectedPlot'), state.get('data').get('plots').toJS())
+      result = state.set('data', state.get('data').merge( fromJS({ plots: reducedPlots })))
       break
     default:
   }

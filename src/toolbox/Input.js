@@ -84,6 +84,7 @@ class Input extends React.Component {
       return (
         <FormInput
           value={this.state.value}
+          readOnly={this.props.readOnly}
           name={this.props.name}
           required={this.props.required}
           error={this.state.error}
@@ -115,6 +116,7 @@ Input.propTypes = {
   name: PropTypes.string,
   loadOptions: PropTypes.func,
   creatable: PropTypes.bool,
+  readOnly: PropTypes.bool,
   async: PropTypes.bool,
   options: PropTypes.arrayOf(PropTypes.shape({
     label: PropTypes.string,

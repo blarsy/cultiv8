@@ -36,7 +36,7 @@ class EditLog extends React.Component {
         options: tagOptions
       },
       {
-        type: 'text',
+        type: 'textArea',
         name: 'description',
         label: 'Description',
         required: true

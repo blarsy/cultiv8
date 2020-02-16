@@ -77,38 +77,30 @@ export const assignCulturesToSurfaces = data => {
     forEach(surfaceRef => {
       const surface = find(surface => surfaceRef.plot === surface.plot && surfaceRef.code === surface.code, data.surfaces)
       if(!surface.cultures) surface.cultures = []
-      surface.cultures.push({
-        product,
-        plantDate: culture.plantDate,
-        status: culture.status
-      })
+      const cultureToAdd = {...culture}
+      cultureToAdd.product = product
+      surface.cultures.push(cultureToAdd)
     }, culture.surfaces)
   }, data.cultures)
 }
 
-export const forecastStatus = (culture, targetDate) => {
-  const currentAndFutureStatusses = culture.statusHistory || []
+export const forecastStatus = culture => {
+  const currentAndFutureStatusses = culture.statusHistory ? [...culture.statusHistory] : []
   if(culture.status === 0) {
-    currentAndFutureStatusses.push({ date: moment(culture.plantDate).add(-culture.product.nurseryDays, 'days').toDate(), status: 1})
+    currentAndFutureStatusses.push({ date: moment(culture.plantDate).add(-culture.product.nurseryDays, 'days').toISOString(), status: 1})
   }
   if(culture.status <= 1) {
     if(culture.nurseryDays !== 0) {
-      currentAndFutureStatusses.push({ date: moment(culture.plantDate), status: 2})
+      currentAndFutureStatusses.push({ date: moment(culture.plantDate).toISOString(), status: 2})
     } else {
-      currentAndFutureStatusses.push({ date: moment(culture.plantDate).add(culture.product.growingDays, 'days').toDate(), status: 3})
+      currentAndFutureStatusses.push({ date: moment(culture.plantDate).add(culture.product.growingDays, 'days').toISOString(), status: 3})
     }
   }
   if(culture.status <= 2) {
-    currentAndFutureStatusses.push({ date: moment(culture.plantDate).add(culture.product.growingDays - culture.product.nurseryDays, 'days').toDate(), status: 3})
+    currentAndFutureStatusses.push({ date: moment(culture.plantDate).add(culture.product.growingDays - culture.product.nurseryDays, 'days').toISOString(), status: 3})
   }
   if(culture.status <= 3) {
-    currentAndFutureStatusses.push({ date: moment(culture.plantDate).add(culture.product.growingDays - culture.product.nurseryDays + culture.product.harvestDays, 'days').toDate(), status: 100})
+    currentAndFutureStatusses.push({ date: moment(culture.plantDate).add(culture.product.growingDays - culture.product.nurseryDays + culture.product.harvestDays, 'days').toISOString(), status: 100})
   }
-  let i
-  for(i = 0; i < currentAndFutureStatusses.length - 1; i ++) {
-    if(targetDate >= currentAndFutureStatusses[i].date && targetDate < currentAndFutureStatusses[i + 1].date) {
-      return currentAndFutureStatusses[i].status
-    }
-  }
-  return currentAndFutureStatusses[i].status
+  return currentAndFutureStatusses
 }

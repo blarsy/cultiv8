@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { map, filter, addIndex, find } from 'ramda'
+import { map, filter, addIndex, find, reverse } from 'ramda'
 import styled from 'styled-components'
 import moment from 'moment'
 import { FlexBlock } from '../toolbox'
@@ -42,15 +42,20 @@ class PlotDisplay extends React.Component {
         <FlexBlock isContainer flexFlow="row wrap" flex="1 0">
           {
             addIndex(map)((surface, idx) => {
-              let cultureDetail
-              let culture
+              let cultureDetail, culture, status
               if(surface.cultures && surface.cultures.length > 0) {
                 culture = find(cultureInSurface => cultureIsActive(this.props.date, cultureInSurface), surface.cultures)
+                if(!culture) {
+                  culture = find(culture => moment(culture.plantDate) > moment(this.props.date), surface.cultures)
+                }
                 if(culture) {
-                  cultureDetail = (<span>{culture.product.name}</span>)
+                  const currentAndFutureStatusses = forecastStatus(culture)
+                  const currentStatus = find(historyItem => moment(historyItem.date) <= moment(this.props.date), reverse(currentAndFutureStatusses))
+                  if(currentStatus) status = currentStatus.status
                 }
               }
-              return (<Surface isContainer flexFlow="column nowrap" key={idx} status={culture ? forecastStatus(culture, moment(this.props.date)): -1}>
+              cultureDetail = culture ? (<span>{culture.product.name}</span>) : ''
+              return (<Surface isContainer flexFlow="column nowrap" key={idx} status={status}>
                 <span>{ surface.code }</span>
                 { cultureDetail }
               </Surface>)

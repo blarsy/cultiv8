@@ -81,6 +81,7 @@ class FormInput extends React.Component {
           onBlur={e => this.props.lostFocus(e)}
           used={this.props.used}
           error={this.props.error}
+          readOnly={this.props.readOnly}
         />
       )
     } else if (this.props.type === 'checkbox') {
@@ -92,6 +93,7 @@ class FormInput extends React.Component {
           onBlur={e => this.props.lostFocus(e)}
           used={this.props.used}
           error={this.props.error}
+          readOnly={this.props.readOnly}
         />
       )
     } else if (this.props.type === 'select') {
@@ -167,6 +169,7 @@ class FormInput extends React.Component {
           onBlur={e => this.props.lostFocus(e)}
           used={this.props.used}
           error={this.props.error}
+          readOnly={this.props.readOnly}
         />
       )
     }
@@ -199,6 +202,7 @@ FormInput.propTypes = {
   loadOptions: PropTypes.func,
   creatable: PropTypes.bool,
   async: PropTypes.bool,
+  readOnly: PropTypes.bool,
   options: PropTypes.arrayOf(PropTypes.shape({
     label: PropTypes.string,
     value: PropTypes.any

@@ -3,7 +3,23 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import moment from 'moment'
 import { find } from 'ramda'
+import styled from 'styled-components'
 import Table from './Table'
+
+const getDelayColor = days => {
+  if(days === 0) return 'inherit'
+  if(days < -10) days = -10
+  if(days > 10) days = 10
+  if(days < 0) {
+    return Number(255).toString(16) + Math.round(Number(255/10 * (10 + days))).toString(16) + Number(255/10 * 10 + days).toString(16)
+  } else {
+
+    return Math.round(Number((255/10) * (days - 1))).toString(16) + Number(255).toString(16) + Math.round(Number((255/10) * (days - 1))).toString(16)
+  }
+}
+const Delay = styled.span`
+  color: #${props => getDelayColor(props.days)}
+`
 
 class Workfeed extends React.Component {
   render() {
@@ -20,7 +36,7 @@ class Workfeed extends React.Component {
           type: 'date'
         },
         flex: '1',
-        content: task => moment(task.date).format('L')
+        content: task => <span>{moment(task.date).format('L')} <Delay days={moment(task.date).diff(moment(), 'days')}>{moment(task.date).diff(moment(), 'days')}</Delay></span>
       },
       {
         title: 'Tâche',

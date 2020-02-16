@@ -76,6 +76,7 @@ class ValidatedForm extends React.Component {
                 name={input.name}
                 type={input.type}
                 value={state[input.name]}
+                readOnly={input.readOnly}
                 onChange={value => {
                   this.props.setState({ [input.name]: value })
                 }}
@@ -133,6 +134,7 @@ ValidatedForm.propTypes = {
       creatable: PropTypes.bool,
       async: PropTypes.bool,
       multi: PropTypes.bool,
+      readOnly: PropTypes.bool,
       options: PropTypes.arrayOf(PropTypes.shape({
         label: PropTypes.string,
         value: PropTypes.any
