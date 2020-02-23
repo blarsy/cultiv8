@@ -55,8 +55,11 @@ class PlotDisplay extends React.Component {
                 }
               }
               cultureDetail = culture ? (<span>{culture.product.name}</span>) : ''
+              let header
+              if(this.props.editable) header = (<input type="text" value={surface.code} name={surface.code} onChange={e => this.props.onSurfaceChanged(idx, this.props.selectedPlot, e.target.value)}/>)
+              else header = (<span>{ surface.code }</span>)
               return (<Surface isContainer flexFlow="column nowrap" key={idx} status={status}>
-                <span>{ surface.code }</span>
+                {header}
                 { cultureDetail }
               </Surface>)
             },
@@ -71,7 +74,9 @@ class PlotDisplay extends React.Component {
 PlotDisplay.propTypes = {
   date: PropTypes.string,
   surfaces: PropTypes.object,
-  selectedPlot: PropTypes.string
+  selectedPlot: PropTypes.string,
+  editable: PropTypes.bool,
+  onSurfaceChanged: PropTypes.func
 }
 
 export default PlotDisplay

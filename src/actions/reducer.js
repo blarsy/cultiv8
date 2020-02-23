@@ -224,6 +224,34 @@ export default (state = initialState, action) => {
       const reducedPlots = reject(plot => plot.code === state.get('groundsState').get('selectedPlot'), state.get('data').get('plots').toJS())
       result = state.set('data', state.get('data').merge( fromJS({ plots: reducedPlots })))
       break
+    case 'TOGGLE_SURFACE_EDITION':
+      if(action.data) {
+        const surfaces = state.get('data').get('surfaces').toJS()
+        const log = state.get('data').get('log').toJS()
+        const cultures = state.get('data').get('cultures').toJS()
+        const selectedPlot = state.get('groundsState').get('selectedPlot')
+        const plotSurfaces = filter(surface => surface.plot === selectedPlot, surfaces)
+
+        forEach(updatedSurface => {
+          const surfaceToUpdate = plotSurfaces[updatedSurface.index]
+
+          forEach(logEntry => {
+            forEach(logSurface => logSurface.code = updatedSurface.code, filter(logSurface => logSurface.plot === selectedPlot && logSurface.code === surfaceToUpdate.code, logEntry.surfaces))
+          }, log)
+          forEach(culture => {
+            forEach(cultureSurface => cultureSurface.code = updatedSurface.code, filter(cultureSurface => cultureSurface.plot === selectedPlot && cultureSurface.code === surfaceToUpdate.code, culture.surfaces))
+          }, cultures)
+          find(surface => surface.plot === selectedPlot && surface.code === surfaceToUpdate.code, surfaces).code = updatedSurface.code
+
+          surfaceToUpdate.code = updatedSurface.code
+        }, action.data)
+        result = state.set('data', state.get('data').merge(fromJS({ log, cultures, surfaces })))
+          .set('groundsState', state.get('groundsState').set('editingSurface', !state.get('groundsState').get('editingSurface')))
+      } else {
+        result = state
+          .set('groundsState', state.get('groundsState').set('editingSurface', !state.get('groundsState').get('editingSurface')))
+      }
+      break
     default:
   }
   localStorage.setItem('state', JSON.stringify(result.toJS()))

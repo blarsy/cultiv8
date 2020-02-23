@@ -1,5 +1,5 @@
 import { fromJS, merge } from 'immutable'
-import { forEach, any, map, filter, includes, find, reduce } from 'ramda'
+import { addIndex, forEach, any, map, filter, includes, find, reduce } from 'ramda'
 import moment from 'moment'
 import { CultureList, LogEntriesList } from '../domain'
 
@@ -7,13 +7,6 @@ const DEFAULT_TOTAL_SURFACE = 10
 
 export const saveCulture = (state, cultureData) => {
   const cultureList = new CultureList(state.get('data').toJS())
-  const selectedSurfaces = map(selectedSurface => {
-    const split = selectedSurface.split('ùùù')
-    return {
-      plot: split[0],
-      code: split[1]
-    }
-  }, cultureData.surfaces)
 
   if(state.get('cultureState').get('editedCulture')) {
     cultureList.update(
@@ -21,13 +14,13 @@ export const saveCulture = (state, cultureData) => {
       cultureData.product,
       cultureData.status,
       cultureData.plantDate,
-      selectedSurfaces)
+      cultureData.surfaces)
   } else {
     cultureList.add(
       cultureData.product,
       cultureData.status,
       cultureData.plantDate,
-      selectedSurfaces)
+      cultureData.surfaces)
   }
 
   const updatedData = merge(state.get('data'), fromJS(cultureList.data()))
@@ -125,13 +118,9 @@ export const searchLog = (state, searchData) => {
       })
     }
     if(searchData.surfaces && searchData.surfaces.length > 0) {
-      const surfacesToSearchFor = map(surface => {
-        const split = surface.split('ùùù')
-        return { plot: split[0], code: split[1] }
-      }, searchData.surfaces)
       filters.push(logEntry => {
         if(!logEntry.surfaces) return false
-        return any(surface => find(logSurface => surface.plot === logSurface.plot && surface.code === logSurface.code, logEntry.surfaces), surfacesToSearchFor)
+        return any(surfaceId => find(logSurface => surfaceId === logSurface, logEntry.surfaces), searchData.surfaces)
       })
     }
     if(searchData.plots && searchData.plots.length > 0) {
@@ -175,12 +164,8 @@ export const searchCulture = (state, searchData) => {
       })
     }
     if(searchData.surfaces && searchData.surfaces.length > 0) {
-      const surfacesToSearchFor = map(surface => {
-        const split = surface.split('ùùù')
-        return { plot: split[0], code: split[1] }
-      }, searchData.surfaces)
       filters.push(culture => {
-        return any(surface => find(logSurface => surface.plot === logSurface.plot && surface.code === logSurface.code, culture.surfaces), surfacesToSearchFor)
+        return any(surfaceId => find(logSurface => surfaceId === logSurface, culture.surfaces), searchData.surfaces)
       })
     }
     if(searchData.status) {
@@ -301,16 +286,50 @@ export const recalculateSurfaces = state => {
   return state.set('data', state.get('data').set('products', fromJS(products)))
 }
 
+const upgradeState = state => {
+  let result = state
+  const currentSchemeVersion = +state.get('data').get('settings').get('dataschemeVersion')
+
+  if(currentSchemeVersion < 2) {
+    // Give an id to every surfaces
+    const surfaces = state.get('data').get('surfaces').toJS()
+    const indexedSurfaces = addIndex(map)((surface, idx) => ({ ...surface, id: idx}), surfaces)
+
+    // Ensure all references to surfaces are made to the id
+    const cultures = state.get('data').get('cultures').toJS()
+    forEach(culture => {
+      culture.surfaces = map(cultureSurface => find(surface => surface.plot === cultureSurface.plot && surface.code === cultureSurface.code, indexedSurfaces).id, culture.surfaces)
+    }, cultures)
+    const logEntries = state.get('data').get('log').toJS()
+    forEach(logEntry => {
+      logEntry.surfaces = map(logEntrySurface => find(surface => surface.plot === logEntrySurface.plot && surface.code === logEntrySurface.code, indexedSurfaces).id, logEntry.surfaces)
+    }, logEntries)
+
+    const updatedSettings = state.get('data').get('settings').set('dataschemeVersion', '2')
+    result = result.set('data', result.get('data').merge({ settings: updatedSettings, surfaces: fromJS(indexedSurfaces), cultures: fromJS(cultures), log: fromJS(logEntries) }))
+  }
+
+  return result
+}
+
 export const setStateRight = state => {
+  let result
   if(state.get('data')) {
     const products = (state.get('data') && state.get('data').get('products') && state.get('data').get('products').toJS()) || []
 
     setProductCalculatedProps(products, state)
 
-    return state.set('data', state.get('data').set('products', fromJS(products)))
+    result = state.set('data', state.get('data').set('products', fromJS(products)))
   } else {
-    return state.set('data', fromJS({ settings: { totalSurface: getTotalSurface }}))
+    result = state.set('data', fromJS({ settings: { totalSurface: getTotalSurface }}))
   }
+  if(!result.get('data').get('settings').get('dataschemeVersion')) {
+    const currentSettings = result.get('data').get('settings')
+    result = result.set('data', result.get('data').set('settings', currentSettings.set('dataschemeVersion', '1')))
+  }
+  result = upgradeState(result)
+
+  return result
 }
 
 export const adoptPlan = (state) => {

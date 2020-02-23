@@ -30,7 +30,10 @@ class CulturesDisplay extends React.Component {
         {
           title: 'Surfaces',
           flex: '2',
-          content: culture => map(surface => surface.plot + ' ' + surface.code + ' ', culture.surfaces)
+          content: culture => map(cultureSurface => {
+            const surfaceData = find(surface => surface.id === cultureSurface, this.props.surfaces)
+            return surfaceData.plot + ' ' + surfaceData.code + ' '
+          }, culture.surfaces)
         },
         {
           title: 'Statut',
@@ -58,7 +61,7 @@ CulturesDisplay.propTypes = {
 }
 
 const mapStateToProps = state => ({
-  surfaces: state.global.get('data').get('surfaces'),
+  surfaces: state.global.get('data').get('surfaces').toJS(),
   data: (state.global.get('cultureState') && state.global.get('cultureState').get('lastSearchResult')) ? state.global.get('cultureState').get('lastSearchResult').toJS() : []
 })
 

@@ -16,7 +16,7 @@ class LogSearch extends React.Component {
     if(props.cultures) {
       this.culturesOptions = sort((a,b) => a.label.localeCompare(b.label), map(culture => ({ value: culture.id, label: `${culture.productName} - ${moment(culture.plantDate).format('L')}`}), props.cultures.toJS()))
     }
-    this.surfacesOptions = sort((a,b) => a.label.localeCompare(b.label), map(surface => ({ value: surface.plot + 'ùùù' + surface.code, label: surface.plot + ' ' + surface.code}), props.surfaces.toJS()))
+    this.surfacesOptions = sort((a,b) => a.label.localeCompare(b.label), map(surface => ({ value: surface.id, label: surface.plot + ' ' + surface.code}), props.surfaces.toJS()))
     this.logToSearch = props.logEntries ? props.logEntries.toJS() : []
     this.plotOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(plot => ({ label: plot.name + ' - ' + plot.code, value: plot.code }), props.plots.toJS()))
 

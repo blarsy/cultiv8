@@ -14,7 +14,7 @@ class EditCulture extends React.Component {
 
     this.surfaces = this.props.surfaces.toJS()
     this.products = this.props.products.toJS()
-    const surfacesOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(surface => ({ label: surface.plot + ' ' + surface.code, value: surface.plot + 'ùùù' + surface.code }), this.surfaces))
+    const surfacesOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(surface => ({ label: surface.plot + ' ' + surface.code, value: surface.id }), this.surfaces))
     const productOptions = map(product => ({
       label: product.name,
       value: product.name
@@ -58,10 +58,8 @@ class EditCulture extends React.Component {
       const initialData = {
         plantDate: moment(cultureToEdit.plantDate).toDate(),
         status: find(option => option.value === cultureToEdit.status, statussesOptions).value,
-        product: find(option => option.value === cultureToEdit.productName, productOptions).value
-      }
-      if(cultureToEdit.surfaces && cultureToEdit.surfaces.length > 0) {
-        initialData.surfaces = map(surface => surface.plot + 'ùùù' + surface.code, cultureToEdit.surfaces)
+        product: find(option => option.value === cultureToEdit.productName, productOptions).value,
+        surfaces: cultureToEdit.surfaces
       }
       this.state = { ...this.state, ...initialData }
     }
@@ -70,10 +68,7 @@ class EditCulture extends React.Component {
   validateCulture() {
     const unavailableSurfaces = []
     forEach(surfaceId => {
-      const split = surfaceId.split('ùùù')
-      const plot = split[0]
-      const code = split[1]
-      const surface = find(surface => surface.plot === plot && surface.code === code, this.surfaces)
+      const surface = find(surface => surface.id === surfaceId, this.surfaces)
       const cultureToCheck = {
         product: find(product => product.name === this.state.product, this.products),
         plantDate: this.state.plantDate

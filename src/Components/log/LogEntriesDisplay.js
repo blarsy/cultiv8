@@ -11,6 +11,7 @@ class LogEntriesDisplay extends React.Component {
 
     this.cultures = props.cultures ? props.cultures.toJS() : []
     this.plots = props.plots ? props.plots.toJS() : []
+    this.surfaces = props.surfaces ? props.surfaces.toJS() : []
   }
 
   render() {
@@ -38,7 +39,14 @@ class LogEntriesDisplay extends React.Component {
           title: 'Surfaces',
           noSort: true,
           flex: '1 0',
-          content: logEntry => logEntry.surfaces && logEntry.surfaces.length >= 0 && map(surface => surface.plot + ' ' + surface.code, logEntry.surfaces)
+          content: logEntry => {
+            if(logEntry.surfaces && logEntry.surfaces.length >= 0) {
+              return map(surfaceId => {
+                const surface = find(surface => surface.id === surfaceId, this.surfaces)
+                return surface.plot + ' ' + surface.code
+              }, logEntry.surfaces)
+            }
+          }
         },
         {
           title: 'Parcelles',
@@ -85,6 +93,7 @@ LogEntriesDisplay.propTypes = {
 
 const mapStateToProps = state => ({
   cultures: state.global.get('data').get('cultures'),
+  surfaces: state.global.get('data').get('surfaces'),
   plots: state.global.get('data').get('plots'),
   data: (state.global.get('logState') && state.global.get('logState').get('lastSearchResult')) ? state.global.get('logState').get('lastSearchResult').toJS() : []
 })

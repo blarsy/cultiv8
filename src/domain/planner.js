@@ -74,8 +74,8 @@ export const cultureIsActive = (date, culture) => {
 export const assignCulturesToSurfaces = data => {
   forEach(culture => {
     const product = find(product => product.name === culture.productName, data.products)
-    forEach(surfaceRef => {
-      const surface = find(surface => surfaceRef.plot === surface.plot && surfaceRef.code === surface.code, data.surfaces)
+    forEach(surfaceId => {
+      const surface = find(surface => surface.id === surfaceId, data.surfaces)
       if(!surface.cultures) surface.cultures = []
       const cultureToAdd = {...culture}
       cultureToAdd.product = product

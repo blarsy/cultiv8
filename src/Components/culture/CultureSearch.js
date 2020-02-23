@@ -14,7 +14,7 @@ class CultureSearch extends React.Component {
     super(props)
 
     this.state = (props.logState && props.logState.get('lastSearchData')) ? props.logState.get('lastSearchData').toJS() : {}
-    this.surfacesOptions = sort((a,b) => a.label.localeCompare(b.label), map(surface => ({ value: surface.plot + 'ùùù' + surface.code, label: surface.plot + ' ' + surface.code}), props.surfaces.toJS()))
+    this.surfacesOptions = sort((a,b) => a.label.localeCompare(b.label), map(surface => ({ value: surface.id, label: surface.plot + ' ' + surface.code}), props.surfaces.toJS()))
     this.productsOptions = sort((a,b) => a.label.localeCompare(b.label), map(product => ({ value: product.name, label: product.name}), props.products.toJS()))
   }
 

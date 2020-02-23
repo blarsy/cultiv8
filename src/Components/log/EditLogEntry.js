@@ -11,7 +11,7 @@ class EditLog extends React.Component {
     super(props)
 
     const cultureOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()) || moment(b.plantDate).toDate() - moment(a.plantDate).toDate(), map(culture => ({ label: `${culture.productName} - ${moment(culture.plantDate).format('L')}`, value: culture.id }), props.cultures.toJS()))
-    const surfaceOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(surface => ({ label: surface.plot + ' ' + surface.code, value: surface.plot + 'ùùù' + surface.code }), props.surfaces.toJS()))
+    const surfaceOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(surface => ({ label: surface.plot + ' ' + surface.code, value: surface.id }), props.surfaces.toJS()))
     const plotOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(plot => ({ label: plot.name + ' ' + plot.code, value: plot.code }), props.plots.toJS()))
     const tagOptions = map(category => ({
       label: category,
@@ -72,13 +72,13 @@ class EditLog extends React.Component {
       const logEntryToEdit = props.logState.get('editedEntry').toJS()
       const initialData = {
         date: moment(logEntryToEdit.date).toDate(),
-        description: logEntryToEdit.description
+        description: logEntryToEdit.description,
       }
       if(logEntryToEdit.tags && logEntryToEdit.tags.length > 0) {
         initialData.tags = logEntryToEdit.tags
       }
       if(logEntryToEdit.surfaces && logEntryToEdit.surfaces.length > 0) {
-        initialData.linkedSurfaces = map(surface => surface.plot + 'ùùù' + surface.code, logEntryToEdit.surfaces)
+        initialData.linkedSurfaces = logEntryToEdit.surfaces
       }
       if(logEntryToEdit.plots && logEntryToEdit.plots.length > 0) {
         initialData.linkedPlots = logEntryToEdit.plots
