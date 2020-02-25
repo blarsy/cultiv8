@@ -336,7 +336,7 @@ export const adoptPlan = (state) => {
   const cultureList = new CultureList(state.get('data').toJS())
   const plan = state.get('planState').get('currentPlan').toJS()
   forEach(rating => {
-    cultureList.add(rating.culture.product.name, rating.culture.status, rating.culture.plantDate, rating.suggestions[rating.selectedSuggestionId].surfaces)
+    cultureList.add(rating.culture.product.name, rating.culture.status, rating.culture.plantDate, map(surface => surface.id , rating.suggestions[rating.selectedSuggestionId].surfaces))
   }, plan.ratings)
   return cultureList.data()
 }
