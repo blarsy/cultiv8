@@ -81,6 +81,7 @@ export default class CultureList {
       // Planned
       this.taskList.add('seed',max(moment(culture.plantDate).add(-product.nurseryDays, 'days'), new Date(new Date().setHours(0,0,0,0))),culture.id)
     } else if(status === 1) {
+      this.taskList.removeCultureAutoTasks(culture.id)
       // Sown
       if(product.nurseryDays > 0) {
         this.taskList.add('plant', moment(culture.plantDate).add(product.nurseryDays, 'days').toISOString(), culture.id)
@@ -88,9 +89,11 @@ export default class CultureList {
         this.taskList.add('harvest', moment(culture.plantDate).add(product.growingDays, 'days').toISOString(), culture.id)
       }
     } else if(status === 2) {
+      this.taskList.removeCultureAutoTasks(culture.id)
       // Planted
       this.taskList.add('harvest', moment(culture.plantDate).add(product.growingDays, 'days').toISOString(), culture.id)
     } else if(status === 3){
+      this.taskList.removeCultureAutoTasks(culture.id)
       // Harvesting
       this.taskList.add('destroy', moment(culture.plantDate).add(product.growingDays + product.harvestDays, 'days').toISOString(), culture.id)
     } else if(status === 4){

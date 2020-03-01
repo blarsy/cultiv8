@@ -9,6 +9,10 @@ import Select from 'react-select'
 const STANDARD_SURFACE = 10
 
 class PlanInput extends React.Component {
+  constructor(props) {
+    super(props)
+    this.surfaces = this.props.surfaces.toJS()
+  }
   render() {
     const selectedCultures = []
     const planState = this.props.planState.toJS()
@@ -30,7 +34,7 @@ class PlanInput extends React.Component {
       selectionDetails = (<FlexBlock isContainer padding="0.5rem" flex="1 0" flexFlow="column" alignItems="stretch" justifyContent="space-between">
           <Button disabled={!planState.selectedPlot} onClick={() => this.props.dispatch({ type: 'PLANMAKE_SUGGEST' })}>Suggérer un plan</Button>
           {selectedCultures.length > 0 && (<p>{selectedCultures.length} cultures sélectionnées.</p>)}
-          {planState.selectedPlot && (<p>Surface disponible: {reduce((acc, surface) => acc + STANDARD_SURFACE, 0, filter(surface => surface.plot === planState.selectedPlot, this.props.surfaces.toJS()))}.</p>)}
+          {planState.selectedPlot && (<p>Surface disponible: {reduce((acc, surface) => acc + STANDARD_SURFACE, 0, filter(surface => surface.plot === planState.selectedPlot, this.surfaces))}.</p>)}
           {selectedCultures.length > 0 && (<p>Surface requise: {reduce((acc, culture) => acc + culture.surface, 0, selectedCultures)}.</p>)}
           <FlexBlock isContainer flex="1 0" flexFlow='row nowrap' padding="0.25rem 0">
             <FlexBlock flex='1 0'>Culture</FlexBlock>
@@ -45,6 +49,13 @@ class PlanInput extends React.Component {
       <p>Parcelle visée</p>
       <SelectPlot value={planState.selectedPlot} onChange={value =>
         this.props.dispatch({ type: 'PLANMAKE_SETSELECTEDPLOT', plot: value})}></SelectPlot>
+      { planState.selectedPlot && (<div>
+        <p>Commencer à la surface:</p>
+        <Select name="surface"
+          value={planState.startSurface || null}
+          onChange={e => this.props.dispatch({ type: 'PLANMAKE_SELECTSTARTSURFACE', surface: e ? e.value : null})}
+          options={map(surface => ({ value: surface.id, label: surface.code }), filter(surface => surface.plot === planState.selectedPlot, this.surfaces))}/>
+      </div>) }
       <p>Priorité de placement</p>
       <Select name="order"
         value={planState.selectedPriority || null}

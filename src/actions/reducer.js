@@ -94,10 +94,13 @@ export default (state = initialState, action) => {
       result = state.set('planState', state.get('planState').set('currentPlan', fromJS(createPlan(state.toJS())).set('currentRating', 0)))
       break
     case 'PLANMAKE_SETSELECTEDPLOT':
-      result = state.set('planState',state.get('planState').set('selectedPlot', action.plot))
+      result = state.set('planState',state.get('planState').set('selectedPlot', action.plot).set('startSurface', null))
       break
     case 'PLANMAKE_SELECTPRIORITY':
       result = state.set('planState', state.get('planState').set('selectedPriority', action.priority))
+      break
+    case 'PLANMAKE_SELECTSTARTSURFACE':
+      result = state.set('planState', state.get('planState').set('startSurface', action.surface))
       break
     case 'VOID_CURRENTPLAN':
       result = state.set('planState', state.get('planState').delete('currentPlan'))

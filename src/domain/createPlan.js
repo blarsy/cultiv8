@@ -3,7 +3,8 @@ import {
   find, sort,
   map, take, reverse,
   reduce, clone, max,
-  addIndex
+  addIndex, takeWhile, takeLastWhile,
+  concat
 } from 'ramda'
 import moment from 'moment'
 import { getNextRange, surfaceIsAvailableInPeriod, assignCulturesToSurfaces } from './planner'
@@ -210,7 +211,20 @@ export default input => {
   const currentPlanRatings = input.planState.currentPlan ? input.planState.currentPlan.ratings : []
   createdSuggestedCultures(rawData, currentPlanRatings)
   assignCulturesToSurfaces(rawData)
-  const surfaces = filter(surface => surface.plot === input.planState.selectedPlot, clone(rawData.surfaces))
+  const plotSurfaces = clone(filter(surface => surface.plot === input.planState.selectedPlot, rawData.surfaces))
+
+  let surfaces
+  if(input.planState.startSurface) {
+    surfaces = concat(
+      filter(surface => surface.id === input.planState.startSurface, plotSurfaces),
+      concat(
+        takeLastWhile(surface => surface.id !== input.planState.startSurface, plotSurfaces),
+        takeWhile(surface => surface.id !== input.planState.startSurface, plotSurfaces)
+      )
+    )
+  } else {
+    surfaces = plotSurfaces
+  }
 
   //Collect selected products
   const selections = []
@@ -292,7 +306,7 @@ export default input => {
   }, cultures)
   const result = {
     ratings,
-    surfaces
+    surfaces: plotSurfaces
   }
   if(input.planState.currentPlan) {
     result.currentRating = input.planState.currentPlan.currentRating

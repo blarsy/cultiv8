@@ -37,24 +37,20 @@ export const removeCulture = (state, cultureId) => {
 
 export const saveLogEntry = (state, logEntryData) => {
   const logEntriesList = new LogEntriesList(state.get('data').toJS())
-  const surfaces = map(surface => {
-    const split = surface.split('ùùù')
-    const plot = split[0]
-    const code = split[1]
-    return { plot, code }
-  }, logEntryData.linkedSurfaces)
 
   if(state.get('logState').get('editedEntry')) {
     logEntriesList.update(state.get('logState').get('editedEntry').get('id'),
       moment(logEntryData.date).format(),
       logEntryData.tags,
-      logEntryData.description, surfaces,
+      logEntryData.description,
+      logEntryData.linkedSurfaces,
       logEntryData.linkedPlots,
       logEntryData.linkedCultures || [])
   } else {
     logEntriesList.add(moment(logEntryData.date).format(),
       logEntryData.tags,
-      logEntryData.description, surfaces,
+      logEntryData.description,
+      logEntryData.linkedSurfaces,
       logEntryData.linkedPlots,
       logEntryData.linkedCultures || [])
   }

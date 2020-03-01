@@ -43,7 +43,7 @@ class LogEntriesDisplay extends React.Component {
             if(logEntry.surfaces && logEntry.surfaces.length >= 0) {
               return map(surfaceId => {
                 const surface = find(surface => surface.id === surfaceId, this.surfaces)
-                return surface.plot + ' ' + surface.code
+                return surface.plot + ' ' + surface.code + ', '
               }, logEntry.surfaces)
             }
           }

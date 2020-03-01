@@ -16,7 +16,7 @@ export default class TaskList {
   }
 
   removeCultureAutoTasks(cultureId) {
-    this.tasks = reject(task => task.cultureId === cultureId && includes(task.status, ['seed', 'plant', 'harvest', 'destroy']), this.tasks)
+    this.tasks = reject(task => task.cultureId === cultureId && includes(task.type, ['seed', 'plant', 'harvest', 'destroy']), this.tasks)
   }
 
   removeCultureTasks(cultureId) {
