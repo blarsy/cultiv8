@@ -43,9 +43,9 @@ export const fromSpreadsheet = file => (new Promise(resolve => {
       const workbook = XLSX.read(data, {type: 'array'})
 
       const result = {
-        soles: parseSheet(workbook, 'Soles', ['code','name','rotationIndex']),
-        surfaces: parseSheet(workbook, 'Surfaces de culture', ['plot','code']),
-        plots: parseSheet(workbook, 'Parcelles', ['code','name']),
+        //soles: parseSheet(workbook, 'Soles', ['code','name','rotationIndex']),
+        //surfaces: parseSheet(workbook, 'Surfaces de culture', ['plot','code']),
+        //plots: parseSheet(workbook, 'Parcelles', ['code','name']),
         products: parseSheet(workbook, 'Produits', [
           'name','family','greediness','productivity','unit','greenhouse','surfaceRatio',
           'surface','greenhouseSurface','sowMin','sowMax','growingDays','nurseryDays','harvestDays',

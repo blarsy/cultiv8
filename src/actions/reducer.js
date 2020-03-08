@@ -191,7 +191,10 @@ export default (state = initialState, action) => {
       const currentData = state.get('data') || fromJS({})
 
       const currentTotalSurface = getTotalSurface(state)
-      result = state.set('data', currentData.set('settings', fromJS({ totalSurface : action.data.totalSurface })))
+      const currentSettings = currentData.get('settings').toJS()
+      currentSettings.totalSurface = action.data.totalSurface
+
+      result = state.set('data', currentData.set('settings', fromJS(currentSettings)))
       if(currentTotalSurface !== action.data.totalSurface) {
         result = recalculateSurfaces(result)
       }

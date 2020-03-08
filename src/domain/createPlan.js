@@ -10,8 +10,6 @@ import moment from 'moment'
 import { getNextRange, surfaceIsAvailableInPeriod, assignCulturesToSurfaces } from './planner'
 import { nextId } from './data'
 
-// Standard unit of surfaces is 10 square meters
-const STANDARD_SURFACE = 10
 const SURFACE_UNAVAILABLE = -1
 
 const rateSurface = (surface, targetCulture) => {
@@ -84,8 +82,8 @@ const rateSurface = (surface, targetCulture) => {
   }
 }
 
-const createSuggestions = (contiguousSurfacesRatings, nbSuggestions, targetCulture) => {
-  const nbSurfaces = Math.round(targetCulture.targetSurface / STANDARD_SURFACE)
+const createSuggestions = (contiguousSurfacesRatings, nbSuggestions, targetCulture, surfaceSqMeters) => {
+  const nbSurfaces = Math.round(targetCulture.targetSurface / surfaceSqMeters)
   let nbPerfectMatches = 0
   const contiguousSets = []
   // First collect contiguous sets of surfaces
@@ -274,7 +272,7 @@ export default input => {
       }, surfaceRatings)
 
       //Create suggestions
-      const suggestions = createSuggestions(contiguousSurfacesRatings, 5, culture)
+      const suggestions = createSuggestions(contiguousSurfacesRatings, 5, culture, input.data.settings.totalSurface * 100 / input.data.surfaces.length)
 
       //Save suggestions & ratings
       rating = {

@@ -64,7 +64,7 @@ export default class CultureList {
         return 'implanté'
       case 3:
         return 'en récolte'
-      case 4:
+      case 100:
         return 'détruit'
       default:
     }
@@ -96,7 +96,7 @@ export default class CultureList {
       this.taskList.removeCultureAutoTasks(culture.id)
       // Harvesting
       this.taskList.add('destroy', moment(culture.plantDate).add(product.growingDays + product.harvestDays, 'days').toISOString(), culture.id)
-    } else if(status === 4){
+    } else if(status === 100){
       this.taskList.removeCultureAutoTasks(culture.id)
     }
     this.logEntriesList.add(today, ['Action'], `statuts passé en '${this.getStatusLabel(status)}'` , [], [], [culture.id])

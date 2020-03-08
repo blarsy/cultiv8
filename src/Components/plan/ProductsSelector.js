@@ -1,7 +1,9 @@
 import React from 'react'
+import moment from 'moment'
 import { connect } from 'react-redux'
-import { Checkbox } from '../../toolbox'
+import { forEach, find } from 'ramda'
 import styled from 'styled-components'
+import { Checkbox } from '../../toolbox'
 import Table from '../Table'
 
 const SurfaceInput = styled.input`
@@ -9,6 +11,20 @@ const SurfaceInput = styled.input`
 `
 
 class ProductsSelector extends React.Component {
+  constructor(props) {
+    super(props)
+    this.products = this.props.products.toJS()
+    this.cultures = this.props.cultures.toJS()
+    this.surfacePlannedForProducts = {}
+    const oneYearFromNow = moment().add(1, 'years')
+    forEach(culture => {
+      const product = find(product => product.name === culture.productName, this.products)
+      const harvestDate = moment(culture.plantDate).add(-product.nurseryDays + product.growingDays, 'days')
+      if(harvestDate.toDate() > moment() && harvestDate.toDate() < oneYearFromNow.toDate()) {
+        this.surfacePlannedForProducts[culture.productName] = (culture.surfaces.length * (props.totalSurface * 100 / props.surfaceCount)).toFixed()
+      }
+    }, this.cultures)
+  }
   toggleAllSelected(){
     this.props.dispatch({ type: 'PLANMAKE_TOGGLEALLPRODUCTS' })
   }
@@ -54,11 +70,18 @@ class ProductsSelector extends React.Component {
           type: 'number',
           value: product => product.surface
         },
-        content: product => ((planState.selections[product.name] && planState.selections[product.name].selected) ?
-          <SurfaceInput type="number"
-            value={planState.selections[product.name].surface.toFixed()}
-            onChange={e => this.setSurface(product.name, e.target.value)}/> :
-            product.surface.toFixed()),
+        content: product => {
+          const surfaceAlreadyPlanned = +this.surfacePlannedForProducts[product.name] || 0
+          let surfaceDisplay
+          if(planState.selections[product.name] && planState.selections[product.name].selected) {
+            surfaceDisplay = (<SurfaceInput type="number"
+              value={planState.selections[product.name].surface.toFixed()}
+              onChange={e => this.setSurface(product.name, e.target.value)}/>)
+          } else {
+            surfaceDisplay = product.surface.toFixed()
+          }
+          return (<span>{surfaceDisplay} ({surfaceAlreadyPlanned.toFixed()})</span>)
+        },
         flexProps: {
           isContainer: true,
           alignItems: 'center'
@@ -100,14 +123,17 @@ class ProductsSelector extends React.Component {
         }
       }
     ]
-    return (<Table data={this.props.products.toJS()} dataColumns={dataColumns} linePadding="0.25rem 0" />)
+    return (<Table data={this.products} dataColumns={dataColumns} linePadding="0.25rem 0" />)
   }
 }
 
 const mapStateToProps = state => {
   return {
     planState: state.global.get('planState'),
-    products: state.global.get('data').get('products')
+    products: state.global.get('data').get('products'),
+    cultures: state.global.get('data').get('cultures'),
+    totalSurface: state.global.get('data').get('settings').get('totalSurface'),
+    surfaceCount: state.global.get('data').get('surfaces').size
   }
 }
 

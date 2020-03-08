@@ -9,6 +9,7 @@ import MenuRoutes from '../MenuRoutes'
 const MenuButton = styled(Button)`
   background-color: ${props => props.selected ? '#5BB375': '#B5FFCB' };
   cursor: ${props => props.selected ? 'default': 'pointer' };
+  text-align: left;
   :active,:focus {
     box-shadow: ${props => props.selected ? '1px 0 3px 2px #9CFFB9': '1px 0 0 2px #9CFFB9' };
   }
