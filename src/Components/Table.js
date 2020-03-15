@@ -4,24 +4,26 @@ import { map, addIndex, sort } from 'ramda'
 import moment from 'moment'
 import styled from 'styled-components'
 import { FlexBlock } from './../toolbox'
+import constants from '../constants'
 
 const Cell = styled(FlexBlock)`
   padding: 0 0.25rem;
-  background-color: ${props => props.lineIndex % 2 !== 0 && '#B5FFCB'};
+  background-color: ${props => props.lineIndex % 2 !== 0 && constants.layout.primaryLight};
 `
 const HeaderCell = styled(FlexBlock)`
   padding: 0.25rem;
-  background-color: #B34A49;
-  color: #B5FFCB;
+  background-color: ${constants.layout.secundaryDark};
+  color: ${constants.layout.primaryLight};
   cursor: ${props => props.sortable && 'pointer'};
 `
 
 const Line = styled(FlexBlock)`
-  padding: ${props => props.padding}
+  padding: ${props => props.padding};
+  cursor: ${props => props.expandable && 'pointer'};
 `
 
 const TableBlock = styled(FlexBlock)`
- border: 1px solid #FF9C9C;
+ border: 1px solid ${constants.layout.secundaryLight};
  border-radius: 0.25rem;
 `
 
@@ -29,7 +31,7 @@ class Table extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = {}
+    this.state = { expanded: {}}
   }
 
   sort(colIndex) {
@@ -101,9 +103,12 @@ class Table extends React.Component {
           return compare(valA, valB)
         }, this.props.data)
       }
-      lines = addIndex(map)((data, lineIdx) => (<Line key={lineIdx} padding={this.props.linePadding} isContainer flexFlow="row nowrap">
-        { addIndex(map)((dataColumn, idx) => <Cell key={idx} justifyContent={dataColumn.alignRight && 'flex-end'} lineIndex={lineIdx} flex={dataColumn.flex} isContainer { ...dataColumn.flexProps }>{dataColumn.content(data)}</Cell>, this.props.dataColumns) }
-      </ Line>), dataToDisplay)
+      lines = addIndex(map)((data, lineIdx) => (<Line expandable={this.props.detailedContent} onClick={() => this.setState({ expanded: {[lineIdx]: !this.state.expanded[lineIdx]} })} isContainer key={lineIdx} flexFlow="column">
+          <FlexBlock padding={this.props.linePadding} isContainer flexFlow="row nowrap">
+            { addIndex(map)((dataColumn, idx) => <Cell key={idx} justifyContent={dataColumn.alignRight && 'flex-end'}  alignItems="center" lineIndex={lineIdx} flex={dataColumn.flex} isContainer { ...dataColumn.flexProps }>{dataColumn.content(data)}</Cell>, this.props.dataColumns) }
+          </ FlexBlock>
+          { this.props.detailedContent && this.state.expanded[lineIdx] && (<Cell key={this.props.dataColumns.length} lineIndex={lineIdx}>{this.props.detailedContent(data)}</Cell>)}
+        </Line>), dataToDisplay)
     }
     return (<TableBlock overflow="auto" isContainer flexFlow="column">
       {header}
@@ -116,8 +121,9 @@ Table.propTypes = {
   dataColumns: PropTypes.arrayOf(PropTypes.shape({
     ratio: PropTypes.string,
     content: PropTypes.func,
-    title: PropTypes.string
+    title: PropTypes.string,
   })),
+  detailedContent: PropTypes.func,
   data: PropTypes.arrayOf(PropTypes.object),
   linePadding: PropTypes.string
 }

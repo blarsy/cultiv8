@@ -44,7 +44,7 @@ class CulturesDisplay extends React.Component {
         }
       ]
     }
-    return (<SearchResultsDisplay searchResults={searchResults} />)
+    return (<SearchResultsDisplay detailedContent={ culture => culture.statusHistory ? map(historyLine => (<p>{ moment(historyLine.date).format('L') + ': ' + find(option => option.value === historyLine.status, statussesOptions).label }</p>), culture.statusHistory) : 'Pas d\'info' } searchResults={searchResults} />)
   }
 }
 

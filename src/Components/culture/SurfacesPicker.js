@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 import Select from 'react-select'
 import styled from 'styled-components'
 import { Button, FlexBlock } from '../../toolbox'
+import constants from '../../constants'
 
 const TinyButton = styled.button`
   padding: 0 0 0 0.25rem;
@@ -14,13 +15,13 @@ const TinyButton = styled.button`
 
 const AddButton = styled.input`
   border-radius: 0.1rem;
-  background-color: #B5FFCB;
-  border: 1px solid #5BB375;
-  color: #B34A49;
+  background-color: ${constants.layout.primaryLight};
+  border: 1px solid ${constants.layout.primaryDark};
+  color: ${constants.layout.secundaryDark};
   padding: 0.25rem;
   cursor: pointer;
   :active,:focus {
-    box-shadow: 1px 0 3px 2px #5BB375;
+    box-shadow: 1px 0 3px 2px ${constants.layout.primaryDark};
     outline: 0;
   }
 `

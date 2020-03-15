@@ -4,7 +4,9 @@ import { connect } from 'react-redux'
 import moment from 'moment'
 import { find, sort } from 'ramda'
 import styled from 'styled-components'
+import { push } from 'react-router-redux'
 import Table from './Table'
+import { Button } from '../toolbox'
 
 const getDelayColor = days => {
   if(days === 0) return 'inherit'
@@ -35,12 +37,25 @@ class Workfeed extends React.Component {
   render() {
     const cols = [
       {
+        title: 'Actions',
+        flex: '1',
+        flexProps: {
+          justifyContent: 'space-around',
+          alignItems: 'center'
+        },
+        noSort: true,
+        content: task => <Button key="pencil" icon="pencil" onClick={() => {
+          this.props.dispatch({ type: 'BEGIN_EDIT_CULTURE', data: find(culture => culture.id === task.cultureId, this.data.cultures) })
+          this.props.dispatch(push('/cultures'))
+        }} />
+      },
+      {
         title: 'Date',
         sort: {
           value: task => task.date,
           type: 'date'
         },
-        flex: '1',
+        flex: '2',
         content: task => <span>{moment(task.date).format('L')} <Delay days={moment(task.date).diff(moment(), 'days')}>{moment(task.date).diff(moment(), 'days')}</Delay></span>
       },
       {
@@ -50,7 +65,7 @@ class Workfeed extends React.Component {
       },
       {
         title: 'Culture',
-        flex: '2',
+        flex: '3',
         content: task => {
           const culture = find(culture => culture.id === task.cultureId, this.data.cultures)
           const product = find(product => product.name === culture.productName, this.data.products)

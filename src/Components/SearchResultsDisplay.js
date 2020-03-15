@@ -24,7 +24,7 @@ class SearchResultsDisplay extends React.Component {
       ...this.props.searchResults.dataColumns
     ]
 
-    return (<Table data={data} dataColumns={dataColumns}/>)
+    return (<Table data={data} detailedContent={this.props.detailedContent} dataColumns={dataColumns}/>)
   }
 }
 
@@ -32,8 +32,9 @@ SearchResultsDisplay.propTypes = {
   searchResults: PropTypes.shape({
     dataColumns: PropTypes.arrayOf(PropTypes.shape({
       ratio: PropTypes.string,
-      content: PropTypes.func
+      content: PropTypes.func,
     })),
+    detailedContent: PropTypes.func,
     data: PropTypes.arrayOf(PropTypes.object),
     removeActionName: PropTypes.string,
     editActionName: PropTypes.string
