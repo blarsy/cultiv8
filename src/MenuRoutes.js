@@ -1,4 +1,4 @@
-export default[
+export default [
   { path: '/home', caption: 'Aujourd\'hui', icon:'home' },
   { path: '/cultures', caption: 'Semis/plantation', icon: 'signpost' },
   { path: '/grounds', caption: 'Terrains', icon:'flag' },

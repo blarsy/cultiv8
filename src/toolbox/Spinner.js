@@ -1,10 +1,20 @@
-import React from 'react'
+import React, { Component } from 'react'
 import styled from 'styled-components'
+import PropTypes from 'prop-types'
 import spinner from '../spinner.gif'
 
-const Spinner = styled.img`
-  height: 1rem;
-  width: 1rem;
+const SpinnerImage = styled.img`
+  height: ${props => props.size || 1}rem;
+  width: ${props => props.size || 1}rem;
   `
 
-export default () => <Spinner src={spinner} alt="spinner" />
+class Spinner extends Component {
+  render() {
+    return (<SpinnerImage src={spinner} size={this.props.size} alt="spinner" />)
+  }
+}
+Spinner.propTypes = {
+  size: PropTypes.number
+}
+
+export default Spinner

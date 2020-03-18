@@ -35,6 +35,20 @@ class Workfeed extends React.Component {
   }
 
   render() {
+    const captionFromTaskType = type => {
+      switch(type) {
+        case 'seed':
+          return 'Semer'
+        case 'plant':
+          return 'Implanter'
+        case 'harvest':
+          return 'Récolter'
+        case 'destroy':
+          return 'Détruire'
+        default:
+          throw new Error('Bad Type')
+      }
+    }
     const cols = [
       {
         title: 'Actions',
@@ -61,7 +75,7 @@ class Workfeed extends React.Component {
       {
         title: 'Tâche',
         flex: '1',
-        content: task => task.type
+        content: task => captionFromTaskType(task.type)
       },
       {
         title: 'Culture',

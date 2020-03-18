@@ -36,12 +36,13 @@ export default class CultureList {
 
   update(id, productName, status, plantDate, surfaces) {
     const cultureToUpdate = find(culture => culture.id === id, this.cultures)
+    const previousStatus = cultureToUpdate.status
     cultureToUpdate.productName = productName
     cultureToUpdate.status = status
     cultureToUpdate.plantDate = plantDate
     cultureToUpdate.surfaces = surfaces
 
-    this.processStatusChange(cultureToUpdate)
+    if(previousStatus !== status) this.processStatusChange(cultureToUpdate)
   }
 
   remove(id) {

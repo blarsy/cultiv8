@@ -11,7 +11,7 @@ import reducer from './actions/reducer'
 import registerServiceWorker from './registerServiceWorker'
 import { createLogger } from 'redux-logger'
 import sagas from './actions/sagas'
-import createHistory from 'history/createBrowserHistory'
+import { createBrowserHistory } from 'history'
 import {
   ConnectedRouter,
   routerReducer,
@@ -20,7 +20,7 @@ import {
 import moment from 'moment'
 import 'moment/locale/fr'
 
-const history = createHistory()
+const history = createBrowserHistory()
 
 const configureStore = () => {
   const middlewares = []
