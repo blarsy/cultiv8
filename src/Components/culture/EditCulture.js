@@ -94,7 +94,7 @@ class EditCulture extends React.Component {
   render() {
     return (
       <FlexBlock>
-        { this.props.cultureState.get('editedCulture') && <SpecialOps culture={this.props.cultureState.get('editedCulture').toJS()} />}
+        { this.props.cultureState.get('editedCulture') && <SpecialOps onOperationDone={() => this.props.onOperationDone()} culture={this.props.cultureState.get('editedCulture').toJS()} />}
         <ValidatedForm
           margin="10%"
           getState={() => this.state}
@@ -115,7 +115,8 @@ class EditCulture extends React.Component {
 }
 
 EditCulture.propTypes = {
-  onEditDone: PropTypes.func
+  onEditDone: PropTypes.func,
+  onOperationDone: PropTypes.func
 }
 
 const mapStateToProps = state => ({

@@ -27,24 +27,28 @@ export default class CultureList {
       id: newId,
       productName,
       status,
-      plantDate,
+      plantDate: moment(plantDate).toISOString(),
       surfaces
     }
     this.cultures.push(culture)
 
-    this.processStatusChange(culture, statusChangeDate || moment(new Date(new Date().setHours(0,0,0,0))).toISOString())
+    this.processStatusChange(culture, statusChangeDate || moment(new Date(new Date().setHours(0,0,0,0))))
     return newId
   }
 
   update(id, productName, status, plantDate, surfaces, statusChangeDate) {
     const cultureToUpdate = find(culture => culture.id === id, this.cultures)
     const previousStatus = cultureToUpdate.status
+    const previousPlantDate = cultureToUpdate.plantDate
     if(productName) cultureToUpdate.productName = productName
     cultureToUpdate.status = status
-    if(plantDate) cultureToUpdate.plantDate = plantDate
+    if(plantDate) cultureToUpdate.plantDate = moment(plantDate).toISOString()
     if(surfaces && surfaces.length > 0) cultureToUpdate.surfaces = surfaces
 
-    if(previousStatus !== status) this.processStatusChange(cultureToUpdate, statusChangeDate || moment(new Date(new Date().setHours(0,0,0,0))).toISOString())
+    if(previousStatus !== status) this.processStatusChange(cultureToUpdate, statusChangeDate || moment(new Date(new Date().setHours(0,0,0,0))))
+    else if(!moment(plantDate).isSame(previousPlantDate)) {
+      this.recalculateTasks(cultureToUpdate)
+    }
   }
 
   remove(id) {
@@ -73,15 +77,14 @@ export default class CultureList {
     }
   }
 
-  processStatusChange(culture, changeDate) {
+  recalculateTasks(culture) {
     const product = this.productFromName(culture.productName)
     const status = culture.status
-    if(!culture.statusHistory) culture.statusHistory = [{date: changeDate, status: culture.status}]
-    else culture.statusHistory.push({date: changeDate, status: culture.status})
 
     if(status === 0) {
+      this.taskList.removeCultureAutoTasks(culture.id)
       // Planned
-      this.taskList.add('seed',max(moment(culture.plantDate).add(-product.nurseryDays, 'days'), new Date(new Date().setHours(0,0,0,0))),culture.id)
+      this.taskList.add('seed',max(moment(culture.plantDate).add(-product.nurseryDays, 'days').toISOString(), new Date(new Date().setHours(0,0,0,0))),culture.id)
     } else if(status === 1) {
       this.taskList.removeCultureAutoTasks(culture.id)
       // Sown
@@ -101,8 +104,26 @@ export default class CultureList {
     } else if(status === 100){
       this.taskList.removeCultureAutoTasks(culture.id)
     }
-    this.logEntriesList.add(moment(changeDate).toISOString(), ['Action'], `statuts passé en '${this.getStatusLabel(status)}'` , [], [], [culture.id])
+  }
 
+  processStatusChange(culture, changeDate) {
+    const product = this.productFromName(culture.productName)
+    const formattedChangedDate = moment(changeDate).toISOString()
+    if(product.nurseryDays === 0) {
+      if(culture.status === 1 || culture.status === 2) {
+        culture.plantDate = formattedChangedDate
+      }
+    } else {
+      if(culture.status === 2) {
+        culture.plantDate = formattedChangedDate
+      }
+    }
+    if(!culture.statusHistory) culture.statusHistory = [{date: formattedChangedDate, status: culture.status}]
+    else culture.statusHistory.push({date: formattedChangedDate, status: culture.status})
+
+    this.recalculateTasks(culture)
+
+    this.logEntriesList.add(formattedChangedDate, ['Action'], `statuts passé en '${this.getStatusLabel(culture.status)}'` , [], [], [culture.id])
   }
 
   splitByStatus(cultureId, surfaces, targetStatus, switchDate) {

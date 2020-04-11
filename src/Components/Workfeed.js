@@ -58,10 +58,13 @@ class Workfeed extends React.Component {
           alignItems: 'center'
         },
         noSort: true,
-        content: task => <Button key="pencil" icon="pencil" onClick={() => {
-          this.props.dispatch({ type: 'BEGIN_EDIT_CULTURE', data: find(culture => culture.id === task.cultureId, this.data.cultures) })
-          this.props.dispatch(push('/cultures'))
-        }} />
+        content: task => [
+          (<Button key="pencil" icon="pencil" onClick={() => {
+            this.props.dispatch({ type: 'BEGIN_EDIT_CULTURE', data: find(culture => culture.id === task.cultureId, this.data.cultures) })
+            this.props.dispatch(push('/cultures'))
+          }} />),
+          (<Button key="trash" icon="trash" onClick={() => this.props.dispatch({ type: 'REMOVE_TASK', task })} />)
+        ]
       },
       {
         title: 'Date',

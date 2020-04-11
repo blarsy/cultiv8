@@ -85,8 +85,9 @@ class SpecialOps extends React.Component {
             date: this.state.switchDate,
             remark: this.state.remark
           })
-          this.setState({ switchToStatus: null })}
-        }
+          this.setState({ switchToStatus: null })
+          this.props.onOperationDone()
+        }}
         actionLabel={actionLabel}
         title={title}
         error={this.state.error} />)
@@ -129,7 +130,8 @@ SpecialOps.propTypes = {
     productName: PropTypes.string,
     surfaces: PropTypes.arrayOf(PropTypes.number),
     status: PropTypes.number
-  })
+  }),
+  onOperationDone: PropTypes.func
 }
 
 const mapStateToProps = state => ({

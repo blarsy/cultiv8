@@ -9,7 +9,9 @@ class Culture extends React.Component {
     let content, button
     if (editing) {
       button = (<Button onClick={() => this.props.dispatch({ type: 'TOGGLE_CULTURE_EDITION' })}>Retour</Button>)
-      content = (<EditCulture onEditDone={data => this.props.dispatch({ type: 'SAVE_CULTURE', data })}/>)
+      content = (<EditCulture
+        onEditDone={data => this.props.dispatch({ type: 'SAVE_CULTURE', data })}
+        onOperationDone={() => this.props.dispatch({ type: 'TOGGLE_CULTURE_EDITION' })} />)
     } else {
       button = (<Button onClick={() => this.props.dispatch({ type: 'TOGGLE_CULTURE_EDITION' })}>Ajouter</Button>)
       content = (<FlexBlock isContainer flexFlow="column" alignItems="stretch">
