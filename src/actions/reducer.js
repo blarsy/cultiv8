@@ -7,7 +7,7 @@ import { setStateRight, searchLog,
   searchCulture, searchProduct,
   saveCulture, removeCulture, saveLogEntry,
   saveProduct, recalculateSurfaces,
-  getTotalSurface, adoptPlan
+  getTotalSurface, adoptPlan, switchCultureState
 } from './stateTransformers'
 
 const persistedState = localStorage.getItem('state')
@@ -257,6 +257,9 @@ export default (state = initialState, action) => {
         result = state
           .set('groundsState', state.get('groundsState').set('editingSurface', !state.get('groundsState').get('editingSurface')))
       }
+      break
+    case 'SWITCHSTATUS_CULTURE':
+      result = switchCultureState(action.targetStatus, action.culture, action.date, action.surfaces, action.remark, state)
       break
     default:
   }

@@ -64,7 +64,8 @@ export const getDestructionDate = culture => {
   return destructionDate
 }
 
-export const cultureIsActive = (date, culture) => {
+export const cultureIsActive = (date, culture, surface) => {
+  //if(any(freedSurface => surface.id === freedSurface.id , culture.freedSurfaces)) return false
   const primitiveDate = moment(date)
   const plantDate = moment(culture.plantDate)
   const destructionDate = getDestructionDate(culture)

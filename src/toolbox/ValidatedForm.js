@@ -1,10 +1,11 @@
 import React from 'react'
 import styled from 'styled-components'
 import PropTypes from 'prop-types'
+import { propEq, find } from 'ramda'
 import { Button } from '../toolbox'
 import { isFormValid, setInputValidity } from './FormValidation'
 import Input from './Input'
-import R from 'ramda'
+import { BlockTitle } from '../StyleLibrary'
 
 const Form = styled.form`
   display: flex;
@@ -17,11 +18,6 @@ const FormBlock = styled.article`
   flex-direction: column;
   margin: 0 0 1rem;
   align-items: ${props => props.align || 'stretch'};
-`
-const Title = styled.p`
-  text-align: center;
-  margin: 0;
-  font-size: 16pt;
 `
 
 const ValidationError = styled.p`
@@ -36,7 +32,7 @@ class ValidatedForm extends React.Component {
   }
 
   setInputValidity(input, isValid) {
-    const found = R.find(R.propEq('input', input), this.inputs)
+    const found = find(propEq('input', input), this.inputs)
 
     if (found) {
       found.isValid = isValid
@@ -54,7 +50,7 @@ class ValidatedForm extends React.Component {
           this.props.onSubmit(e)
         }}
       >
-        <Title>{this.props.title}</Title>
+        <BlockTitle>{this.props.title}</BlockTitle>
         {this.props.inputs.map(input => {
           const state = this.props.getState()
           if (

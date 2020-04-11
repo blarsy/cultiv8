@@ -1,4 +1,4 @@
-import { find, filter, reject, any } from 'ramda'
+import { find, filter, reject, any, forEach } from 'ramda'
 import { nextId } from './data'
 
 export default class LogEntriesList {
@@ -30,6 +30,10 @@ export default class LogEntriesList {
     }
     this.addTags(tags)
     this.log.push(logEntry)
+  }
+
+  linkEntriesToSplitCulture(originalCultureId, newCultureId) {
+    forEach(logEntry => logEntry.cultures.push(newCultureId), filter(logEntry => any(logCulture => logCulture === originalCultureId, logEntry.cultures), this.log))
   }
 
   update(id, date, tags, description, surfaces, plots, cultures) {

@@ -336,3 +336,20 @@ export const adoptPlan = (state) => {
   }, plan.ratings)
   return cultureList.data()
 }
+
+export const switchCultureState = (targetStatus, cultureId, date, surfaces, remark, state) => {
+  const stateData = state.get('data').toJS()
+  const cultureList = new CultureList(stateData)
+  const logEntriesList = new LogEntriesList(stateData)
+  if(!surfaces || surfaces.length === 0) {
+    cultureList.update(cultureId, null, targetStatus, null, surfaces, date)
+    if(remark){
+      const cultureSurfaces = find(culture => culture.id === cultureId, stateData.cultures).surfaces
+      logEntriesList.add(date, ['Remarque'], remark, cultureSurfaces, [], [cultureId])
+    }
+  } else {
+    const newCultureId = cultureList.splitByStatus(cultureId, surfaces, targetStatus, date)
+    if(remark) logEntriesList.add(date, ['Remarque'], remark, surfaces, [], [newCultureId])
+  }
+  return state.set('data', merge(state.get('data'), fromJS(cultureList.data())))
+}

@@ -4,9 +4,10 @@ import { sort, map, forEach, find } from 'ramda'
 import { connect } from 'react-redux'
 import moment from 'moment'
 import { fromJS } from 'immutable'
-import { ValidatedForm, getInitialState } from '../../toolbox'
+import { FlexBlock, ValidatedForm, getInitialState } from '../../toolbox'
 import { surfaceIsAvailableForCulture } from '../../domain/planner'
 import { statussesOptions } from './common'
+import SpecialOps from './SpecialOps'
 
 class EditCulture extends React.Component {
   constructor(props) {
@@ -92,20 +93,23 @@ class EditCulture extends React.Component {
 
   render() {
     return (
-      <ValidatedForm
-        margin="10%"
-        getState={() => this.state}
-        setState={state => this.setState(state)}
-        inputs={this.inputs}
-        onSubmit={() => {
-          if(this.validateCulture()) {
-            this.props.onEditDone(this.state)
-          }
-        }}
-        actionLabel="Ok"
-        title="Edition culture"
-        error={this.state.error}
-      />
+      <FlexBlock>
+        { this.props.cultureState.get('editedCulture') && <SpecialOps culture={this.props.cultureState.get('editedCulture').toJS()} />}
+        <ValidatedForm
+          margin="10%"
+          getState={() => this.state}
+          setState={state => this.setState(state)}
+          inputs={this.inputs}
+          onSubmit={() => {
+            if(this.validateCulture()) {
+              this.props.onEditDone(this.state)
+            }
+          }}
+          actionLabel="Ok"
+          title="Edition culture"
+          error={this.state.error}
+        />
+      </FlexBlock>
     )
   }
 }

@@ -1,4 +1,4 @@
-import { find, filter, max } from 'ramda'
+import { find, filter, max, reject, any } from 'ramda'
 import moment from 'moment'
 import TaskList from './TaskList'
 import LogEntriesList from './LogEntriesList'
@@ -21,9 +21,10 @@ export default class CultureList {
     }
   }
 
-  add(productName, status, plantDate, surfaces) {
+  add(productName, status, plantDate, surfaces, statusChangeDate) {
+    const newId = nextId(this.cultures)
     const culture = {
-      id: nextId(this.cultures),
+      id: newId,
       productName,
       status,
       plantDate,
@@ -31,18 +32,19 @@ export default class CultureList {
     }
     this.cultures.push(culture)
 
-    this.processStatusChange(culture)
+    this.processStatusChange(culture, statusChangeDate || moment(new Date(new Date().setHours(0,0,0,0))).toISOString())
+    return newId
   }
 
-  update(id, productName, status, plantDate, surfaces) {
+  update(id, productName, status, plantDate, surfaces, statusChangeDate) {
     const cultureToUpdate = find(culture => culture.id === id, this.cultures)
     const previousStatus = cultureToUpdate.status
-    cultureToUpdate.productName = productName
+    if(productName) cultureToUpdate.productName = productName
     cultureToUpdate.status = status
-    cultureToUpdate.plantDate = plantDate
-    cultureToUpdate.surfaces = surfaces
+    if(plantDate) cultureToUpdate.plantDate = plantDate
+    if(surfaces && surfaces.length > 0) cultureToUpdate.surfaces = surfaces
 
-    if(previousStatus !== status) this.processStatusChange(cultureToUpdate)
+    if(previousStatus !== status) this.processStatusChange(cultureToUpdate, statusChangeDate || moment(new Date(new Date().setHours(0,0,0,0))).toISOString())
   }
 
   remove(id) {
@@ -71,12 +73,11 @@ export default class CultureList {
     }
   }
 
-  processStatusChange(culture) {
+  processStatusChange(culture, changeDate) {
     const product = this.productFromName(culture.productName)
-    const today = moment(new Date(new Date().setHours(0,0,0,0))).toISOString()
     const status = culture.status
-    if(!culture.statusHistory) culture.statusHistory = [{date: today, status: culture.status}]
-    else culture.statusHistory.push({date: today, status: culture.status})
+    if(!culture.statusHistory) culture.statusHistory = [{date: changeDate, status: culture.status}]
+    else culture.statusHistory.push({date: changeDate, status: culture.status})
 
     if(status === 0) {
       // Planned
@@ -100,7 +101,27 @@ export default class CultureList {
     } else if(status === 100){
       this.taskList.removeCultureAutoTasks(culture.id)
     }
-    this.logEntriesList.add(today, ['Action'], `statuts passé en '${this.getStatusLabel(status)}'` , [], [], [culture.id])
+    this.logEntriesList.add(moment(changeDate).toISOString(), ['Action'], `statuts passé en '${this.getStatusLabel(status)}'` , [], [], [culture.id])
 
+  }
+
+  splitByStatus(cultureId, surfaces, targetStatus, switchDate) {
+    // As the switch applies only to some of the surfaces assigned to the culture,
+    // we must create a new culture with only the concened surfaces, and unassign
+    // those from the original culture
+    const originalCulture = find(culture => culture.id === cultureId, this.cultures)
+    originalCulture.surfaces = reject(surface => any(newCultureSurface => surface === newCultureSurface, surfaces), originalCulture.surfaces)
+
+    const newCultureId = this.add(
+      originalCulture.productName,
+      targetStatus,
+      originalCulture.plantDate,
+      surfaces,
+      switchDate
+    )
+
+    this.logEntriesList.linkEntriesToSplitCulture(originalCulture.id, newCultureId)
+
+    return newCultureId
   }
 }
