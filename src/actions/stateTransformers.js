@@ -305,6 +305,17 @@ const upgradeState = state => {
     result = result.set('data', result.get('data').merge({ settings: updatedSettings, surfaces: fromJS(indexedSurfaces), cultures: fromJS(cultures), log: fromJS(logEntries) }))
   }
 
+  if(currentSchemeVersion < 3) {
+    const cultures = state.get('data').get('cultures').toJS()
+    const cultureList = new CultureList(state.get('data').toJS())
+    forEach(culture => {
+      cultureList.recalculateTasks(culture)
+    }, cultures)
+
+    const updatedSettings = state.get('data').get('settings').set('dataschemeVersion', '3')
+    result = result.set('data', result.get('data').merge({ settings: updatedSettings}).merge(fromJS(cultureList.data())))
+  }
+
   return result
 }
 

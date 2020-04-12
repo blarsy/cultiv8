@@ -1,4 +1,4 @@
-import { find, filter, max, reject, any } from 'ramda'
+import { find, filter, max, reject, any, reverse } from 'ramda'
 import moment from 'moment'
 import TaskList from './TaskList'
 import LogEntriesList from './LogEntriesList'
@@ -80,27 +80,29 @@ export default class CultureList {
   recalculateTasks(culture) {
     const product = this.productFromName(culture.productName)
     const status = culture.status
+    const baseDate = culture.statusHistory && culture.statusHistory.length > 1 ?
+      find(statusSwitch => statusSwitch.status === status, reverse(culture.statusHistory)).date :
+      culture.plantDate
 
     if(status === 0) {
-      this.taskList.removeCultureAutoTasks(culture.id)
       // Planned
       this.taskList.add('seed',max(moment(culture.plantDate).add(-product.nurseryDays, 'days').toISOString(), new Date(new Date().setHours(0,0,0,0))),culture.id)
     } else if(status === 1) {
       this.taskList.removeCultureAutoTasks(culture.id)
       // Sown
       if(product.nurseryDays > 0) {
-        this.taskList.add('plant', moment(culture.plantDate).add(product.nurseryDays, 'days').toISOString(), culture.id)
+        this.taskList.add('plant', moment(baseDate).add(product.nurseryDays, 'days').toISOString(), culture.id)
       } else {
-        this.taskList.add('harvest', moment(culture.plantDate).add(product.growingDays, 'days').toISOString(), culture.id)
+        this.taskList.add('harvest', moment(baseDate).add(product.growingDays, 'days').toISOString(), culture.id)
       }
     } else if(status === 2) {
       this.taskList.removeCultureAutoTasks(culture.id)
       // Planted
-      this.taskList.add('harvest', moment(culture.plantDate).add(product.growingDays, 'days').toISOString(), culture.id)
+      this.taskList.add('harvest', moment(baseDate).add(product.growingDays, 'days').toISOString(), culture.id)
     } else if(status === 3){
       this.taskList.removeCultureAutoTasks(culture.id)
       // Harvesting
-      this.taskList.add('destroy', moment(culture.plantDate).add(product.growingDays + product.harvestDays, 'days').toISOString(), culture.id)
+      this.taskList.add('destroy', moment(baseDate).add(product.harvestDays, 'days').toISOString(), culture.id)
     } else if(status === 100){
       this.taskList.removeCultureAutoTasks(culture.id)
     }
