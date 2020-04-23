@@ -6,7 +6,8 @@ import { find, sort } from 'ramda'
 import styled from 'styled-components'
 import { push } from 'react-router-redux'
 import Table from './Table'
-import { Button } from '../toolbox'
+import { Button, FlexBlock} from '../toolbox'
+import RescheduleTask from './task/RescheduleTask'
 
 const getDelayColor = days => {
   if(days === 0) return 'inherit'
@@ -28,13 +29,14 @@ class Workfeed extends React.Component {
     super(props)
     this.data = {
       cultures: this.props.data.get('cultures') ? this.props.data.get('cultures').toJS() : [],
-      products: this.props.data.get('products') ? this.props.data.get('products').toJS() : [],
-      tasks: this.props.data.get('tasks') ? this.props.data.get('tasks').toJS() : [],
+      products: this.props.data.get('products') ? this.props.data.get('products').toJS() : []
     }
-    this.tasks = sort((a, b) => a.date.localeCompare(b.date), this.data.tasks)
+
+    this.state = {}
   }
 
   render() {
+    const tasks = this.props.data.get('tasks') ? sort((a, b) => a.date.localeCompare(b.date), this.props.data.get('tasks').toJS()) : []
     const captionFromTaskType = type => {
       switch(type) {
         case 'seed':
@@ -63,7 +65,7 @@ class Workfeed extends React.Component {
             this.props.dispatch({ type: 'BEGIN_EDIT_CULTURE', data: find(culture => culture.id === task.cultureId, this.data.cultures) })
             this.props.dispatch(push('/cultures'))
           }} />),
-          (<Button key="reschedule" icon="clock" onClick={() => this.props.dispatch({ type: 'RESCHEDULE_TASK', task })} />)
+          (<Button key="reschedule" icon="clock" onClick={() => this.setState({ reschedulingTask : task })} />)
         ]
       },
       {
@@ -91,7 +93,17 @@ class Workfeed extends React.Component {
       }
     ]
 
-    return (<Table data={this.tasks} dataColumns={cols} />)
+    if(this.state.reschedulingTask) {
+      return (<FlexBlock>
+        <Button icon="chevron-left" onClick={() => this.setState({ reschedulingTask : null })}>Retour</Button>
+        <RescheduleTask initialDate={this.state.reschedulingTask.date} onDateModified={newDate => {
+          this.props.dispatch({ type: 'RESCHEDULE_TASK', newDate, task: this.state.reschedulingTask.id })
+          this.setState({ reschedulingTask : null })}
+        }/>
+      </FlexBlock>)
+    } else {
+      return (<Table data={tasks} dataColumns={cols} />)
+    }
   }
 }
 

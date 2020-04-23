@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Button, FlexBlock } from '../toolbox'
-import { ProductSearch, ProductsDisplay, DataContent, EditProduct } from '../Components'
+import { ProductSearch, ProductsDisplay, DataContent, EditProduct, EditProductFollowUp } from '../Components'
 
 class Product extends React.Component {
   render() {
@@ -9,6 +9,9 @@ class Product extends React.Component {
     if(this.props.state.get('editing')) {
       button = (<Button onClick={() => this.props.dispatch({ type: 'TOGGLE_PRODUCT_CREATION' })} icon="chevron-left">Retour</Button>)
       content = (<EditProduct onEditDone={ data => this.props.dispatch({ type: 'SAVE_PRODUCT', data })  }/>)
+    } else if (this.props.state.get('editingFollowUp')){
+      button = (<Button onClick={() => this.props.dispatch({ type: 'END_EDIT_FOLLOWUP'})} icon="chevron-left">Retour</Button>)
+      content = (<EditProductFollowUp />)
     } else {
       button = (<Button onClick={() => this.props.dispatch({ type: 'TOGGLE_PRODUCT_CREATION' })} icon="plus">Ajouter</Button>)
       content = (<FlexBlock isContainer flexFlow="column" alignItems="stretch">

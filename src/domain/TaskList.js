@@ -1,18 +1,20 @@
-import { reject, includes } from 'ramda'
+import { reject, includes, find } from 'ramda'
 import moment from 'moment'
+import { nextId } from './data'
 
 export default class TaskList {
   constructor(data) {
     this.tasks = data.tasks || []
   }
 
-  tasks() {
-    return this.tasks
+  reschedule(id, newDate) {
+    const taskToReschedule = find(task => task.id === id, this.tasks)
+    taskToReschedule.date = moment(newDate).toISOString()
   }
 
   add(type, date, cultureId) {
     this.removeCultureAutoTasks(cultureId)
-    this.tasks.push({ type, date, cultureId, creation: moment().toISOString() })
+    this.tasks.push({ id: nextId(this.tasks), type, date, cultureId, creation: moment().toISOString() })
   }
 
   removeCultureAutoTasks(cultureId) {

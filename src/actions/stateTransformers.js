@@ -1,7 +1,8 @@
 import { fromJS, merge } from 'immutable'
 import { addIndex, forEach, any, map, filter, includes, find, reduce } from 'ramda'
 import moment from 'moment'
-import { CultureList, LogEntriesList } from '../domain'
+import { CultureList, LogEntriesList, TaskList } from '../domain'
+import { nextId } from './../domain/data'
 
 const DEFAULT_TOTAL_SURFACE = 10
 
@@ -201,7 +202,7 @@ export const searchProduct = (state, searchData) => {
     }
 
     if(searchData.families && searchData.families.length) {
-      filters.push(product => any(family => product.family === family.label, searchData.families))
+      filters.push(product => any(family => product.family === family, searchData.families))
     }
 
     if(searchData.greedinesses && searchData.greedinesses.length) {
@@ -316,6 +317,14 @@ const upgradeState = state => {
     result = result.set('data', result.get('data').merge({ settings: updatedSettings}).merge(fromJS(cultureList.data())))
   }
 
+  if(currentSchemeVersion < 4) {
+    const tasks = state.get('data').get('tasks').toJS()
+    forEach(task => task.id = nextId(tasks), tasks)
+
+    const updatedSettings = state.get('data').get('settings').set('dataschemeVersion', '4')
+    result = result.set('data', result.get('data').merge({ settings: updatedSettings}).merge(fromJS({ tasks })))
+  }
+
   return result
 }
 
@@ -363,4 +372,10 @@ export const switchCultureState = (targetStatus, cultureId, date, surfaces, rema
     if(remark) logEntriesList.add(date, ['Remarque'], remark, surfaces, [], [newCultureId])
   }
   return state.set('data', merge(state.get('data'), fromJS(cultureList.data())))
+}
+
+export const rescheduleTask = (taskId, newDate, state) => {
+  const taskList = new TaskList(state.get('data').toJS())
+  taskList.reschedule(taskId, newDate)
+  return state.set('data', merge(state.get('data'), fromJS({ tasks: taskList.tasks })))
 }

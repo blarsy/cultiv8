@@ -8,11 +8,16 @@ class SearchForm extends React.Component {
     if(this.props.globalState.get(this.props.formState) && this.props.globalState.get(this.props.formState).get('lastSearchData'))
       this.props.setState(this.props.globalState.get(this.props.formState).get('lastSearchData').toJS())
   }
+
+  triggerSearch() {
+    this.props.dispatch({ type: this.props.actionName, data: this.props.searchData})
+  }
+
   render() {
-    return (<FlexBlock isContainer flexFlow="row wrap">
+    return (<FlexBlock isContainer flexFlow="row wrap" onKeyUp={e => { if(e.keyCode === 13) { this.triggerSearch() }}}>
         { this.props.children }
         <FlexBlock flex="0 0 100%" isContainer justifyContent="center" padding="0.5rem">
-          <Button onClick={() => this.props.dispatch({ type: this.props.actionName, data: this.props.searchData})} icon="magnifying-glass">Chercher</Button>
+          <Button onClick={() => this.triggerSearch()} icon="magnifying-glass">Chercher</Button>
         </FlexBlock>
       </FlexBlock>)
   }

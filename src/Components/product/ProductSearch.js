@@ -35,11 +35,11 @@ class ProductSearch extends React.Component {
       </FlexBlock>
       <FlexBlock flex="0 0 50%" isContainer flexFlow="column" justifyContent="stretch">
         <span>Planté/semé entre</span>
-        <Select value={this.state.sowMin} options={monthesOptions} onChange={e => this.setState({ sowMin: e.value })}/>
+        <Select value={this.state.sowMin} options={monthesOptions} onChange={e => this.setState({ sowMin: e ? e.value : null })}/>
       </FlexBlock>
       <FlexBlock flex="0 0 50%" isContainer flexFlow="column" justifyContent="stretch">
         <span>et</span>
-        <Select value={this.state.sowMax} options={monthesOptions} onChange={e => this.setState({ sowMax: e.value })}/>
+        <Select value={this.state.sowMax} options={monthesOptions} onChange={e => this.setState({ sowMax: e ? e.value : null })}/>
       </FlexBlock>
     </SearchForm>)
   }

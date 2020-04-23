@@ -7,7 +7,7 @@ import { setStateRight, searchLog,
   searchCulture, searchProduct,
   saveCulture, removeCulture, saveLogEntry,
   saveProduct, recalculateSurfaces,
-  getTotalSurface, adoptPlan, switchCultureState
+  getTotalSurface, adoptPlan, switchCultureState, rescheduleTask
 } from './stateTransformers'
 
 const persistedState = localStorage.getItem('state')
@@ -260,6 +260,14 @@ export default (state = initialState, action) => {
       break
     case 'SWITCHSTATUS_CULTURE':
       result = switchCultureState(action.targetStatus, action.culture, action.date, action.surfaces, action.remark, state)
+      result = searchCulture(result)
+      break
+    case 'EDIT_PRODUCT_FOLLOWUPTASKS':
+      const productStateEditFollowUp = state.get('productState').set('editingFollowUp', true).set('editedProduct', fromJS(action.product))
+      result = merge(state, { productState: productStateEditFollowUp })
+      break
+    case 'RESCHEDULE_TASK':
+      result = rescheduleTask(action.task, action.newDate, state)
       break
     default:
   }

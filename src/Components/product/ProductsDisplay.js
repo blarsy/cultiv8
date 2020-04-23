@@ -17,6 +17,9 @@ class ProductsDisplay extends React.Component {
       data: this.props.data,
       removeActionName: 'REMOVE_PRODUCT',
       editActionName: 'BEGIN_EDIT_PRODUCT',
+      otherActions: [
+        { icon: "calendar", action: product => this.props.dispatch({ type: 'EDIT_PRODUCT_FOLLOWUPTASKS', product }) }
+      ],
       dataColumns: [
         {
           title: 'Nom',
