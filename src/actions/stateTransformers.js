@@ -379,3 +379,30 @@ export const rescheduleTask = (taskId, newDate, state) => {
   taskList.reschedule(taskId, newDate)
   return state.set('data', merge(state.get('data'), fromJS({ tasks: taskList.tasks })))
 }
+
+export const addFollowUp = (state, productName, growingDays, dateBegin, dateEnd, actionType, details) => {
+  const products = state.get('data').get('products').toJS()
+  const product = find(product => product.name === productName, products)
+  if(!product.followUp) product.followUp = []
+
+  product.followUp.push({
+    id: nextId(product.followUp),
+    growingDays, dateBegin, dateEnd, actionType, details
+  })
+
+  return state.set('data', state.get('data').merge( fromJS({ products })))
+}
+
+export const updateFollowUp = (state, productName, followUpId, growingDays, dateBegin, dateEnd, actionType, details) => {
+  const products = state.get('data').get('products').toJS()
+  const product = find(product => product.name === productName, products)
+  const followUpToUpdate = find(followUp => followUp.id === followUpId, product.followUp)
+
+  followUpToUpdate.growingDays = growingDays
+  followUpToUpdate.dateBegin = dateBegin
+  followUpToUpdate.dateEnd = dateEnd
+  followUpToUpdate.actionType = actionType
+  followUpToUpdate.details = details
+
+  return state.set('data', state.get('data').merge( fromJS({ products })))
+}

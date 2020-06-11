@@ -7,7 +7,8 @@ import { setStateRight, searchLog,
   searchCulture, searchProduct,
   saveCulture, removeCulture, saveLogEntry,
   saveProduct, recalculateSurfaces,
-  getTotalSurface, adoptPlan, switchCultureState, rescheduleTask
+  getTotalSurface, adoptPlan, switchCultureState,
+  rescheduleTask, addFollowUp, updateFollowUp
 } from './stateTransformers'
 
 const persistedState = localStorage.getItem('state')
@@ -266,8 +267,31 @@ export default (state = initialState, action) => {
       const productStateEditFollowUp = state.get('productState').set('editingFollowUp', true).set('editedProduct', fromJS(action.product))
       result = merge(state, { productState: productStateEditFollowUp })
       break
+    case 'END_EDIT_FOLLOWUP':
+      const productStateEndEditFollowUp = state.get('productState').set('editingFollowUp', false).set('editedProduct', null)
+      result = merge(state, { productState: productStateEndEditFollowUp })
+      break
     case 'RESCHEDULE_TASK':
       result = rescheduleTask(action.task, action.newDate, state)
+      break
+    case 'REMOVE_TASK':
+      const tasks = filter(task => task.id !== action.taskId, state.get('data').get('tasks').toJS())
+      result = state.set('data', merge(state.get('data'), fromJS({ tasks })))
+      break
+    case 'MODIFY_PRODUCTFOLLOWUP':
+      if(action.data.adding) {
+        result = addFollowUp(state, action.productName, action.data.growingDays, action.data.dateBegin, action.data.dateEnd, action.data.actionType, action.data.details)
+      } else {
+        result = updateFollowUp(state, action.productName, action.data.id, action.data.growingDays, action.data.dateBegin, action.data.dateEnd, action.data.actionType, action.data.details)
+      }
+      result = searchProduct(result)
+      break
+    case 'REMOVE_PRODUCT_FOLLOWUP':
+      const products = state.get('data').get('products').toJS()
+      const productToUpdate = find(product => product.name === action.productName, products)
+      productToUpdate.followUp = reject(followUp => followUp.id === action.id, productToUpdate.followUp)
+      result = state.set('data', merge(state.get('data'), fromJS({ products })))
+      result = searchProduct(result)
       break
     default:
   }

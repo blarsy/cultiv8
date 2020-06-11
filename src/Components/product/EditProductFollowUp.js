@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import { sort, map, uniq, union, forEach } from 'ramda'
+import { sort, map, uniq, union, forEach, find } from 'ramda'
 import moment from 'moment'
 import Table from '../Table'
 import { ValidatedForm, getInitialState, Button, FlexBlock } from '../../toolbox'
@@ -10,7 +10,10 @@ class EditProductFollowUp extends React.Component {
   constructor(props) {
     super(props)
     let allActionTypes = []
-    forEach(product => allActionTypes = union(allActionTypes, map(followUp => followUp.actionType, product.followUp), this.props.products.toJS()))
+    forEach(product =>
+      allActionTypes = union(allActionTypes,
+        map(followUp => ({value: followUp.actionType, label: followUp.actionType }), product.followUp || []))
+    , this.props.products.toJS())
     const actionTypeOptions = uniq(allActionTypes)
 
     this.followUpInputs = [
@@ -49,19 +52,14 @@ class EditProductFollowUp extends React.Component {
       }
     ]
 
-    this.product = props.productState.get('editedProduct').toJS()
-    const initialState = getInitialState(this.followUpInputs)
-    if(!this.product.followUp){
-      this.state = { ...initialState, followUpTasks : [] }
-    } else {
-      this.state = { ...initialState, followUpTasks : sort((a, b) => b.growingDays - a.growingDays, this.product.followUp) }
-    }
-
     this.followUpTableDataColumns = [
       {
         title: 'Actions',
         flex: '1',
-        content: followUpTask => (<Button icon="pencil" onClick={() => this.setState({ editing: true, ...followUpTask })}></Button>)
+        content: followUpTask => ([
+          (<Button key="pencil" icon="pencil" onClick={() => this.setState({ editing: true, ...followUpTask })}></Button>),
+          (<Button key="trash" icon="trash" onClick={() => this.props.dispatch({ type: 'REMOVE_PRODUCT_FOLLOWUP', productName: this.props.productState.get('editedProduct').get('name'), id: followUpTask.id})}></Button>)
+        ])
       },
       {
         title: 'Type de temporalité',
@@ -72,13 +70,10 @@ class EditProductFollowUp extends React.Component {
         title: 'Quand ?',
         flex: '1',
         content: followUpTask => {
-          switch(followUpTask.schedulingType) {
-            case 1:
-              return followUpTask.growingDays + ' jours'
-            case 2:
-              return moment(followUpTask.dateBegin).format('L') + ' - ' + moment(followUpTask.dateEnd).format('L')
-            default:
-              return '?'
+          if(followUpTask.growingDays) {
+            return followUpTask.growingDays + ' jours'
+          } else {
+            return moment(followUpTask.dateBegin).format('L') + ' - ' + moment(followUpTask.dateEnd).format('L')
           }
         }
       },
@@ -93,10 +88,13 @@ class EditProductFollowUp extends React.Component {
         content: followUpTask => followUpTask.details
       }
     ]
+    this.state = getInitialState(this.followUpInputs)
 
   }
 
   render() {
+    this.product = find(product => product.name === this.props.productState.get('editedProduct').get('name'), this.props.products.toJS())
+
     let content
     if(this.state.adding || this.state.editing) {
       content = (<ValidatedForm
@@ -105,15 +103,18 @@ class EditProductFollowUp extends React.Component {
           setState={state => this.setState(state)}
           inputs={this.followUpInputs}
           onSubmit={() => {
-            this.props.dispatch({ type: 'MODIFY_PRODUCTFOLLOWUP', productId: this.product.id, data: this.state })}
-          }
+            this.props.dispatch({ type: 'MODIFY_PRODUCTFOLLOWUP', productName: this.product.name, data: this.state })
+            this.setState({adding: false, editing: false})
+          }}
           actionLabel="Ok"
           title="Gestion tâche de suivi"
         />)
     } else {
       content =(<FlexBlock>
-        <Button onClick={() => this.setState({ adding: true })}>Ajouter</Button>
-        <Table data={this.state.followUpTasks} dataColumns={this.followUpTableDataColumns} />
+        <Button onClick={() => {
+            this.setState({ adding: true })
+        }}>Ajouter</Button>
+      <Table data={sort((a, b) => b.growingDays - a.growingDays, this.product.followUp || [])} dataColumns={this.followUpTableDataColumns} />
       </FlexBlock>)
     }
     return content

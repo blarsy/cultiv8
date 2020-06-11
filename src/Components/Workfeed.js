@@ -65,7 +65,8 @@ class Workfeed extends React.Component {
             this.props.dispatch({ type: 'BEGIN_EDIT_CULTURE', data: find(culture => culture.id === task.cultureId, this.data.cultures) })
             this.props.dispatch(push('/cultures'))
           }} />),
-          (<Button key="reschedule" icon="clock" onClick={() => this.setState({ reschedulingTask : task })} />)
+          (<Button key="reschedule" icon="clock" onClick={() => this.setState({ reschedulingTask : task })} />),
+          (<Button key="remove" icon="trash" onClick={() => this.props.dispatch({ type : 'REMOVE_TASK', taskId: task.id})} />)
         ]
       },
       {
