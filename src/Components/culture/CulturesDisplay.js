@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { map, find, includes, join, filter, addIndex } from 'ramda'
 import moment from 'moment'
+import { push } from 'react-router-redux'
 import SearchResultsDisplay from '../SearchResultsDisplay'
 import { statussesOptions } from './common'
 
@@ -22,6 +23,15 @@ class CulturesDisplay extends React.Component {
       data: this.props.data,
       removeActionName: 'REMOVE_CULTURE',
       editActionName: 'BEGIN_EDIT_CULTURE',
+      otherActions: [
+        {
+          icon: 'book',
+          action: culture => {
+            this.props.dispatch({ type: 'ADD_LOGENTRY_TO_CULTURE', logEntry: { date: new Date(), cultures: [culture.id] } })
+            this.props.dispatch(push('/log'))
+          }
+        }
+      ],
       dataColumns: [
         {
           title: 'Date plantation',

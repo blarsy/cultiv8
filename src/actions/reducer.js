@@ -140,6 +140,10 @@ export default (state = initialState, action) => {
       const updatedCultureState = state.get('cultureState').set('editing', true).set('editedCulture', fromJS(action.data))
       result = merge(state, { cultureState: updatedCultureState })
       break
+    case 'ADD_LOGENTRY_TO_CULTURE':
+      const logStateWithNewEntry = state.get('logState').set('editing', true).set('initialData', fromJS(action.logEntry))
+      result = merge(state, { logState: logStateWithNewEntry })
+      break
     case 'SAVE_CULTURE':
       result = saveCulture(state, action.data)
       result = searchCulture(result)

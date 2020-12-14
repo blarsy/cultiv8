@@ -68,8 +68,13 @@ class EditLog extends React.Component {
     ]
 
     this.state = getInitialState(this.inputs)
+    let logEntryToEdit
     if(props.logState && props.logState.get('editedEntry')) {
-      const logEntryToEdit = props.logState.get('editedEntry').toJS()
+      logEntryToEdit = props.logState.get('editedEntry').toJS()
+    } else if (props.logState && props.logState.get('initialData')) {
+      logEntryToEdit = props.logState.get('initialData').toJS()
+    }
+    if(logEntryToEdit) {
       const initialData = {
         date: moment(logEntryToEdit.date).toDate(),
         description: logEntryToEdit.description,
