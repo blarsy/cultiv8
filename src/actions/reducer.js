@@ -192,6 +192,12 @@ export default (state = initialState, action) => {
       result = saveProduct(state, action.data)
       result = searchProduct(result)
       break
+    case 'REMOVE_PRODUCT':
+      const productsBeforeRemoval = state.get('data').get('products').toJS()
+      const updatedForProductRemoval = merge(state.get('data'), fromJS({ products: filter(product => product.name !== action.data.name, productsBeforeRemoval) }))
+      result = merge(state, { data : updatedForProductRemoval })
+      result = searchProduct(result)
+      break
     case 'SAVE_SETTINGS':
       const currentData = state.get('data') || fromJS({})
 
