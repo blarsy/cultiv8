@@ -4,7 +4,9 @@ import PropTypes from 'prop-types'
 import { map, filter, addIndex, find, reverse, includes } from 'ramda'
 import styled from 'styled-components'
 import moment from 'moment'
+import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu'
 import { FlexBlock } from '../toolbox'
+import Table from './Table'
 import constants from '../constants'
 import { cultureIsActive, forecastStatus } from '../domain/planner'
 
@@ -55,6 +57,7 @@ class PlotDisplay extends React.Component {
     this.state = { highlightedSurfaces: [] }
   }
   render() {
+    const menuId = 'surfaceContextMenu'
     this.surfacesInfos = addIndex(map)((surface, idx) => {
       let culture, status
       if(surface.cultures && surface.cultures.length > 0) {
@@ -70,55 +73,83 @@ class PlotDisplay extends React.Component {
       }
       return { status, culture, idx, surface }
     }, filter(surface => surface.plot === this.props.selectedPlot, this.props.surfaces.toJS()))
+    const surfaceDetailed = this.props.surfaceDetailed && this.props.surfaceDetailed.toJS()
     return (
-      <FlexBlock flexFlow="column">
-        <FlexBlock isContainer flexFlow="row wrap" flex="1 0">
-          {
-            map(surfaceInfo => {
-              const cultureDetail = surfaceInfo.culture ? (<span>{surfaceInfo.culture.product.name}</span>) : ''
-              let header
-              if(this.props.editable) header = (<input type="text" value={surfaceInfo.surface.code} name={surfaceInfo.surface.code} onChange={e => this.props.onSurfaceChanged(surfaceInfo.idx, this.props.selectedPlot, e.target.value)}/>)
-              else header = (<span>{ surfaceInfo.surface.code }</span>)
-              const isHighlighted = includes(surfaceInfo.surface.id, this.state.highlightedSurfaces) &&
-                (surfaceInfo.culture.status < 1 || (surfaceInfo.culture.product.nurseryDays > 0 && surfaceInfo.culture.status < 2))
-              return (<Surface
-                draggable={isHighlighted ? 'true':'false'}
-                highlighted={isHighlighted}
-                onMouseEnter={e => {
-                  if(surfaceInfo.culture) {
-                    this.setState({ highlightedSurfaces: surfaceInfo.culture.surfaces })
-                  }
-                }}
-                onDragStart={e => {
-                  e.dataTransfer.setData('culture', surfaceInfo.culture.id)}
-                }
-                onDragEnter={e => {
-                  if(!isHighlighted){
-                    if(surfaceInfo.culture) {
-                      this.setState({ insertSurface: surfaceInfo.culture.surfaces[0] })
-                    } else {
-                      this.setState({ insertSurface: surfaceInfo.surface.id })
+      <FlexBlock isContainer flexFlow="column">
+        <ContextMenu id={menuId}>
+          <MenuItem onClick={e => this.props.dispatch({ type: 'SELECT_SURFACE_FOR_DETAILS', surface: this.state.currentSurface})}>
+            Historique cultures
+          </MenuItem>
+        </ContextMenu>
+
+        <FlexBlock isContainer flexFlow="column" overflow="hidden">
+          <FlexBlock isContainer flexFlow="row wrap" flex="2 0" overflow="auto">
+            {
+              map(surfaceInfo => {
+                const cultureDetail = surfaceInfo.culture ? (<span>{surfaceInfo.culture.product.name}</span>) : ''
+                let header
+                if(this.props.editable) header = (<input type="text" value={surfaceInfo.surface.code} name={surfaceInfo.surface.code} onChange={e => this.props.onSurfaceChanged(surfaceInfo.idx, this.props.selectedPlot, e.target.value)}/>)
+                else header = (<span>{ surfaceInfo.surface.code }</span>)
+                const isHighlighted = includes(surfaceInfo.surface.id, this.state.highlightedSurfaces) &&
+                  (surfaceInfo.culture.status < 1 || (surfaceInfo.culture.product.nurseryDays > 0 && surfaceInfo.culture.status < 2))
+                return (<ContextMenuTrigger key={surfaceInfo.idx} id={menuId}>
+                  <Surface
+                    draggable={isHighlighted ? 'true':'false'}
+                    highlighted={isHighlighted}
+                    onMouseEnter={e => {
+                      this.setState({ currentSurface: surfaceInfo.surface })
+                      if(surfaceInfo.culture) {
+                        this.setState({ highlightedSurfaces: surfaceInfo.culture.surfaces })
+                      }
+                    }}
+                    onDragStart={e => {
+                      e.dataTransfer.setData('culture', surfaceInfo.culture.id)}
                     }
+                    onDragEnter={e => {
+                      if(!isHighlighted){
+                        if(surfaceInfo.culture) {
+                          this.setState({ insertSurface: surfaceInfo.culture.surfaces[0] })
+                        } else {
+                          this.setState({ insertSurface: surfaceInfo.surface.id })
+                        }
+                      }
+                    }}
+                    onDragOver={e => e.preventDefault()}
+                    onDragExit={() => this.setState({ insertSurface: null })}
+                    onDragEnd={() => {
+                      this.setState({ insertSurface: null })}
+                    }
+                    onDrop={e => {
+                      this.props.dispatch({ type: 'PLOT_INSERTANDSHIFT_CULTURE', culture: e.dataTransfer.getData('culture'), targetSurface: this.state.insertSurface})
+                      this.setState({ insertSurface: null })}
+                    }
+                    isContainer
+                    isInsertable={surfaceInfo.surface.id === this.state.insertSurface}
+                    flexFlow="column nowrap"
+                    status={surfaceInfo.status}>
+                    {header}
+                    { cultureDetail }
+                  </Surface>
+                </ContextMenuTrigger>)
+              }, this.surfacesInfos)
+            }
+          </FlexBlock>
+          { surfaceDetailed &&
+            <FlexBlock isContainer flex="1 0" flexFlow="column" overflow="hidden">
+              Historique cultures pour la surface {surfaceDetailed.code}
+              <Table data={surfaceDetailed.cultures} dataColumns={[
+                  {
+                    title: 'Produit',
+                    content: culture => culture.product.name,
+                    flex: '1 0'
+                  },
+                  {
+                    title: 'Date plantation',
+                    content: culture => culture.plantDate,
+                    flex: '1 0'
                   }
-                }}
-                onDragOver={e => e.preventDefault()}
-                onDragExit={() => this.setState({ insertSurface: null })}
-                onDragEnd={() => {
-                  this.setState({ insertSurface: null })}
-                }
-                onDrop={e => {
-                  this.props.dispatch({ type: 'PLOT_INSERTANDSHIFT_CULTURE', culture: e.dataTransfer.getData('culture'), targetSurface: this.state.insertSurface})
-                  this.setState({ insertSurface: null })}
-                }
-                isContainer
-                isInsertable={surfaceInfo.surface.id === this.state.insertSurface}
-                flexFlow="column nowrap"
-                key={surfaceInfo.idx}
-                status={surfaceInfo.status}>
-                {header}
-                { cultureDetail }
-              </Surface>)
-            }, this.surfacesInfos)
+                ]}/>
+            </FlexBlock>
           }
         </FlexBlock>
       </FlexBlock>
@@ -130,8 +161,13 @@ PlotDisplay.propTypes = {
   date: PropTypes.string,
   surfaces: PropTypes.object,
   selectedPlot: PropTypes.string,
+  surfaceDetailed: PropTypes.object,
   editable: PropTypes.bool,
   onSurfaceChanged: PropTypes.func
 }
 
-export default connect()(PlotDisplay)
+const mapStateToProps = state => ({
+  surfaceDetailed: state.global.get('groundsState') && state.global.get('groundsState').get('surfaceDetailed')
+})
+
+export default connect(mapStateToProps)(PlotDisplay)

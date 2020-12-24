@@ -112,7 +112,9 @@ class Table extends React.Component {
     }
     return (<TableBlock overflow="auto" isContainer flexFlow="column">
       {header}
-      {lines}
+      <FlexBlock overflow="auto">
+        {lines}
+      </FlexBlock>
     </TableBlock>)
   }
 }

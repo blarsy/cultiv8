@@ -128,7 +128,7 @@ export default (state = initialState, action) => {
       result = state.set('planState', state.get('planState').set('currentPlan', fromJS(createPlan(stateWithPlanToRecreate.toJS()))))
       break
     case 'GROUND_SELECTPLOT':
-      result = mergeDeep(state, fromJS({ groundsState: { selectedPlot: action.value }}))
+      result = mergeDeep(state, fromJS({ groundsState: { selectedPlot: action.value, surfaceDetailed: null }}))
       break
     case 'GROUND_CHANGEDISPLAYDATE':
       result = mergeDeep(state, fromJS({ groundsState: { displayDate: action.value }}))
@@ -302,6 +302,9 @@ export default (state = initialState, action) => {
       productToUpdate.followUp = reject(followUp => followUp.id === action.id, productToUpdate.followUp)
       result = state.set('data', merge(state.get('data'), fromJS({ products })))
       result = searchProduct(result)
+      break
+    case 'SELECT_SURFACE_FOR_DETAILS':
+      result = state.set('groundsState', state.get('groundsState').set('surfaceDetailed', fromJS(action.surface)))
       break
     default:
   }

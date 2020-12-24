@@ -58,7 +58,7 @@ class Ground extends React.Component {
           selectedPlot={selectedPlot} />)
       }
 
-      content = (<FlexBlock>
+      content = (<FlexBlock isContainer overflow="hidden" flexFlow="column">
         <FlexBlock isContainer justifyContent="space-around">
           <FlexBlock isContainer flexFlow="column" padding="0 0 1rem">
             <p>Sélectionnez la parcelle à visualiser:</p>
@@ -75,7 +75,7 @@ class Ground extends React.Component {
             }} selected={displayDate} onChange={value => this.props.dispatch({ type: 'GROUND_CHANGEDISPLAYDATE', value})} />
           </FlexBlock>
           </FlexBlock>
-          <FlexBlock isContainer flex="1 0" justifyContent="center">
+          <FlexBlock isContainer flex="1 0" justifyContent="center" overflow="hidden">
           {plotZone}
           </FlexBlock>
         </FlexBlock>)
