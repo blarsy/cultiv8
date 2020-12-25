@@ -14,7 +14,7 @@ class Product extends React.Component {
       content = (<EditProductFollowUp />)
     } else {
       button = (<Button onClick={() => this.props.dispatch({ type: 'TOGGLE_PRODUCT_CREATION' })} icon="plus">Ajouter</Button>)
-      content = (<FlexBlock isContainer flexFlow="column" alignItems="stretch">
+      content = (<FlexBlock isContainer flex="1 0" flexFlow="column" alignItems="stretch" overflow="hidden">
         <ProductSearch />
         <ProductsDisplay />
       </FlexBlock>)
@@ -22,7 +22,7 @@ class Product extends React.Component {
     return (
       <FlexBlock isContainer flex="1" flexFlow="column" overflow="hidden">
         <FlexBlock flex="0" alignItems="center" padding="0 0 0.5rem">{button}</FlexBlock>
-        <FlexBlock flex="1 0">
+        <FlexBlock overflow="hidden" isContainer flex="1 0">
           <DataContent>{content}</DataContent>
         </FlexBlock>
       </FlexBlock>

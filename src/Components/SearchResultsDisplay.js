@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { map } from 'ramda'
-import { Button } from './../toolbox'
+import { Button, FlexBlock } from './../toolbox'
 import Table from './Table'
 
 class SearchResultsDisplay extends React.Component {
@@ -14,9 +14,10 @@ class SearchResultsDisplay extends React.Component {
         title: 'Actions',
         ratio: '1',
         flexProps: {
-          justifyContent: 'space-around',
+          justifyContent: 'center',
           alignItems: 'center'
         },
+        flex: '1 0 5rem',
         noSort: true,
         content: data => [
           (<Button key="trash" icon="trash" onClick={() => this.props.dispatch({ type: this.props.searchResults.removeActionName, data })} />),
@@ -26,8 +27,9 @@ class SearchResultsDisplay extends React.Component {
       },
       ...this.props.searchResults.dataColumns
     ]
-
-    return (<Table data={data} detailedContent={this.props.detailedContent} dataColumns={dataColumns}/>)
+    return (<FlexBlock isContainer overflow="hidden">
+      <Table data={data} detailedContent={this.props.detailedContent} dataColumns={dataColumns}/>
+    </FlexBlock>)
   }
 }
 

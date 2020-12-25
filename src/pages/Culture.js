@@ -14,7 +14,7 @@ class Culture extends React.Component {
         onOperationDone={() => this.props.dispatch({ type: 'TOGGLE_CULTURE_EDITION' })} />)
     } else {
       button = (<Button onClick={() => this.props.dispatch({ type: 'TOGGLE_CULTURE_EDITION' })}>Ajouter</Button>)
-      content = (<FlexBlock isContainer flexFlow="column" alignItems="stretch">
+      content = (<FlexBlock isContainer flex="1 0" flexFlow="column" alignItems="stretch">
           <CultureSearch />
           <CulturesDisplay />
         </FlexBlock>
@@ -22,8 +22,8 @@ class Culture extends React.Component {
     }
     return (
       <FlexBlock isContainer flexFlow="column" flex="1">
-        <FlexBlock flex="0" alignItems="center">{button}</FlexBlock>
-        <FlexBlock flex="1 0" padding="0.5rem">
+        <FlexBlock flex="0">{button}</FlexBlock>
+        <FlexBlock isContainer flex="1 0" padding="0.5rem" overflow="hidden">
           <DataContent>{content}</DataContent>
         </FlexBlock>
       </FlexBlock>

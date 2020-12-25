@@ -110,9 +110,9 @@ class Table extends React.Component {
           { this.props.detailedContent && this.state.expanded[lineIdx] && (<Cell key={this.props.dataColumns.length} lineIndex={lineIdx}>{this.props.detailedContent(data)}</Cell>)}
         </Line>), dataToDisplay)
     }
-    return (<TableBlock overflow="auto" isContainer flexFlow="column">
+    return (<TableBlock overflow="auto" isContainer flex="1 0" flexFlow="column">
       {header}
-      <FlexBlock overflow="auto">
+      <FlexBlock>
         {lines}
       </FlexBlock>
     </TableBlock>)
