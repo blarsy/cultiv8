@@ -6,7 +6,7 @@ import { FlexBlock } from '../toolbox'
 
 class Home extends React.Component {
   render() {
-    return (<DataContent><FlexBlock flex="1"><Workfeed /></FlexBlock></DataContent>)
+    return (<DataContent><FlexBlock isContainer flex="1"><Workfeed /></FlexBlock></DataContent>)
   }
 }
 

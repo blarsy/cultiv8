@@ -11,7 +11,7 @@ class Log extends React.Component {
       content = (<EditLogEntry onEditDone={ data => this.props.dispatch({ type: 'SAVE_LOGENTRY', data })} />)
     } else {
       button = (<Button onClick={() => this.props.dispatch({ type: 'TOGGLE_LOGENTRY_CREATION' })} icon="plus">Ajouter</Button>)
-      content = (<FlexBlock isContainer flexFlow="column" alignItems="stretch">
+      content = (<FlexBlock isContainer flex="1 0" flexFlow="column" alignItems="stretch">
         <LogSearch />
         <LogEntriesDisplay />
       </FlexBlock>)

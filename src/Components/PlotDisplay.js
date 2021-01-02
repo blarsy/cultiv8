@@ -11,7 +11,9 @@ import constants from '../constants'
 import { cultureIsActive, forecastStatus } from '../domain/planner'
 
 const Surface = styled(FlexBlock)`
-  border: 1px ${props => props.highlighted ? 'dotted' : 'solid'} ${constants.layout.secundaryLight};
+  border: 1px solid ${constants.layout.secundaryLight};
+  outline: ${props => props.detailed ? '4px solid ' + constants.layout.secundaryLight : '0'};
+  outline-offset: ${props => props.detailed ? '-4px' : '0'};
   margin: 1px;
   animation: ${props => props.isInsertable && 'glow 0.5s infinite alternate'};
   background: ${props => {
@@ -49,6 +51,9 @@ const Surface = styled(FlexBlock)`
       box-shadow: 0 0 10px 10px ${constants.layout.secundaryLight};
     }
   }
+`
+const SurfaceContent = styled(FlexBlock)`
+  margin: ${props => props.detailed ? '4px' : '0'};
 `
 
 class PlotDisplay extends React.Component {
@@ -92,10 +97,12 @@ class PlotDisplay extends React.Component {
                 else header = (<span>{ surfaceInfo.surface.code }</span>)
                 const isHighlighted = includes(surfaceInfo.surface.id, this.state.highlightedSurfaces) &&
                   (surfaceInfo.culture.status < 1 || (surfaceInfo.culture.product.nurseryDays > 0 && surfaceInfo.culture.status < 2))
+                const isDetailed = this.props.surfaceDetailed && this.props.surfaceDetailed.get('code') === surfaceInfo.surface.code
                 return (<ContextMenuTrigger key={surfaceInfo.idx} id={menuId}>
                   <Surface
                     draggable={isHighlighted ? 'true':'false'}
                     highlighted={isHighlighted}
+                    detailed={isDetailed}
                     onMouseEnter={e => {
                       this.setState({ currentSurface: surfaceInfo.surface })
                       if(surfaceInfo.culture) {
@@ -127,8 +134,12 @@ class PlotDisplay extends React.Component {
                     isInsertable={surfaceInfo.surface.id === this.state.insertSurface}
                     flexFlow="column nowrap"
                     status={surfaceInfo.status}>
-                    {header}
-                    { cultureDetail }
+                    <SurfaceContent detailed={isDetailed}
+                      isContainer
+                      flexFlow="column nowrap">
+                      {header}
+                      { cultureDetail }
+                    </SurfaceContent>
                   </Surface>
                 </ContextMenuTrigger>)
               }, this.surfacesInfos)
