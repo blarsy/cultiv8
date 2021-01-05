@@ -22,7 +22,7 @@ class Product extends React.Component {
     return (
       <FlexBlock isContainer flex="1" flexFlow="column" overflow="hidden">
         <FlexBlock flex="0" alignItems="center" padding="0 0 0.5rem">{button}</FlexBlock>
-        <FlexBlock overflow="hidden" isContainer flex="1 0">
+        <FlexBlock overflow="auto" isContainer flex="1 0">
           <DataContent>{content}</DataContent>
         </FlexBlock>
       </FlexBlock>

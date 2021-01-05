@@ -14,7 +14,7 @@ class Plan extends React.Component {
     }
     return (
       <DataContent>
-        <FlexBlock isContainer flexFlow="column" alignItems="stretch">
+        <FlexBlock isContainer flexFlow="column" alignItems="stretch" flex="1 0" overflow="auto">
           <FlexBlock isContainer flexFlow="row" justifyContent="flex-end" padding="0 0 0.5rem">
             <Button icon="chevron-left" disabled={!hasPlan} onClick={() => this.props.dispatch({ type: 'VOID_CURRENTPLAN' })}>Sélection produits</Button>
             <Button icon="check" disabled={!hasPlan} onClick={() => this.props.dispatch({ type: 'ACCEPT_PLAN' })}>Terminé</Button>

@@ -93,7 +93,7 @@ class EditCulture extends React.Component {
 
   render() {
     return (
-      <FlexBlock>
+      <FlexBlock isContainer flex="1 0" flexFlow="column">
         { this.props.cultureState.get('editedCulture') && <SpecialOps onOperationDone={() => this.props.onOperationDone()} culture={this.props.cultureState.get('editedCulture').toJS()} />}
         <ValidatedForm
           margin="10%"
