@@ -306,6 +306,15 @@ export default (state = initialState, action) => {
     case 'SELECT_SURFACE_FOR_DETAILS':
       result = state.set('groundsState', state.get('groundsState').set('surfaceDetailed', fromJS(action.surface)))
       break
+    case 'COPY_TABLE_BEGIN':
+      result = state.set('uiState', fromJS({ message: 'En train de copier ...', spin: true }))
+      break
+    case 'COPY_TABLE_DONE':
+      result = state.set('uiState', fromJS({ message: 'Contenu copié dans le presse-papier' }))
+      break
+    case 'RESET_UI_STATE':
+      result = state.set('uiState', fromJS({ message: null, spin: false }))
+      break;
     default:
   }
   localStorage.setItem('state', JSON.stringify(result.toJS()))

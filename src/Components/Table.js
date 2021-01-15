@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 import { map, addIndex, sort } from 'ramda'
 import moment from 'moment'
 import styled from 'styled-components'
+import { connect } from 'react-redux'
 import { FlexBlock } from './../toolbox'
 import constants from '../constants'
 
@@ -23,8 +24,28 @@ const Line = styled(FlexBlock)`
 `
 
 const TableBlock = styled(FlexBlock)`
+ position: relative;
  border: 1px solid ${constants.layout.secundaryLight};
  border-radius: 0.25rem;
+`
+
+const Thumb = styled.span`
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #fff;
+  opacity: 0.5;
+  :hover {
+    opacity: 0.9;
+  }
+  padding: 0.5rem;
+  border: 1px solid #000;
+  cursor: pointer;
+  display: ${props => props.visible ? 'visible' : 'none'}
+`
+
+const Icon = styled.img`
+  height: 1rem;
 `
 
 class Table extends React.Component {
@@ -42,6 +63,7 @@ class Table extends React.Component {
 
   render() {
     let lines
+    const rawDataLines = []
     const header = (<FlexBlock isContainer>
       { addIndex(map)((dataColumn, idx) => (
         <HeaderCell
@@ -103,14 +125,32 @@ class Table extends React.Component {
           return compare(valA, valB)
         }, this.props.data)
       }
-      lines = addIndex(map)((data, lineIdx) => (<Line expandable={this.props.detailedContent} onClick={() => this.setState({ expanded: {[lineIdx]: !this.state.expanded[lineIdx]} })} isContainer key={lineIdx} flexFlow="column">
-          <FlexBlock padding={this.props.linePadding} isContainer flexFlow="row nowrap">
-            { addIndex(map)((dataColumn, idx) => <Cell key={idx} justifyContent={dataColumn.alignRight && 'flex-end'}  alignItems="center" lineIndex={lineIdx} flex={dataColumn.flex} isContainer { ...dataColumn.flexProps }>{dataColumn.content(data)}</Cell>, this.props.dataColumns) }
-          </ FlexBlock>
-          { this.props.detailedContent && this.state.expanded[lineIdx] && (<Cell key={this.props.dataColumns.length} lineIndex={lineIdx}>{this.props.detailedContent(data)}</Cell>)}
-        </Line>), dataToDisplay)
+      lines = addIndex(map)((data, lineIdx) => {
+        const dataLine = []
+        const line = (<Line expandable={this.props.detailedContent} onClick={() => this.setState({ expanded: {[lineIdx]: !this.state.expanded[lineIdx]} })} isContainer key={lineIdx} flexFlow="column">
+            <FlexBlock padding={this.props.linePadding} isContainer flexFlow="row nowrap">
+              { addIndex(map)((dataColumn, idx) => {
+                const content = dataColumn.content(data)
+                if(typeof content === "string") dataLine.push(content)
+                return (<Cell key={idx} justifyContent={dataColumn.alignRight && 'flex-end'}  alignItems="center" lineIndex={lineIdx} flex={dataColumn.flex} isContainer { ...dataColumn.flexProps }>
+                  {content}
+                </Cell>)
+              }, this.props.dataColumns) }
+            </ FlexBlock>
+            { this.props.detailedContent && this.state.expanded[lineIdx] && (<Cell key={this.props.dataColumns.length} lineIndex={lineIdx}>{this.props.detailedContent(data)}</Cell>)}
+          </Line>)
+        rawDataLines.push(dataLine)
+        return line
+      }, dataToDisplay)
     }
-    return (<TableBlock overflow="auto" isContainer flex="1 0" flexFlow="column">
+    return (<TableBlock
+      overflow="auto"
+      isContainer
+      flex="1 0"
+      flexFlow="column"
+      onMouseEnter={e => this.setState({hovered: true})}
+      onMouseLeave={e => this.setState({hovered: false})}>
+      <Thumb onClick={e => this.props.dispatch({ type: 'COPY_TABLE_BEGIN', data: rawDataLines })} visible={this.state.hovered}><Icon src={'img/copy.svg'}/></Thumb>
       {header}
       <FlexBlock>
         {lines}
@@ -130,4 +170,4 @@ Table.propTypes = {
   linePadding: PropTypes.string
 }
 
-export default Table
+export default connect()(Table)
