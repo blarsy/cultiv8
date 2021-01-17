@@ -38,8 +38,8 @@ class Input extends React.Component {
   onChange(e) {
     let value
     if (this.props.type === 'date') value = e ? e.format() : ''
-    else if (this.props.type === 'select') {
-      if(this.props.multi) {
+    else if (this.props.type === 'select' || this.props.type === 'culturesSelect') {
+      if(this.props.multi || this.props.type === 'culturesSelect') {
         value = map(item => item.value, e)
       } else {
         value = e.value
@@ -63,7 +63,7 @@ class Input extends React.Component {
   lostFocus(e) {
     let value = null
     if (this.props.type === 'date') value = e
-    else if (this.props.type === 'select') value = this.state.value
+    else if (this.props.type === 'select'  || this.props.type === 'culturesSelect') value = this.state.value
     else value = e.target.value
     this.setState({ used: true, error: this.validate(value) })
   }
@@ -78,7 +78,8 @@ class Input extends React.Component {
         'checkbox',
         'date',
         'select',
-        'number'
+        'number',
+        'culturesSelect'
       ].includes(this.props.type)
     ) {
       return (

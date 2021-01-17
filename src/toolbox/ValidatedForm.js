@@ -63,6 +63,7 @@ class ValidatedForm extends React.Component {
               'date',
               'select',
               'number',
+              'culturesSelect',
               'custom'
             ].includes(input.type)
           ) {

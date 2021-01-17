@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import DatePicker from 'react-datepicker'
 import Select, { Async, AsyncCreatable, Creatable } from 'react-select'
 import moment from 'moment'
+import CulturesSelect from './CulturesSelect'
 import '../../node_modules/react-datepicker/dist/react-datepicker.min.css'
 import '../../node_modules/react-select/dist/react-select.min.css'
 
@@ -47,7 +48,7 @@ border: ${props =>
 flex-grow: 1;
 `
 
-const Field = styled.label`
+const Field = styled.div`
   font-weight: bold;
   > div {
     display: flex;
@@ -94,6 +95,17 @@ class FormInput extends React.Component {
           used={this.props.used}
           error={this.props.error}
           readOnly={this.props.readOnly}
+        />
+      )
+    } else if (this.props.type === 'culturesSelect') {
+      element = (
+        <CulturesSelect
+          name={this.props.name}
+          value={this.props.value}
+          onChange={e => this.props.onChange(e)}
+          lostFocus={e => this.props.lostFocus(e)}
+          used={this.props.used}
+          error={this.props.error}
         />
       )
     } else if (this.props.type === 'select') {
@@ -191,6 +203,7 @@ class FormInput extends React.Component {
 }
 
 FormInput.propTypes = {
+  name: PropTypes.string,
   value: PropTypes.any,
   required: PropTypes.bool,
   error: PropTypes.string,

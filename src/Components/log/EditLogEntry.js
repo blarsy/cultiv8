@@ -10,7 +10,6 @@ class EditLog extends React.Component {
   constructor(props) {
     super(props)
 
-    const cultureOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()) || moment(b.plantDate).toDate() - moment(a.plantDate).toDate(), map(culture => ({ label: `${culture.productName} - ${moment(culture.plantDate).format('L')}`, value: culture.id }), props.cultures.toJS()))
     const surfaceOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(surface => ({ label: surface.plot + ' ' + surface.code, value: surface.id }), props.surfaces.toJS()))
     const plotOptions = sort((a, b) => a.label.toUpperCase().localeCompare(b.label.toUpperCase()), map(plot => ({ label: plot.name + ' ' + plot.code, value: plot.code }), props.plots.toJS()))
     const tagOptions = map(category => ({
@@ -58,12 +57,10 @@ class EditLog extends React.Component {
         multi: true
       },
       {
-        type: 'select',
+        type: 'culturesSelect',
         name: 'linkedCultures',
         label: 'Cultures concernées',
-        required: false,
-        options: cultureOptions,
-        multi: true
+        required: false
       }
     ]
 
