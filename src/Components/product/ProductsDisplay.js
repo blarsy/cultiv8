@@ -136,7 +136,7 @@ class ProductsDisplay extends React.Component {
           content: product => product.harvestDays
         },
         {
-          title: 'Heures travail',
+          title: 'Minutes travail',
           flex: '1 0 7rem',
           sort: {
             type: 'number',

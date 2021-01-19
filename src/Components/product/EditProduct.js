@@ -92,7 +92,7 @@ class EditProduct extends React.Component {
       {
         type: 'number',
         name: 'workPerSqMeter',
-        label: 'Heures de travail',
+        label: 'Minutes de travail par m2',
         required: true
       },
       {
