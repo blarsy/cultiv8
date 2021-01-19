@@ -4,7 +4,7 @@ import moment from 'moment'
 import { CultureList, LogEntriesList, TaskList } from '../domain'
 import { nextId } from './../domain/data'
 
-const DEFAULT_TOTAL_SURFACE = 10
+const DEFAULT_SURFACE_SIZE = 30
 
 export const saveCulture = (state, cultureData) => {
   const cultureList = new CultureList(state.get('data').toJS())
@@ -249,8 +249,8 @@ export const searchProduct = (state, searchData) => {
   return state.set('productState', productState)
 }
 
-export const calculateProduct = (product, totalSurface, sumRatios) => {
-  product.surface = (+product.surfaceRatio / sumRatios) * totalSurface * 100
+export const calculateProduct = (product, surfaceSize) => {
+  product.surface = +product.surfaceRatio * surfaceSize
   product.totalNumberOfPlants = product.surface * +product.plantsPerSqMeter
   product.greenhouseSurface = product.greenhouse ? product.surface : 0
   product.incomePerSqMeter = +product.productivity * +product.actualPrice
@@ -263,16 +263,13 @@ export const calculateProduct = (product, totalSurface, sumRatios) => {
 }
 
 const setProductCalculatedProps = (products, state) => {
-  const totalSurface = getTotalSurface(state)
-  const sumRatios = reduce((acc, value) => {
-    return acc + value.surfaceRatio
-  }, 0, products)
+  const surfaceSize = getSurfaceSize(state)
 
-  forEach(product => calculateProduct(product, totalSurface, sumRatios), products)
+  forEach(product => calculateProduct(product, surfaceSize), products)
 }
 
-export const getTotalSurface = state => {
-  return (state.get('data') && state.get('data').get('settings') && state.get('data').get('settings').get('totalSurface')) || DEFAULT_TOTAL_SURFACE
+export const getSurfaceSize = state => {
+  return (state.get('data') && state.get('data').get('settings') && state.get('data').get('settings').get('surfaceSize')) || DEFAULT_SURFACE_SIZE
 }
 
 export const recalculateSurfaces = state => {
@@ -337,7 +334,7 @@ export const setStateRight = state => {
 
     result = state.set('data', state.get('data').set('products', fromJS(products)))
   } else {
-    result = state.set('data', fromJS({ settings: { totalSurface: getTotalSurface }}))
+    result = state.set('data', fromJS({ settings: { surfaceSize: getSurfaceSize(state) }}))
   }
   if(!result.get('data').get('settings').get('dataschemeVersion')) {
     const currentSettings = result.get('data').get('settings')

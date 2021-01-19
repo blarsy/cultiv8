@@ -7,7 +7,7 @@ import { setStateRight, searchLog,
   searchCulture, searchProduct,
   saveCulture, removeCulture, saveLogEntry,
   saveProduct, recalculateSurfaces,
-  getTotalSurface, adoptPlan, switchCultureState,
+  getSurfaceSize, adoptPlan, switchCultureState,
   rescheduleTask, addFollowUp, updateFollowUp
 } from './stateTransformers'
 
@@ -201,12 +201,12 @@ export default (state = initialState, action) => {
     case 'SAVE_SETTINGS':
       const currentData = state.get('data') || fromJS({})
 
-      const currentTotalSurface = getTotalSurface(state)
+      const currentsurfaceSize = getSurfaceSize(state)
       const currentSettings = currentData.get('settings').toJS()
-      currentSettings.totalSurface = action.data.totalSurface
+      currentSettings.surfaceSize = action.data.surfaceSize
 
       result = state.set('data', currentData.set('settings', fromJS(currentSettings)))
-      if(currentTotalSurface !== action.data.totalSurface) {
+      if(currentsurfaceSize !== action.data.surfaceSize) {
         result = recalculateSurfaces(result)
       }
       break

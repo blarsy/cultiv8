@@ -11,8 +11,8 @@ class Settings extends React.Component {
     this.inputs = [
       {
         type: 'number',
-        name: 'totalSurface',
-        label: 'Surface totale (en ares)',
+        name: 'surfaceSize',
+        label: 'Mètres carrés par surface',
         required: true
       }
     ]
@@ -40,7 +40,7 @@ class Settings extends React.Component {
 
 Settings.propTypes = {
   settings: PropTypes.shape({
-    totalSurface: PropTypes.number
+    surfaceSize: PropTypes.number
   })
 }
 

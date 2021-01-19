@@ -272,7 +272,7 @@ export default input => {
       }, surfaceRatings)
 
       //Create suggestions
-      const suggestions = createSuggestions(contiguousSurfacesRatings, 5, culture, input.data.settings.totalSurface * 100 / input.data.surfaces.length)
+      const suggestions = createSuggestions(contiguousSurfacesRatings, 5, culture, input.data.settings.surfaceSize)
 
       //Save suggestions & ratings
       rating = {

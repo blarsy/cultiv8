@@ -21,7 +21,7 @@ class ProductsSelector extends React.Component {
       const product = find(product => product.name === culture.productName, this.products)
       const harvestDate = moment(culture.plantDate).add(-product.nurseryDays + product.growingDays, 'days')
       if(harvestDate.toDate() > moment() && harvestDate.toDate() < oneYearFromNow.toDate()) {
-        this.surfacePlannedForProducts[culture.productName] = (culture.surfaces.length * (props.totalSurface * 100 / props.surfaceCount)).toFixed()
+        this.surfacePlannedForProducts[culture.productName] = (culture.surfaces.length * props.surfaceSize).toFixed()
       }
     }, this.cultures)
   }
@@ -132,7 +132,7 @@ const mapStateToProps = state => {
     planState: state.global.get('planState'),
     products: state.global.get('data').get('products'),
     cultures: state.global.get('data').get('cultures'),
-    totalSurface: state.global.get('data').get('settings').get('totalSurface'),
+    surfaceSize: state.global.get('data').get('settings').get('surfaceSize'),
     surfaceCount: state.global.get('data').get('surfaces').size
   }
 }
