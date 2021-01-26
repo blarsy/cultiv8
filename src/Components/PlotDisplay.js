@@ -62,6 +62,7 @@ class PlotDisplay extends React.Component {
     this.state = { highlightedSurfaces: [] }
   }
   render() {
+    const disableDragAndDrop = this.props.disableDragAndDrop
     const menuId = 'surfaceContextMenu'
     this.surfacesInfos = addIndex(map)((surface, idx) => {
       let culture, status
@@ -95,40 +96,59 @@ class PlotDisplay extends React.Component {
                 let header
                 if(this.props.editable) header = (<input type="text" value={surfaceInfo.surface.code} name={surfaceInfo.surface.code} onChange={e => this.props.onSurfaceChanged(surfaceInfo.idx, this.props.selectedPlot, e.target.value)}/>)
                 else header = (<span>{ surfaceInfo.surface.code }</span>)
-                const isHighlighted = includes(surfaceInfo.surface.id, this.state.highlightedSurfaces) &&
-                  (surfaceInfo.culture.status < 1 || (surfaceInfo.culture.product.nurseryDays > 0 && surfaceInfo.culture.status < 2))
+                const isHighlighted = (includes(surfaceInfo.surface.id, this.state.highlightedSurfaces) &&
+                  (surfaceInfo.culture.status < 1 || (surfaceInfo.culture.product.nurseryDays > 0 && surfaceInfo.culture.status < 2)))
+                  || (this.props.selectedSurfaces && includes(surfaceInfo.surface.id, this.props.selectedSurfaces))
                 const isDetailed = this.props.surfaceDetailed && this.props.surfaceDetailed.get('code') === surfaceInfo.surface.code
                 return (<ContextMenuTrigger key={surfaceInfo.idx} id={menuId}>
                   <Surface
-                    draggable={isHighlighted ? 'true':'false'}
+                    draggable={!disableDragAndDrop && isHighlighted ? 'true':'false'}
                     highlighted={isHighlighted}
                     detailed={isDetailed}
                     onMouseEnter={e => {
-                      this.setState({ currentSurface: surfaceInfo.surface })
-                      if(surfaceInfo.culture) {
-                        this.setState({ highlightedSurfaces: surfaceInfo.culture.surfaces })
-                      }
-                    }}
-                    onDragStart={e => {
-                      e.dataTransfer.setData('culture', surfaceInfo.culture.id)}
-                    }
-                    onDragEnter={e => {
-                      if(!isHighlighted){
+                      if(!disableDragAndDrop) {
+                        this.setState({ currentSurface: surfaceInfo.surface })
                         if(surfaceInfo.culture) {
-                          this.setState({ insertSurface: surfaceInfo.culture.surfaces[0] })
-                        } else {
-                          this.setState({ insertSurface: surfaceInfo.surface.id })
+                          this.setState({ highlightedSurfaces: surfaceInfo.culture.surfaces })
                         }
                       }
                     }}
-                    onDragOver={e => e.preventDefault()}
-                    onDragExit={() => this.setState({ insertSurface: null })}
+                    onDragStart={e => {
+                      if(!disableDragAndDrop) {
+                        e.dataTransfer.setData('culture', surfaceInfo.culture.id)}
+                      }
+                    }
+                    onDragEnter={e => {
+                      if(!disableDragAndDrop) {
+                        if(!isHighlighted){
+                          if(surfaceInfo.culture) {
+                            this.setState({ insertSurface: surfaceInfo.culture.surfaces[0] })
+                          } else {
+                            this.setState({ insertSurface: surfaceInfo.surface.id })
+                          }
+                        }
+                      }
+                    }}
+                    onDragOver={e => {
+                      if(!disableDragAndDrop) {
+                        e.preventDefault()}
+                      }
+                    }
+                    onDragExit={() => {
+                      if(!disableDragAndDrop) {
+                        this.setState({ insertSurface: null })}
+                      }
+                    }
                     onDragEnd={() => {
-                      this.setState({ insertSurface: null })}
+                      if(!disableDragAndDrop) {
+                        this.setState({ insertSurface: null })}
+                      }
                     }
                     onDrop={e => {
-                      this.props.dispatch({ type: 'PLOT_INSERTANDSHIFT_CULTURE', culture: e.dataTransfer.getData('culture'), targetSurface: this.state.insertSurface})
-                      this.setState({ insertSurface: null })}
+                      if(!disableDragAndDrop) {
+                        this.props.dispatch({ type: 'PLOT_INSERTANDSHIFT_CULTURE', culture: e.dataTransfer.getData('culture'), targetSurface: this.state.insertSurface})
+                        this.setState({ insertSurface: null })}
+                      }
                     }
                     isContainer
                     isInsertable={surfaceInfo.surface.id === this.state.insertSurface}
@@ -174,7 +194,9 @@ PlotDisplay.propTypes = {
   selectedPlot: PropTypes.string,
   surfaceDetailed: PropTypes.object,
   editable: PropTypes.bool,
-  onSurfaceChanged: PropTypes.func
+  onSurfaceChanged: PropTypes.func,
+  disableDragAndDrop: PropTypes.bool,
+  selectedSurfaces: PropTypes.arrayOf(PropTypes.number)
 }
 
 const mapStateToProps = state => ({

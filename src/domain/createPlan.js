@@ -238,7 +238,7 @@ export default input => {
       product: find(product => product.name === selection.name, input.data.products) }),
     selections))
 
-  //For each product ordered by interest, rate each surface for suitable-ness
+  //For each product ordered by priority, rate each surface for suitable-ness
   const ratings=[]
 
   forEach(culture => {
@@ -289,7 +289,8 @@ export default input => {
         const cultureToSuggest = {
           product: culture.product,
           status: 0,
-          plantDate
+          plantDate,
+          surfaces: map(surface => surface.id, suggestions[0].surfaces)
         }
         rating.culture = cultureToSuggest
         rating.selectedSuggestionId = suggestions[0].id

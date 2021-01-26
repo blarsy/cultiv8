@@ -76,6 +76,9 @@ export const assignCulturesToSurfaces = data => {
   forEach(culture => {
     const product = find(product => product.name === culture.productName, data.products)
     forEach(surfaceId => {
+      //cheap trick to accomadate for the fact this method may be called with
+      //a full surface object, but also with a simpe surface id
+      if(surfaceId.id) surfaceId = surfaceId.id
       const surface = find(surface => surface.id === surfaceId, data.surfaces)
       if(!surface.cultures) surface.cultures = []
       const cultureToAdd = {...culture}
