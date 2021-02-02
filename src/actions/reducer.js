@@ -5,7 +5,7 @@ import fileDownload from 'js-file-download'
 import createPlan from '../domain/createPlan'
 import { setStateRight, searchLog,
   searchCulture, searchProduct,
-  saveCulture, removeCulture, saveLogEntry,
+  saveCulture, updateCulture, removeCulture, saveLogEntry,
   saveProduct, recalculateSurfaces,
   getSurfaceSize, adoptPlan, switchCultureState,
   rescheduleTask, addFollowUp, updateFollowUp
@@ -136,10 +136,6 @@ export default (state = initialState, action) => {
     case 'TOGGLE_CULTURE_EDITION':
       result = mergeDeep(state, fromJS({ cultureState: { editedCulture: null, editing: !state.get('cultureState').get('editing') }}))
       break
-    case 'BEGIN_EDIT_CULTURE':
-      const updatedCultureState = state.get('cultureState').set('editing', true).set('editedCulture', fromJS(action.data))
-      result = merge(state, { cultureState: updatedCultureState })
-      break
     case 'ADD_LOGENTRY_TO_CULTURE':
       const logStateWithNewEntry = state.get('logState').set('editing', true).set('initialData', fromJS(action.logEntry))
       result = merge(state, { logState: logStateWithNewEntry })
@@ -147,6 +143,9 @@ export default (state = initialState, action) => {
     case 'SAVE_CULTURE':
       result = saveCulture(state, action.data)
       result = searchCulture(result)
+      break
+    case 'MOVE_CULTURE':
+      result = updateCulture(state, action.data)
       break
     case 'REMOVE_CULTURE':
       result = removeCulture(state, action.data.id)

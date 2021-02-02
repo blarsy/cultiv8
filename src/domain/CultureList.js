@@ -7,6 +7,7 @@ import { nextId } from './data'
 export default class CultureList {
   constructor(data) {
     this.cultures = data.cultures || []
+    this.surfaces = data.surfaces || []
     this.taskList = new TaskList(data)
     this.products = data.products || []
     this.logEntriesList = new LogEntriesList(data)
@@ -15,6 +16,7 @@ export default class CultureList {
   data() {
     return {
       cultures: this.cultures,
+      surfaces: this.surfaces,
       tasks: this.taskList.tasks,
       log: this.logEntriesList.log,
       logTags: this.logEntriesList.logTags

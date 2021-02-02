@@ -17,7 +17,7 @@ class Ground extends React.Component {
       if(this.data.cultures) assignCulturesToSurfaces(this.data)
     }
 
-    this.state = { updatedSurfaces: {}, surfaces: fromJS(this.data.surfaces) }
+    this.state = { updatedSurfaces: {} }
   }
 
   registerUpdatedSurfaceCode(surfaceIndex, targetPlot, newCode) {
@@ -31,9 +31,10 @@ class Ground extends React.Component {
   }
 
   render() {
-    const state = this.props.state ? this.props.state.toJS() : null
-    const selectedPlot = state && state.selectedPlot
-    const editedPlot = state && state.editedPlot
+    const groundsState = this.props.state ? this.props.state.toJS() : null
+    const selectedPlot = groundsState && groundsState.selectedPlot
+    const editedPlot = groundsState && groundsState.editedPlot
+
     let plotHasCultures = false
     if(selectedPlot){
       plotHasCultures = any(surface => surface.plot === selectedPlot && surface.cultures && surface.cultures.length > 0, this.data.surfaces)
@@ -43,18 +44,23 @@ class Ground extends React.Component {
     if(editedPlot){
       content = (<EditPlot onEditDone={data => this.props.dispatch({ type: 'SAVE_PLOT', data })}/>)
     } else {
-      const displayDate = (state && state.displayDate) ? moment(state.displayDate) : moment(new Date())
+      const displayDate = (groundsState && groundsState.displayDate) ? moment(groundsState.displayDate) : moment(new Date())
 
       let plotZone
 
       if(!selectedPlot || !displayDate) {
         plotZone = (<p>Veuillez fournir les infos nécessaires sur la parcelle ci-dessus.</p>)
       } else {
+        const data = this.props.data.toJS()
+        assignCulturesToSurfaces(data)
         plotZone = (<PlotDisplay
-          editable={state.editingSurface}
+          editable={groundsState.editingSurface}
           onSurfaceChanged={(surfaceIndex, targetPlot, newCode) => this.registerUpdatedSurfaceCode(surfaceIndex, targetPlot, newCode)}
           date={displayDate.toISOString()}
-          surfaces={this.state.surfaces}
+          surfaces={data.surfaces}
+          onCultureMoved={data => {
+            this.props.dispatch({ type: 'MOVE_CULTURE', data})
+          }}
           selectedPlot={selectedPlot} />)
       }
 
@@ -89,9 +95,9 @@ class Ground extends React.Component {
             <Button icon="pencil" disabled={!selectedPlot || !!editedPlot} onClick={() => this.props.dispatch({ type: 'TOGGLE_PLOT_EDITION' })}>Modifier</Button>
             {!editedPlot && (<Button icon="trash" disabled={!selectedPlot || plotHasCultures} onClick={() => this.props.dispatch({ type: 'REMOVE_PLOT' })}>Supprimer</Button>)}
             {editedPlot && (<Button icon="chevron-left" disabled={!selectedPlot} onClick={() => this.props.dispatch({ type: 'TOGGLE_PLOT_EDITION' })}>Annuler</Button>)}
-            {selectedPlot && any(surface => surface.plot === selectedPlot, this.data.surfaces) && !state.editingSurface &&
+            {selectedPlot && any(surface => surface.plot === selectedPlot, this.data.surfaces) && !groundsState.editingSurface &&
               (<Button icon="grid-three-up" onClick={() => this.props.dispatch({ type: 'TOGGLE_SURFACE_EDITION'})}>Edition surfaces</Button>)}
-            {selectedPlot && any(surface => surface.plot === selectedPlot, this.data.surfaces) && state.editingSurface &&
+            {selectedPlot && any(surface => surface.plot === selectedPlot, this.data.surfaces) && groundsState.editingSurface &&
               (<Button icon="grid-three-up" onClick={() => this.props.dispatch({ type: 'TOGGLE_SURFACE_EDITION', data: this.state.updatedSurfaces })}>Sauver surfaces</Button>)}
           </FlexBlock>
           {content}

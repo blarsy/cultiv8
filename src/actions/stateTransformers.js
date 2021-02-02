@@ -6,6 +6,19 @@ import { nextId } from './../domain/data'
 
 const DEFAULT_SURFACE_SIZE = 30
 
+export const updateCulture = (state, cultureData) => {
+  const cultureList = new CultureList(state.get('data').toJS())
+  cultureList.update(
+    cultureData.id,
+    cultureData.productName,
+    cultureData.status,
+    cultureData.plantDate,
+    cultureData.surfaces)
+
+  const updatedData = merge(state.get('data'), fromJS(cultureList.data()))
+  return merge(state, { data: updatedData })
+}
+
 export const saveCulture = (state, cultureData) => {
   const cultureList = new CultureList(state.get('data').toJS())
 

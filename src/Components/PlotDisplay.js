@@ -1,10 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import PropTypes from 'prop-types'
-import { map, filter, addIndex, find, reverse, includes } from 'ramda'
+import { map, filter, addIndex, find, findIndex, reverse, includes } from 'ramda'
 import styled from 'styled-components'
 import moment from 'moment'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from 'react-contextmenu'
+import { push } from 'react-router-redux'
 import { FlexBlock } from '../toolbox'
 import Table from './Table'
 import constants from '../constants'
@@ -62,6 +63,7 @@ class PlotDisplay extends React.Component {
     this.state = { highlightedSurfaces: [] }
   }
   render() {
+    const surfaces = this.props.surfaces
     const disableDragAndDrop = this.props.disableDragAndDrop
     const menuId = 'surfaceContextMenu'
     this.surfacesInfos = addIndex(map)((surface, idx) => {
@@ -78,12 +80,18 @@ class PlotDisplay extends React.Component {
         }
       }
       return { status, culture, idx, surface }
-    }, filter(surface => surface.plot === this.props.selectedPlot, this.props.surfaces.toJS()))
+    }, filter(surface => surface.plot === this.props.selectedPlot, surfaces))
     const surfaceDetailed = this.props.surfaceDetailed && this.props.surfaceDetailed.toJS()
     return (
       <FlexBlock isContainer flexFlow="column">
         <ContextMenu id={menuId}>
-          <MenuItem onClick={e => this.props.dispatch({ type: 'SELECT_SURFACE_FOR_DETAILS', surface: this.state.currentSurface})}>
+          <MenuItem disabled={!this.state.currentSurfaceInfo || !this.state.currentSurfaceInfo.culture} onClick={e => {
+              this.props.dispatch({ type: 'BEGIN_EDIT_CULTURE', data: this.state.currentSurfaceInfo.culture})
+              this.props.dispatch(push('/cultures'))
+            }}>
+            Editer
+          </MenuItem>
+          <MenuItem onClick={e => this.props.dispatch({ type: 'SELECT_SURFACE_FOR_DETAILS', surface: this.state.currentSurfaceInfo.surface})}>
             Historique cultures
           </MenuItem>
         </ContextMenu>
@@ -100,14 +108,14 @@ class PlotDisplay extends React.Component {
                   (surfaceInfo.culture.status < 1 || (surfaceInfo.culture.product.nurseryDays > 0 && surfaceInfo.culture.status < 2)))
                   || (this.props.selectedSurfaces && includes(surfaceInfo.surface.id, this.props.selectedSurfaces))
                 const isDetailed = this.props.surfaceDetailed && this.props.surfaceDetailed.get('code') === surfaceInfo.surface.code
-                return (<ContextMenuTrigger key={surfaceInfo.idx} id={menuId}>
+                return (<ContextMenuTrigger key={surfaceInfo.idx} id={menuId} disable={this.state.dragging}>
                   <Surface
                     draggable={!disableDragAndDrop && isHighlighted ? 'true':'false'}
                     highlighted={isHighlighted}
                     detailed={isDetailed}
                     onMouseEnter={e => {
                       if(!disableDragAndDrop) {
-                        this.setState({ currentSurface: surfaceInfo.surface })
+                        this.setState({ currentSurfaceInfo: surfaceInfo })
                         if(surfaceInfo.culture) {
                           this.setState({ highlightedSurfaces: surfaceInfo.culture.surfaces })
                         }
@@ -116,16 +124,36 @@ class PlotDisplay extends React.Component {
                     onDragStart={e => {
                       if(!disableDragAndDrop) {
                         e.dataTransfer.setData('culture', surfaceInfo.culture.id)}
+                        let amountContiguousSurfaces = 1
+                        const currentSurfaceIndex = this.surfacesInfos.indexOf(surfaceInfo)
+                        while(currentSurfaceIndex + amountContiguousSurfaces <= this.surfacesInfos.length &&
+                          this.surfacesInfos[currentSurfaceIndex + amountContiguousSurfaces].culture &&
+                          this.surfacesInfos[currentSurfaceIndex + amountContiguousSurfaces].culture.id === this.surfacesInfos[currentSurfaceIndex].culture.id){
+                          amountContiguousSurfaces ++
+                        }
+                        this.setState({ dragging: true, action: { culture: surfaceInfo.culture, originSurface: surfaceInfo.surface, amountSurfaces: amountContiguousSurfaces } })
                       }
                     }
                     onDragEnter={e => {
                       if(!disableDragAndDrop) {
                         if(!isHighlighted){
-                          if(surfaceInfo.culture) {
-                            this.setState({ insertSurface: surfaceInfo.culture.surfaces[0] })
-                          } else {
+                          let spaceAvailable = true
+                          let counter = 0
+                          let currentSurfaceIndex = this.surfacesInfos.indexOf(surfaceInfo)
+                          do {
+                            if(this.surfacesInfos[currentSurfaceIndex].culture){
+                              spaceAvailable = false
+                              break
+                            }
+                            currentSurfaceIndex ++
+                            counter ++
+                          }
+                          while(counter < this.state.action.amountSurfaces && currentSurfaceIndex <= this.surfacesInfos.length)
+                          if(spaceAvailable) {
                             this.setState({ insertSurface: surfaceInfo.surface.id })
                           }
+                        } else {
+                          this.setState({ insertSurface: null })
                         }
                       }
                     }}
@@ -136,18 +164,24 @@ class PlotDisplay extends React.Component {
                     }
                     onDragExit={() => {
                       if(!disableDragAndDrop) {
-                        this.setState({ insertSurface: null })}
+                        this.setState({ insertSurface: null, dragging: false, action: null })}
                       }
                     }
                     onDragEnd={() => {
                       if(!disableDragAndDrop) {
-                        this.setState({ insertSurface: null })}
+                        this.setState({ insertSurface: null, dragging: false, action: null })}
                       }
                     }
                     onDrop={e => {
-                      if(!disableDragAndDrop) {
-                        this.props.dispatch({ type: 'PLOT_INSERTANDSHIFT_CULTURE', culture: e.dataTransfer.getData('culture'), targetSurface: this.state.insertSurface})
-                        this.setState({ insertSurface: null })}
+                      if(!disableDragAndDrop && this.state.insertSurface) {
+                        const cultureToModify = this.state.action.culture
+                        let originSurfaceIndex = findIndex(surface => surface === this.state.action.originSurface.id, cultureToModify.surfaces)
+                        let targetSurfaceIndex = findIndex(surfaceInfo => surfaceInfo.surface.id === this.state.insertSurface, this.surfacesInfos)
+                        for (let i=0; i<this.state.action.amountSurfaces; i ++){
+                          cultureToModify.surfaces[originSurfaceIndex + i] = this.surfacesInfos[targetSurfaceIndex + i].surface.id
+                        }
+                        this.props.onCultureMoved(cultureToModify)
+                        this.setState({ insertSurface: null, dragging: false, action: null })}
                       }
                     }
                     isContainer
@@ -168,7 +202,7 @@ class PlotDisplay extends React.Component {
           { surfaceDetailed &&
             <FlexBlock isContainer flex="1 0" flexFlow="column" overflow="hidden">
               Historique cultures pour la surface {surfaceDetailed.code}
-              <Table data={surfaceDetailed.cultures} dataColumns={[
+              <Table data={surfaceDetailed.cultures || []} dataColumns={[
                   {
                     title: 'Produit',
                     content: culture => culture.product.name,
@@ -176,7 +210,7 @@ class PlotDisplay extends React.Component {
                   },
                   {
                     title: 'Date plantation',
-                    content: culture => culture.plantDate,
+                    content: culture => moment(culture.plantDate).format('L'),
                     flex: '1 0'
                   }
                 ]}/>
@@ -190,11 +224,12 @@ class PlotDisplay extends React.Component {
 
 PlotDisplay.propTypes = {
   date: PropTypes.string,
-  surfaces: PropTypes.object,
+  surfaces: PropTypes.arrayOf(PropTypes.object),
   selectedPlot: PropTypes.string,
   surfaceDetailed: PropTypes.object,
   editable: PropTypes.bool,
   onSurfaceChanged: PropTypes.func,
+  onCultureMoved: PropTypes.func,
   disableDragAndDrop: PropTypes.bool,
   selectedSurfaces: PropTypes.arrayOf(PropTypes.number)
 }
