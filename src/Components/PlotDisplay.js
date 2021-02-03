@@ -136,25 +136,23 @@ class PlotDisplay extends React.Component {
                     }
                     onDragEnter={e => {
                       if(!disableDragAndDrop) {
-                        if(!isHighlighted){
-                          let spaceAvailable = true
-                          let counter = 0
-                          let currentSurfaceIndex = this.surfacesInfos.indexOf(surfaceInfo)
-                          do {
-                            if(this.surfacesInfos[currentSurfaceIndex].culture){
-                              spaceAvailable = false
-                              break
-                            }
-                            currentSurfaceIndex ++
-                            counter ++
+                        let spaceAvailable = true
+                        let counter = 0
+                        let currentSurfaceIndex = this.surfacesInfos.indexOf(surfaceInfo)
+                        do {
+                          if(this.surfacesInfos[currentSurfaceIndex].culture &&
+                            !includes(this.surfacesInfos[currentSurfaceIndex].surface.id, this.state.highlightedSurfaces)){
+                            spaceAvailable = false
+                            break
                           }
-                          while(counter < this.state.action.amountSurfaces && currentSurfaceIndex <= this.surfacesInfos.length)
-                          if(spaceAvailable) {
-                            this.setState({ insertSurface: surfaceInfo.surface.id })
-                          }
-                        } else {
-                          this.setState({ insertSurface: null })
+                          currentSurfaceIndex ++
+                          counter ++
                         }
+                        while(counter < this.state.action.amountSurfaces && currentSurfaceIndex <= this.surfacesInfos.length)
+                        if(spaceAvailable) {
+                          this.setState({ insertSurface: surfaceInfo.surface.id })
+                        }
+
                       }
                     }}
                     onDragOver={e => {
