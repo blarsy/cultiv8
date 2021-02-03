@@ -21,7 +21,11 @@ class ProductsSelector extends React.Component {
       const product = find(product => product.name === culture.productName, this.products)
       const harvestDate = moment(culture.plantDate).add(-product.nurseryDays + product.growingDays, 'days')
       if(harvestDate.toDate() > moment() && harvestDate.toDate() < oneYearFromNow.toDate()) {
-        this.surfacePlannedForProducts[culture.productName] = (culture.surfaces.length * props.surfaceSize).toFixed()
+        if(!this.surfacePlannedForProducts[culture.productName])
+          this.surfacePlannedForProducts[culture.productName] = (culture.surfaces.length * props.surfaceSize)
+        else {
+          this.surfacePlannedForProducts[culture.productName] += (culture.surfaces.length * props.surfaceSize)
+        }
       }
     }, this.cultures)
   }
