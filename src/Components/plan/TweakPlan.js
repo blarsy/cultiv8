@@ -18,7 +18,7 @@ class TweakPlan extends React.Component {
       const rating = currentRating.toJS()
       const selectedSuggestionSurfaces = map(surface => surface.id, rating.suggestions[rating.selectedSuggestionId].surfaces)
       plotZone = (<PlotDisplay
-        surfaces={currentPlan.get('surfaces')}
+        surfaces={currentPlan.get('surfaces').toJS()}
         selectedPlot={this.props.planState.get('selectedPlot')}
         date={moment(currentRating.get('culture').get('plantDate')).toISOString()}
         disableDragAndDrop
