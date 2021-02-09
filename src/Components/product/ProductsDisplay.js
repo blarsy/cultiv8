@@ -1,7 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { find } from 'ramda'
+import { find, map, filter, addIndex, sort } from 'ramda'
+import moment from 'moment'
+
 import SearchResultsDisplay from '../SearchResultsDisplay'
 import { monthesOptions, greedinessOptions } from './common'
 
@@ -10,6 +12,19 @@ class ProductsDisplay extends React.Component {
     super(props)
 
     this.products = props.products ? props.products.toJS() : []
+    this.cultures = props.cultures ? props.cultures.toJS() : []
+    this.surfaces = props.surfaces ? props.surfaces.toJS() : []
+  }
+
+  getProductDetails(product) {
+    const culturesForProduct = addIndex(map)((culture, idx) => (<li key={idx}>{ moment(culture.plantDate).format('L') }, {culture.surfaces.length} surfaces ({map(surfaceId => {
+      const surface = find(surface => surface.id === surfaceId, this.surfaces)
+      return surface.plot + ' ' + surface.code
+    }, culture.surfaces).join(', ')})</li>),
+      sort((a,b) => a.plantDate.localeCompare(b.plantDate), filter(culture => culture.productName === product.name, this.cultures)))
+    return (<div>
+      {culturesForProduct.length > 0 ? (<div><p>Cultures</p><ul>{ culturesForProduct }</ul></div>) : 'Pas de culture associée ...'}
+    </div>)
   }
 
   render() {
@@ -247,7 +262,9 @@ class ProductsDisplay extends React.Component {
         }
       ]
     }
-    return (<SearchResultsDisplay searchResults={searchResults} />)
+    return (<SearchResultsDisplay
+      detailedContent={ product => this.getProductDetails(product) }
+      searchResults={searchResults} />)
   }
 }
 
@@ -260,6 +277,8 @@ ProductsDisplay.propTypes = {
 
 const mapStateToProps = state => ({
   products: state.global.get('data').get('products'),
+  cultures: state.global.get('data').get('cultures'),
+  surfaces: state.global.get('data').get('surfaces'),
   data: (state.global.get('productState') && state.global.get('productState').get('lastSearchResult')) ? state.global.get('productState').get('lastSearchResult').toJS() : []
 })
 
