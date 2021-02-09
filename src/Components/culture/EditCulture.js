@@ -6,7 +6,7 @@ import moment from 'moment'
 import { fromJS } from 'immutable'
 import { FlexBlock, ValidatedForm, getInitialState } from '../../toolbox'
 import { surfaceIsAvailableForCulture } from '../../domain/planner'
-import { statussesOptions } from './common'
+import { statussesOptions, getCultureDetails } from './common'
 import SpecialOps from './SpecialOps'
 
 class EditCulture extends React.Component {
@@ -109,6 +109,7 @@ class EditCulture extends React.Component {
           title="Edition culture"
           error={this.state.error}
         />
+      {getCultureDetails(this.props.cultureState.get('editedCulture').toJS(), this.props.log.toJS() || [], this.props.tasks.toJS() || [])}
       </FlexBlock>
     )
   }
@@ -122,6 +123,8 @@ EditCulture.propTypes = {
 const mapStateToProps = state => ({
   products: state.global.get('data').get('products') || fromJS([]),
   surfaces: state.global.get('data').get('surfaces') || fromJS([]),
+  log: state.global.get('data').get('log') || fromJS([]),
+  tasks: state.global.get('data').get('tasks') || fromJS([]),
   cultureState: state.global.get('cultureState')
 })
 
