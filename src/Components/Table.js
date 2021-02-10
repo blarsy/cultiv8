@@ -127,8 +127,8 @@ class Table extends React.Component {
       }
       lines = addIndex(map)((data, lineIdx) => {
         const dataLine = []
-        const line = (<Line expandable={this.props.detailedContent} onClick={() => this.setState({ expanded: {[lineIdx]: !this.state.expanded[lineIdx]} })} isContainer key={lineIdx} flexFlow="column">
-            <FlexBlock padding={this.props.linePadding} isContainer flexFlow="row nowrap">
+        const line = (<Line expandable={this.props.detailedContent} isContainer key={lineIdx} flexFlow="column">
+            <FlexBlock padding={this.props.linePadding} onClick={() => this.setState({ expanded: {[lineIdx]: !this.state.expanded[lineIdx]} })} isContainer flexFlow="row nowrap">
               { addIndex(map)((dataColumn, idx) => {
                 const content = dataColumn.content(data)
                 if(typeof content === "string") dataLine.push(content)
