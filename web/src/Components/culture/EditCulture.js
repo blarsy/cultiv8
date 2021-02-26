@@ -109,7 +109,7 @@ class EditCulture extends React.Component {
           title="Edition culture"
           error={this.state.error}
         />
-      {getCultureDetails(this.props.cultureState.get('editedCulture').toJS(), this.props.log.toJS() || [], this.props.tasks.toJS() || [])}
+      {this.props.cultureState.get('editedCulture') && getCultureDetails(this.props.cultureState.get('editedCulture').toJS(), this.props.log.toJS() || [], this.props.tasks.toJS() || [])}
       </FlexBlock>
     )
   }
