@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express')
+import { gql } from 'apollo-server-express'
 
 export default gql`
   type Culture {
@@ -46,6 +46,6 @@ export default gql`
     workPerSqMeter: Float
   }
   type Query {
-      CurrentCultures: [Culture]
+      currentCultures: [Culture]
   }
 `

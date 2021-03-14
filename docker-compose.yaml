@@ -1,18 +1,22 @@
 version: "3.9"
 services:
-  api:
-    build: server/
-    ports:
-      - "4000:4000"
-  web:
-    build: web/
-    ports:
-      - "3000:3000"
   db:
-    build: db/
+    image: "mongo:latest"
     restart: always
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: password123
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=password123
+  api:
+    build: server/
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+  web:
+    build: web/
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
