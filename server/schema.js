@@ -1,24 +1,29 @@
 import { gql } from 'apollo-server-express'
 
 export default gql`
+  type Farm {
+    _id: ID,
+    name: String
+  },
   type Culture {
-    id: ID,
+    _id: ID,
     product: Product,
-    plantDate: Int,
+    plantDate: String,
     status: Int,
     surfaces: [Surface]
   }
   type Surface {
-    id: ID,
+    _id: ID,
     plot: Plot,
     code: String
   }
   type Plot {
-    id: ID,
+    _id: ID,
     Code: String,
     Description: String
   }
   type Product {
+    _id: ID,
     harvestDays: Int,
     interestRatio: Float,
     soilOccupationRatio: Float,
@@ -45,7 +50,19 @@ export default gql`
     surfaceRatio: Int,
     workPerSqMeter: Float
   }
+  type Task {
+    _id: ID,
+    type: String,
+    culture: Culture,
+    date: String,
+    creation: String
+  }
   type Query {
-      currentCultures: [Culture]
+      currentCultures: [Culture],
+      tasks: [Task],
+      task(id: ID): Task,
+      farms: [Farm],
+      farm(id: ID): Farm,
+      cultures: [Culture]
   }
 `

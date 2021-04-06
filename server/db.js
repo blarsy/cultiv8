@@ -4,21 +4,25 @@ import fs from 'fs'
 
 const data = JSON.parse(fs.readFileSync('./data.json'))
 const { MongoClient } = mongodb
+const mongoServerName = "localhost" // "db"
+const adminUri =
+  `mongodb://root:password123@${mongoServerName}`
 const uri =
-  "mongodb://root:password123@db"
-const client = new MongoClient(uri)
+  `mongodb://cultiv8app:password123@${mongoServerName}/?authSource=cultiv8`
+export const client = new MongoClient(uri)
 
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export default async function run() {
+export async function run() {
+  const adminClient = new MongoClient(adminUri)
   try {
     let loop
     do {
       try {
         loop = false
-        await client.connect()
+        await adminClient.connect()
       }
       catch(connectError) {
         if (connectError.name === 'MongoNetworkError') {
@@ -30,10 +34,13 @@ export default async function run() {
       }
     } while(loop)
 
-    const db = client.db('cultiv8')
+    console.log('Connected...')
+
+    const db = adminClient.db('cultiv8')
     const farm = db.collection('farm')
     const theFarm = await farm.findOne({})
     if(!theFarm) {
+      console.log('No data found, importing ...')
       await db.addUser('cultiv8app', 'password123', {
         roles: [{
           role : 'readWrite',
@@ -41,9 +48,12 @@ export default async function run() {
         }]
       })
       await importData(db)
+      console.lof('Import completed.')
+    } else {
+      console.log('Data present, no import neded.')
     }
   } finally {
-    await client.close()
+    await adminClient.close()
   }
 }
 
