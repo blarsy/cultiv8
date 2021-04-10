@@ -58,11 +58,16 @@ export default gql`
     creation: String
   }
   type Query {
-      currentCultures: [Culture],
       tasks: [Task],
-      task(id: ID): Task,
+      task(_id: ID): Task,
       farms: [Farm],
-      farm(id: ID): Farm,
-      cultures: [Culture]
+      farm(_id: ID): Farm,
+      cultures: [Culture],
+      products: [Product],
+      product: Product
+  }
+  type Mutation {
+    rescheduleTask(_id: ID, date: String): Task,
+    deleteTask(_id: ID): Int
   }
 `

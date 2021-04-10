@@ -4,7 +4,7 @@ import fs from 'fs'
 
 const data = JSON.parse(fs.readFileSync('./data.json'))
 const { MongoClient } = mongodb
-const mongoServerName = "localhost" // "db"
+const mongoServerName = "localhost" //"db"
 const adminUri =
   `mongodb://root:password123@${mongoServerName}`
 const uri =
@@ -48,7 +48,7 @@ export async function run() {
         }]
       })
       await importData(db)
-      console.lof('Import completed.')
+      console.log('Import completed.')
     } else {
       console.log('Data present, no import neded.')
     }

@@ -1,7 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import styled from 'styled-components'
-import { push } from 'react-router-redux'
 import { map } from 'ramda'
 import { TinyLogo, Button, FlexBlock } from '../toolbox'
 import MenuRoutes from '../MenuRoutes'
@@ -26,9 +25,9 @@ class TopMenu extends React.Component {
           const selected = menuItem.path === pathname
           return (<MenuButton
             key={menuItem.path}
+            to={menuItem.path}
             selected={selected}
-            icon={menuItem.icon}
-            onClick={() => this.props.dispatch(push(menuItem.path))}>
+            icon={menuItem.icon}>
             {menuItem.caption}
           </MenuButton>)
         }

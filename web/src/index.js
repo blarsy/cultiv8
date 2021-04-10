@@ -5,7 +5,6 @@ import { Provider } from 'react-redux'
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import createSagaMiddleware from 'redux-saga'
 import { Iterable } from 'immutable'
-import Modal from 'react-modal'
 import App from './App'
 import reducer from './actions/reducer'
 import registerServiceWorker from './registerServiceWorker'
@@ -19,8 +18,14 @@ import {
 } from 'react-router-redux'
 import moment from 'moment'
 import 'moment/locale/fr'
+import { ApolloClient, InMemoryCache } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 
 const history = createBrowserHistory()
+const apolloClient = new ApolloClient({
+  uri: 'http://localhost:4000/graphql',
+  cache: new InMemoryCache()
+})
 
 const configureStore = () => {
   const middlewares = []
@@ -51,14 +56,14 @@ const configureStore = () => {
 }
 moment.locale('fr')
 
-Modal.setAppElement('#root')
-
 ReactDOM.render(
   <Provider store={configureStore()}>
     <ConnectedRouter history={history}>
-      <App />
+      <ApolloProvider client={apolloClient}>
+          <App />
+      </ApolloProvider>
     </ConnectedRouter>
   </Provider>,
-  document.getElementById('root')
-)
+  document.getElementById('root'))
+
 registerServiceWorker()

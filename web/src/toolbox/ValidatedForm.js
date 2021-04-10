@@ -6,6 +6,8 @@ import { Button } from '../toolbox'
 import { isFormValid, setInputValidity } from './FormValidation'
 import Input from './Input'
 import { BlockTitle } from '../StyleLibrary'
+import { getInitialState } from './FormValidation'
+import Spinner from './Spinner'
 
 const Form = styled.form`
   display: flex;
@@ -15,20 +17,28 @@ const Form = styled.form`
 `
 const FormBlock = styled.article`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   margin: 0 0 1rem;
   align-items: ${props => props.align || 'stretch'};
+  justify-content: center
 `
 
-const ValidationError = styled.p`
+const ErrorMsg = styled.p`
   color: red;
   margin-top: 0.25rem;
   margin-bottom: 0;
 `
 
 class ValidatedForm extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      ...getInitialState(props.inputs),
+      ...props.initialState
+    }
+  }
   isFormValid() {
-    return !isFormValid(this.props.getState(), this.props.inputs)
+    return !isFormValid(this.state, this.props.inputs)
   }
 
   setInputValidity(input, isValid) {
@@ -47,12 +57,11 @@ class ValidatedForm extends React.Component {
         margin={this.props.margin || '2rem'}
         onSubmit={e => {
           e.preventDefault()
-          this.props.onSubmit(e)
+          this.props.onSubmit(this.state)
         }}
       >
         <BlockTitle>{this.props.title}</BlockTitle>
         {this.props.inputs.map(input => {
-          const state = this.props.getState()
           if (
             [
               'text',
@@ -72,10 +81,10 @@ class ValidatedForm extends React.Component {
                 key={input.name}
                 name={input.name}
                 type={input.type}
-                value={state[input.name]}
-                readOnly={input.readOnly}
+                value={this.state[input.name]}
+                readOnly={input.readOnly || this.props.processing}
                 onChange={value => {
-                  this.props.setState({ [input.name]: value })
+                  this.setState({ [input.name]: value })
                 }}
                 required={input.required}
                 label={input.label}
@@ -85,8 +94,8 @@ class ValidatedForm extends React.Component {
                   setInputValidity(
                     inputName,
                     isValid,
-                    state,
-                    this.props.setState
+                    this.state,
+                    state => this.setState(state)
                   )}
                 creatable={input.creatable}
                 async={input.async}
@@ -100,12 +109,16 @@ class ValidatedForm extends React.Component {
           }
         })}
         <FormBlock align="center">
-          {this.props.error &&
-            <ValidationError>{this.props.error}</ValidationError>
+          {this.state.error &&
+            <ErrorMsg>{this.state.error}</ErrorMsg>
           }
           <Button type="submit" disabled={this.isFormValid()}>
             {this.props.actionLabel || 'Save'}
           </Button>
+          {this.props.processing && <Spinner size="2" />}
+          {this.props.lastError &&
+            <ErrorMsg>{this.props.lastError}</ErrorMsg>
+          }
         </FormBlock>
       </Form>
     )
@@ -115,11 +128,11 @@ class ValidatedForm extends React.Component {
 ValidatedForm.propTypes = {
   title: PropTypes.string.isRequired,
   margin: PropTypes.string,
-  setState: PropTypes.func.isRequired,
-  getState: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   actionLabel: PropTypes.string,
-  error: PropTypes.string,
+  initialState: PropTypes.object,
+  processing: PropTypes.bool,
+  lastError: PropTypes.string,
   inputs: PropTypes.arrayOf(
     PropTypes.shape({
       type: PropTypes.string.isRequired,

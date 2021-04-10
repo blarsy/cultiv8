@@ -2,12 +2,19 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import styled, { injectGlobal } from 'styled-components'
-import { Route, withRouter } from 'react-router-dom'
+import { AppContextProvider, AppContextConsumer } from './AppContext'
+import { Route, BrowserRouter as Router, Redirect, Switch } from 'react-router-dom'
 import { FlexBlock, InfoZone } from './toolbox'
 import { Home, DataImport, Culture, Ground, Log, Plan, Product, Settings } from './pages'
 import TopMenu from './Components/TopMenu'
+import Modal from './Components/Modal'
 
 class App extends Component {
+  constructor(props) {
+    super(props)
+    this.setContext = value => this.setState(value)
+    this.state = { setContext: this.setContext}
+  }
   componentDidMount() {
     injectGlobal`
       html {
@@ -121,21 +128,34 @@ class App extends Component {
     `
       return (
         <RootElement>
-          <HorizontalStack>
-            <TopMenu/>
-            <FlexBlock isContainer flex="1 0" padding="0.5rem" overflow="hidden">
-              <Route exact path="/" component={Home} />
-              <Route path="/plan" component={Plan} />
-              <Route path="/dataimport" component={DataImport} />
-              <Route path="/cultures" component={Culture} />
-              <Route path="/grounds" component={Ground} />
-              <Route path="/log" component={Log} />
-              <Route path="/home" component={Home} />
-              <Route path="/products" component={Product} />
-              <Route path="/settings" component={Settings} />
-            </FlexBlock>
-          </HorizontalStack>
-          <InfoZone/>
+          <AppContextProvider value={this.state}>
+            <Router>
+              <HorizontalStack>
+                <TopMenu/>
+                <FlexBlock isContainer flex="1 0" padding="0.5rem" overflow="hidden">
+                  <Switch>
+                    <Route exact path="/">
+                      <Redirect to="/home" />
+                    </Route>
+                    <Route path="/home" component={Home} />
+                  </Switch>
+                  <Route path="/plan" component={Plan} />
+                  <Route path="/dataimport" component={DataImport} />
+                  <Route path="/cultures" component={Culture} />
+                  <Route path="/grounds" component={Ground} />
+                  <Route path="/log" component={Log} />
+                  <Route path="/products" component={Product} />
+                  <Route path="/settings" component={Settings} />
+                </FlexBlock>
+              </HorizontalStack>
+              <InfoZone/>
+            </Router>
+            <AppContextConsumer>
+              {context => {
+                return context.modal && (<Modal></Modal>)
+              }}
+            </AppContextConsumer>
+          </AppContextProvider>
         </RootElement>
       )
   }
@@ -145,4 +165,4 @@ App.propTypes = {
   profile: PropTypes.object,
 }
 
-export default withRouter(connect()(App))
+export default connect()(App)
