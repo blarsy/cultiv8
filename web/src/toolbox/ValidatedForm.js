@@ -115,7 +115,7 @@ class ValidatedForm extends React.Component {
           <Button type="submit" disabled={this.isFormValid()}>
             {this.props.actionLabel || 'Save'}
           </Button>
-          {this.props.processing && <Spinner size="2" />}
+          {this.props.processing && <Spinner size={2} />}
           {this.props.lastError &&
             <ErrorMsg>{this.props.lastError}</ErrorMsg>
           }

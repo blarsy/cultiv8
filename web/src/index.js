@@ -18,14 +18,10 @@ import {
 } from 'react-router-redux'
 import moment from 'moment'
 import 'moment/locale/fr'
-import { ApolloClient, InMemoryCache } from '@apollo/client'
 import { ApolloProvider } from '@apollo/client/react'
+import { apolloClient } from './accounts'
 
 const history = createBrowserHistory()
-const apolloClient = new ApolloClient({
-  uri: 'http://localhost:4000/graphql',
-  cache: new InMemoryCache()
-})
 
 const configureStore = () => {
   const middlewares = []
@@ -55,6 +51,7 @@ const configureStore = () => {
   return store
 }
 moment.locale('fr')
+
 
 ReactDOM.render(
   <Provider store={configureStore()}>

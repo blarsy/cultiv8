@@ -4,17 +4,44 @@ import { connect } from 'react-redux'
 import styled, { injectGlobal } from 'styled-components'
 import { AppContextProvider, AppContextConsumer } from './AppContext'
 import { Route, BrowserRouter as Router, Redirect, Switch } from 'react-router-dom'
-import { FlexBlock, InfoZone } from './toolbox'
+import { useQuery, gql } from '@apollo/client'
+import { FlexBlock, InfoZone, Spinner } from './toolbox'
 import { Home, DataImport, Culture, Ground, Log, Plan, Product, Settings } from './pages'
 import TopMenu from './Components/TopMenu'
 import Modal from './Components/Modal'
+import Login from './Components/Login'
+import { accountsClient, apolloClient } from './accounts'
+
+const GET_USER_QUERY = gql`
+  query getUser {
+    getUser {
+      id
+      username
+      emails {
+        address
+      }
+    }
+  }
+`
 
 class App extends Component {
   constructor(props) {
     super(props)
     this.setContext = value => this.setState(value)
-    this.state = { setContext: this.setContext}
+    this.state = { setContext: this.setContext, userLoading: true}
+
+    this.queryUser()
   }
+
+  queryUser() {
+    apolloClient.query({query: GET_USER_QUERY, fetchPolicy: "no-cache"
+  }).then(user => {
+      this.setState( {user: user.data.getUser, userLoading: false} )
+    }, err => {
+      this.setState( {userLoadError: err, userLoading: false} )
+    })
+  }
+
   componentDidMount() {
     injectGlobal`
       html {
@@ -126,38 +153,54 @@ class App extends Component {
       flex-flow: row;
       overflow: hidden;
     `
-      return (
-        <RootElement>
-          <AppContextProvider value={this.state}>
-            <Router>
-              <HorizontalStack>
-                <TopMenu/>
-                <FlexBlock isContainer flex="1 0" padding="0.5rem" overflow="hidden">
-                  <Switch>
-                    <Route exact path="/">
-                      <Redirect to="/home" />
-                    </Route>
-                    <Route path="/home" component={Home} />
-                  </Switch>
-                  <Route path="/plan" component={Plan} />
-                  <Route path="/dataimport" component={DataImport} />
-                  <Route path="/cultures" component={Culture} />
-                  <Route path="/grounds" component={Ground} />
-                  <Route path="/log" component={Log} />
-                  <Route path="/products" component={Product} />
-                  <Route path="/settings" component={Settings} />
-                </FlexBlock>
-              </HorizontalStack>
-              <InfoZone/>
-            </Router>
-            <AppContextConsumer>
-              {context => {
-                return context.modal && (<Modal></Modal>)
-              }}
-            </AppContextConsumer>
-          </AppContextProvider>
-        </RootElement>
-      )
+
+    if(this.state.userLoading) return (
+      <FlexBlock isContainer justifyContent="center" padding="2rem">
+        <Spinner size={4}/>
+      </FlexBlock>
+    )
+    let content
+    if(!this.state.user) {
+      content = <Login onLoggedIn={ () => this.queryUser() }/>
+    } else {
+      content = (<Router>
+        <HorizontalStack>
+          <TopMenu userName={this.state.user.emails[0].address} onLogOut={ async () => {
+              await accountsClient.logout()
+              this.setState( {user: null} )
+            } }/>
+          <FlexBlock isContainer flex="1 0" padding="0.5rem" overflow="hidden">
+            <Switch>
+              <Route exact path="/">
+                <Redirect to="/home" />
+              </Route>
+              <Route path="/home" component={Home} />
+            </Switch>
+            <Route path="/plan" component={Plan} />
+            <Route path="/dataimport" component={DataImport} />
+            <Route path="/cultures" component={Culture} />
+            <Route path="/grounds" component={Ground} />
+            <Route path="/log" component={Log} />
+            <Route path="/products" component={Product} />
+            <Route path="/settings" component={Settings} />
+          </FlexBlock>
+        </HorizontalStack>
+        <InfoZone/>
+      </Router>
+)
+    }
+    return (
+      <RootElement>
+        <AppContextProvider value={this.state}>
+          { content }
+          <AppContextConsumer>
+            {context => {
+              return context.modal && (<Modal></Modal>)
+            }}
+          </AppContextConsumer>
+        </AppContextProvider>
+      </RootElement>
+    )
   }
 }
 

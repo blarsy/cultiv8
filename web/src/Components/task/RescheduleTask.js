@@ -29,7 +29,7 @@ export default props => {
       }
     ]}
     onSubmit={async formData => {
-      await reschedule({ variables: { id: taskId, date: formData.newDate}})
+      await reschedule({ variables: { id: taskId, date: formData.newDate }})
       return history.push('/home')
     }}
     actionLabel="Ok"

@@ -1,5 +1,6 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { withApollo } from '@apollo/client/react/hoc'
+import { gql } from '@apollo/client'
 import { map, sort } from 'ramda'
 import Select from 'react-select'
 import moment from 'moment'
@@ -13,12 +14,20 @@ class CultureSearch extends React.Component {
   constructor(props) {
     super(props)
 
-    this.state = (props.logState && props.logState.get('lastSearchData')) ? props.logState.get('lastSearchData').toJS() : {}
-    this.surfacesOptions = sort((a,b) => a.label.localeCompare(b.label), map(surface => ({ value: surface.id, label: surface.plot + ' ' + surface.code}), props.surfaces.toJS()))
-    this.productsOptions = sort((a,b) => a.label.localeCompare(b.label), map(product => ({ value: product.name, label: product.name}), props.products.toJS()))
+    this.state = {}
+    // this.surfacesOptions = sort((a,b) => a.label.localeCompare(b.label), map(surface => ({ value: surface.id, label: surface.plot + ' ' + surface.code}), props.surfaces.toJS()))
+    // this.productsOptions = sort((a,b) => a.label.localeCompare(b.label), map(product => ({ value: product.name, label: product.name}), props.products.toJS()))
+    this.surfacesOptions = props.client.query({
+      query: gql`query allSurfaces($farmId: ID)
+        {
+          surfaces(farmId: $farmId ) { _id, code, plot {code}}
+        }`,
+      variables: { farmId: '606c7701825d8ea34ef96b1c'}
+    })
   }
 
   render() {
+
     return (<SearchForm formState="cultureState" actionName="SEARCH_CULTURE" searchData={this.state} setState={args => this.setState(args)}>
       <FlexBlock flex="0 0 50%">
         <span>Production</span>
@@ -51,4 +60,4 @@ const mapStateToProps = state => {
   }
 }
 
-export default connect(mapStateToProps)(CultureSearch)
+export default withApollo(CultureSearch)

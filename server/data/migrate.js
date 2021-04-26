@@ -1,68 +1,29 @@
-import mongodb from 'mongodb'
-import { map, forEach } from 'ramda'
+import password from 'password-hash-and-salt'
 import fs from 'fs'
+import { map, forEach } from 'ramda'
 
-const data = JSON.parse(fs.readFileSync('./data.json'))
-const { MongoClient } = mongodb
-const mongoServerName = "localhost" //"db"
-const adminUri =
-  `mongodb://root:password123@${mongoServerName}`
-const uri =
-  `mongodb://cultiv8app:password123@${mongoServerName}/?authSource=cultiv8`
-export const client = new MongoClient(uri)
+const data = JSON.parse(fs.readFileSync('./data/data.json'))
+const hashPromise = new Promise((resolve, reject) => {
+  password('password123').hash((err, hash) => {
+    if(err) reject(err)
+    resolve(hash)
+  })
+})
 
-function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-export async function run() {
-  const adminClient = new MongoClient(adminUri)
-  try {
-    let loop
-    do {
-      try {
-        loop = false
-        await adminClient.connect()
-      }
-      catch(connectError) {
-        if (connectError.name === 'MongoNetworkError') {
-          await(delay(1000))
-          loop = true
-        } else {
-          throw connectError
-        }
-      }
-    } while(loop)
-
-    console.log('Connected...')
-
-    const db = adminClient.db('cultiv8')
-    const farm = db.collection('farm')
-    const theFarm = await farm.findOne({})
-    if(!theFarm) {
-      console.log('No data found, importing ...')
-      await db.addUser('cultiv8app', 'password123', {
-        roles: [{
-          role : 'readWrite',
-          db   : 'cultiv8'
-        }]
-      })
-      await importData(db)
-      console.log('Import completed.')
-    } else {
-      console.log('Data present, no import neded.')
-    }
-  } finally {
-    await adminClient.close()
-  }
-}
-
-async function importData(db) {
+export async function importData(db) {
+  await db.addUser('cultiv8app', 'password123', {
+    roles: [{
+      role : 'readWrite',
+      db   : 'cultiv8'
+    }]
+  })
+  const hash = await hashPromise
   const theFarm = {
     name: 'Le comptoir fermier du Rosoir',
     dataschemeVersion: data.settings.dataschemeVersion,
     surfaceSize: data.settings.surfaceSize,
-    totalSurface: data.settings.totalSurface
+    totalSurface: data.settings.totalSurface,
+    hash
   }
   const farm = db.collection('farm')
   const result = await farm.insertOne(theFarm)
@@ -105,7 +66,7 @@ async function importData(db) {
   await db.collection('logTag').find({}).forEach(logTag => {
     logTagIdsByName[logTag.name] = logTag._id
   })
-  console.log(logTagIdsByName)
+
   await db.collection('log').insertMany(map(log => ({
     date: log.date,
     description: log.description,

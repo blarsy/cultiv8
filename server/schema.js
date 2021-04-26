@@ -19,8 +19,9 @@ export default gql`
   }
   type Plot {
     _id: ID,
-    Code: String,
-    Description: String
+    code: String,
+    name: String,
+    farmId: ID
   }
   type Product {
     _id: ID,
@@ -48,7 +49,8 @@ export default gql`
     nurseryDays: Int,
     greenhouse: Boolean,
     surfaceRatio: Int,
-    workPerSqMeter: Float
+    workPerSqMeter: Float,
+    farmId: ID
   }
   type Task {
     _id: ID,
@@ -64,7 +66,8 @@ export default gql`
       farm(_id: ID): Farm,
       cultures: [Culture],
       products: [Product],
-      product: Product
+      product: Product,
+      surfaces(farmId: ID): [Surface]
   }
   type Mutation {
     rescheduleTask(_id: ID, date: String): Task,

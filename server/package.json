@@ -1,12 +1,19 @@
 {
   "type": "module",
   "dependencies": {
+    "@accounts/database-manager": "^0.31.1",
+    "@accounts/graphql-api": "^0.31.1",
+    "@accounts/mongo": "^0.31.1",
+    "@accounts/password": "^0.31.1",
+    "@accounts/server": "^0.31.1",
+    "@graphql-modules/core": "^0.7.17",
     "apollo-datasource-mongodb": "^0.3.1",
     "apollo-server-express": "^2.20.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "graphql": "^15.5.0",
     "mongodb": "^3.6.4",
+    "password-hash-and-salt": "^0.1.4",
     "ramda": "^0.27.1"
   }
 }

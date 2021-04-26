@@ -23,6 +23,9 @@ export default {
     cultures: async (source, args, { dataSources: {cultures}}) => {
       return cultures.getCultures()
     },
+    surfaces: async (source, args, { dataSources: {surfaces}}) => {
+      return surfaces.getAll(args.farmId)
+    }
   },
   Task: {
     culture: async (parent, args,  { dataSources: {cultures}}) => {
@@ -32,6 +35,11 @@ export default {
   Culture: {
     product: async (parent, args, { dataSources: {products}}) => {
       return products.getProduct(parent.product)
+    }
+  },
+  Surface: {
+    plot: async (parent, args, { dataSources: {plots}}) => {
+      return plots.getPlot(parent.plot)
     }
   }
 }

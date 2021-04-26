@@ -9,6 +9,7 @@ const Icon = styled.img`
   `
 
 const LinkButton = styled(Link)`
+  display: inline-block;
   border-radius: 0.25rem;
   background-color: ${constants.layout.primaryLight};
   border: 1px solid ${constants.layout.primaryDark};
