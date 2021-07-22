@@ -42,7 +42,7 @@
     "url-loader": "0.6.2",
     "web3": "^1.0.0-beta.34",
     "whatwg-fetch": "2.0.3",
-    "xlsx": "^0.15.1"
+    "xlsx": "^0.17.0"
   },
   "scripts": {
     "start": "node scripts/start.js",
