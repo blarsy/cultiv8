@@ -15,7 +15,7 @@
     "html-webpack-plugin": "2.29.0",
     "immutable": "^4.0.0-rc.12",
     "js-file-download": "^0.4.9",
-    "moment": "^2.22.2",
+    "moment": "^2.29.4",
     "object-assign": "4.1.1",
     "promise": "8.0.1",
     "raf": "3.4.0",
